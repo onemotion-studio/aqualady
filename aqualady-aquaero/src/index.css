@@ -1,0 +1,126 @@
+@import "tailwindcss";
+
+@theme {
+  --color-teal-brand: #2C8889;
+  --color-teal-light: #3DA3A4;
+  --color-teal-dark: #256F70;
+  --color-sand: #e6c9a8;
+  --color-sand-light: #f5e6d3;
+  --color-sand-dark: #d4a96a;
+  --color-cream: #fdfbf7;
+  --color-white: #ffffff;
+  --color-red-accent: #dc2626;
+  --color-red-light: #fee2e2;
+  --color-green-accent: #16a34a;
+  --color-green-light: #dcfce7;
+  --color-star: #f59e0b;
+  --font-family-base: "DM Sans", "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-weight-base: 400;
+  --line-height-base: 1.75;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: var(--font-family-base);
+  font-weight: var(--font-weight-base);
+  line-height: var(--line-height-base);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-size: 16px;
+}
+
+body {
+  margin: 0;
+  background: #e8ecec;
+  display: flex;
+  justify-content: center;
+  min-height: 100dvh;
+}
+
+#root {
+  width: 100%;
+  max-width: 430px;
+  min-height: 100dvh;
+  background: var(--color-cream);
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.06);
+  position: relative;
+}
+
+/* Mobile-first: на десктопе центрируем как приложение */
+@media (min-width: 768px) {
+  body {
+    padding: 20px 0;
+    background: #dce3e3;
+  }
+  #root {
+    border-radius: 24px;
+    min-height: calc(100dvh - 40px);
+    max-height: calc(100dvh - 40px);
+    overflow-y: auto;
+  }
+}
+
+/* Scrollbar styling */
+#root::-webkit-scrollbar {
+  width: 4px;
+}
+#root::-webkit-scrollbar-track {
+  background: transparent;
+}
+#root::-webkit-scrollbar-thumb {
+  background: var(--color-sand-dark);
+  border-radius: 2px;
+}
+
+/* Sticky mobile CTA button */
+.sticky-cta {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 430px;
+  z-index: 90;
+  padding: 12px 16px 16px;
+  background: linear-gradient(to top, rgba(253, 251, 247, 0.98) 60%, transparent);
+  pointer-events: none;
+}
+
+.sticky-cta > * {
+  pointer-events: auto;
+}
+
+/* Animations */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes bounce-in {
+  0% { transform: scale(0.3); opacity: 0; }
+  50% { transform: scale(1.15); }
+  70% { transform: scale(0.95); }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes pulse-sparkle {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.2); }
+  60% { transform: scale(0.9); }
+  100% { transform: scale(1); }
+}
+@keyframes sparkle-float {
+  0% { opacity: 0; transform: translateY(0) rotate(0deg) scale(0); }
+  50% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-80px) rotate(180deg) scale(1.2); }
+}
+.animate-fade-in {
+  animation: fade-in 0.2s ease-out;
+}
+.animate-bounce-in {
+  animation: bounce-in 0.5s ease-out;
+}
+.animate-pulse-sparkle {
+  animation: pulse-sparkle 0.6s ease-out;
+}
