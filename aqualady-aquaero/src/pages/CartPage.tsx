@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { useCart } from '../context/CartContext'
 import { POOLS, type PoolId } from '../config'
 
@@ -16,6 +16,9 @@ Płatności są obsługiwane przez bezpiecznych zewnętrznych operatorów (Blik,
 Klient ma prawo do wglądu i usunięcia swoich danych.`
 
 export default function CartPage() {
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' })
+  }, [])
   const { state, dispatch } = useCart()
   const [promoCode, setPromoCode] = useState('')
   const [agreed, setAgreed] = useState(false)
