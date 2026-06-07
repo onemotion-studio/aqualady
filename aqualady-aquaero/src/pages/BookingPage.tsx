@@ -1,66 +1,38 @@
 ﻿import { useState, useMemo, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Calendar from '../components/Calendar'
-import type { AvailableDate, TimeSlot } from '../components/Calendar'
 import { useCart } from '../context/CartContext'
-import { POOLS, PRICES, type PoolId } from '../config'
-
-const DEMO_AVAILABLE_DATES: AvailableDate[] = [
-  { date: '2026-06-08', slots: [{ label: 'Poranne zajecia 9:00-10:00', time: '9:00', value: 'morning' }, { label: 'Wieczorne zajecia 18:00-19:00', time: '18:00', value: 'evening' }] },
-  { date: '2026-06-10', slots: [{ label: 'Poranne zajecia 9:00-10:00', time: '9:00', value: 'morning' }] },
-  { date: '2026-06-12', slots: [{ label: 'Wieczorne zajecia 18:00-19:00', time: '18:00', value: 'evening' }] },
-  { date: '2026-06-15', slots: [{ label: 'Poranne zajecia 9:00-10:00', time: '9:00', value: 'morning' }, { label: 'Wieczorne zajecia 18:00-19:00', time: '18:00', value: 'evening' }] },
-  { date: '2026-06-17', slots: [{ label: 'Poranne zajecia 9:00-10:00', time: '9:00', value: 'morning' }, { label: 'Wieczorne zajecia 18:00-19:00', time: '18:00', value: 'evening' }] },
-  { date: '2026-06-19', slots: [{ label: 'Poranne zajecia 9:00-10:00', time: '9:00', value: 'morning' }] },
-  { date: '2026-06-22', slots: [{ label: 'Wieczorne zajecia 18:00-19:00', time: '18:00', value: 'evening' }] },
-  { date: '2026-06-24', slots: [{ label: 'Poranne zajecia 9:00-10:00', time: '9:00', value: 'morning' }, { label: 'Wieczorne zajecia 18:00-19:00', time: '18:00', value: 'evening' }] },
-  { date: '2026-06-26', slots: [{ label: 'Poranne zajecia 9:00-10:00', time: '9:00', value: 'morning' }] },
-  { date: '2026-06-29', slots: [{ label: 'Poranne zajecia 9:00-10:00', time: '9:00', value: 'morning' }, { label: 'Wieczorne zajecia 18:00-19:00', time: '18:00', value: 'evening' }] },
-  { date: '2026-07-01', slots: [{ label: 'Poranne zajecia 9:00-10:00', time: '9:00', value: 'morning' }] },
-  { date: '2026-07-03', slots: [{ label: 'Wieczorne zajecia 18:00-19:00', time: '18:00', value: 'evening' }] },
-  { date: '2026-07-06', slots: [{ label: 'Poranne zajecia 9:00-10:00', time: '9:00', value: 'morning' }, { label: 'Wieczorne zajecia 18:00-19:00', time: '18:00', value: 'evening' }] },
-  { date: '2026-07-08', slots: [{ label: 'Poranne zajecia 9:00-10:00', time: '9:00', value: 'morning' }] },
-  { date: '2026-07-10', slots: [{ label: 'Wieczorne zajecia 18:00-19:00', time: '18:00', value: 'evening' }] },
-  { date: '2026-07-13', slots: [{ label: 'Poranne zajecia 9:00-10:00', time: '9:00', value: 'morning' }, { label: 'Wieczorne zajecia 18:00-19:00', time: '18:00', value: 'evening' }] },
-  { date: '2026-07-15', slots: [{ label: 'Poranne zajecia 9:00-10:00', time: '9:00', value: 'morning' }] },
-  { date: '2026-07-17', slots: [{ label: 'Wieczorne zajecia 18:00-19:00', time: '18:00', value: 'evening' }] },
-  { date: '2026-07-20', slots: [{ label: 'Poranne zajecia 9:00-10:00', time: '9:00', value: 'morning' }, { label: 'Wieczorne zajecia 18:00-19:00', time: '18:00', value: 'evening' }] },
-  { date: '2026-07-22', slots: [{ label: 'Poranne zajecia 9:00-10:00', time: '9:00', value: 'morning' }] },
-  { date: '2026-07-24', slots: [{ label: 'Wieczorne zajecia 18:00-19:00', time: '18:00', value: 'evening' }] },
-  { date: '2026-07-27', slots: [{ label: 'Poranne zajecia 9:00-10:00', time: '9:00', value: 'morning' }, { label: 'Wieczorne zajecia 18:00-19:00', time: '18:00', value: 'evening' }] },
-  { date: '2026-07-29', slots: [{ label: 'Poranne zajecia 9:00-10:00', time: '9:00', value: 'morning' }] },
-  { date: '2026-07-31', slots: [{ label: 'Wieczorne zajecia 18:00-19:00', time: '18:00', value: 'evening' }] },
-]
+import { useSchedule } from '../context/ScheduleContext'
+import { BUILTIN_POOLS, loadPools, PRICES, type PoolId } from '../config'
 
 export default function BookingPage() {
   const navigate = useNavigate()
   const { dispatch } = useCart()
+  const { schedule } = useSchedule()
 
+  const [allPools] = useState(loadPools)
   const [selectedPool, setSelectedPool] = useState<PoolId | null>(null)
   const [expandedMap, setExpandedMap] = useState<PoolId | null>(null)
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
-  const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null)
+  const [selectedSlot, setSelectedSlot] = useState<{ value: string; label: string } | null>(null)
   const [showConfirm, setShowConfirm] = useState(false)
   const [confirmItem, setConfirmItem] = useState('')
   const [resetKey, setResetKey] = useState(0)
   const slotsRef = useRef<HTMLDivElement>(null)
 
-  const poolList = Object.values(POOLS)
-
-  const resetSelection = () => {
-    setSelectedDate(null)
-    setSelectedSlot(null)
-  }
+  const poolList = useMemo(() => Object.values(allPools), [allPools])
 
   const handlePoolClick = (poolId: PoolId) => {
     if (selectedPool === poolId) {
       setExpandedMap(null)
       setSelectedPool(null)
-      resetSelection()
+      setSelectedDate(null)
+      setSelectedSlot(null)
     } else {
       setSelectedPool(poolId)
       setExpandedMap(poolId)
-      resetSelection()
+      setSelectedDate(null)
+      setSelectedSlot(null)
       setResetKey(k => k + 1)
     }
   }
@@ -78,26 +50,8 @@ export default function BookingPage() {
     }
   }, [selectedDate])
 
-  const handleSlotSelect = (slot: TimeSlot) => {
+  const handleSlotSelect = (slot: { value: string; label: string }) => {
     setSelectedSlot(slot)
-  }
-
-  const addPass = (type: 'pass8' | 'pass12' | 'pass16') => {
-    if (!selectedPool) return
-    const labelMap = { pass8: 'Karnet na 8 zajec', pass12: 'Karnet na 12 zajec', pass16: 'Karnet na 16 zajec' }
-    const label = labelMap[type] || 'Karnet'
-    const id = type + '-' + selectedPool + '-' + Date.now() + '-' + Math.random()
-    dispatch({
-      type: 'ADD_ITEM',
-      payload: {
-        id,
-        poolId: selectedPool,
-        type,
-        label: label + ' - ' + POOLS[selectedPool].name,
-        price: PRICES[type],
-      },
-    })
-    showAnimation(label + ' zostal dodany do koszyka!')
   }
 
   const showAnimation = (label: string) => {
@@ -112,16 +66,18 @@ export default function BookingPage() {
   const handleAddToCart = () => {
     if (!selectedPool || !selectedDate || !selectedSlot) return
     const id = 'single-' + selectedPool + '-' + selectedDate + '-' + selectedSlot.value + '-' + Date.now() + '-' + Math.random()
+    const pool = allPools[selectedPool]
     dispatch({
       type: 'ADD_ITEM',
       payload: {
         id,
         poolId: selectedPool,
         type: 'single',
-        label: POOLS[selectedPool].name + ' - ' + selectedSlot.label,
+        label: selectedSlot.label,
         date: selectedDate,
         time: selectedSlot.value,
         price: PRICES.single,
+        quantity: 1,
       },
     })
     showAnimation('Dodano: ' + selectedSlot.label)
@@ -129,29 +85,51 @@ export default function BookingPage() {
     setSelectedSlot(null)
   }
 
+  // Slots for selected date from schedule
   const slotsForSelectedDate = useMemo(() => {
-    if (!selectedDate) return []
-    const found = DEMO_AVAILABLE_DATES.find(a => a.date === selectedDate)
-    return found ? found.slots : []
-  }, [selectedDate])
+    if (!selectedPool || !selectedDate) return []
+    const entry = schedule.find(s => s.poolId === selectedPool && s.date === selectedDate)
+    return entry ? entry.slots : []
+  }, [selectedPool, selectedDate, schedule])
 
-  const currentPool = selectedPool ? POOLS[selectedPool] : null
+  // Scheduled date strings for the calendar highlight
+  const scheduledDateStrings = useMemo(() => {
+    if (!selectedPool) return []
+    return schedule
+      .filter(e => e.poolId === selectedPool && e.slots.length > 0)
+      .map(e => e.date)
+  }, [selectedPool, schedule])
+
+  const currentPool = selectedPool ? Object.values(allPools).find(p => p.id === selectedPool) : null
   const canAddToCart = selectedPool !== null && selectedDate !== null && selectedSlot !== null
+
+  // Build availableDates for Calendar
+  const availableDates = useMemo(() => {
+    if (!selectedPool) return []
+    const entries = schedule.filter(e => e.poolId === selectedPool && e.slots.length > 0)
+    return entries.map(e => ({
+      date: e.date,
+      slots: e.slots.map(s => ({ label: s.label, time: s.time, value: s.value })),
+    }))
+  }, [selectedPool, schedule])
 
   return (
     <div className="space-y-5 pb-8 pt-4">
       <h1 className="pt-4 text-xl font-bold text-stone-800">Wybierz zajecia</h1>
 
+      {/* Pool Selection with accordion map */}
       <div className="space-y-3">
         <p className="text-sm font-medium text-stone-600">Wybierz basen:</p>
         {poolList.map(p => {
-          const isSelected = selectedPool === p.id.toUpperCase() as PoolId
-          const isExpanded = expandedMap === p.id.toUpperCase() as PoolId
-          const poolId = p.id.toUpperCase() as PoolId
+          const isSelected = selectedPool === p.id
+          const isExpanded = expandedMap === p.id
 
           return (
             <div key={p.id}>
-              <button onClick={() => handlePoolClick(poolId)} className={'w-full bg-white rounded-2xl p-4 shadow-sm border text-left transition-all active:scale-[0.99] ' + (isSelected ? 'border-teal-brand shadow-md' : 'border-sand/15 hover:shadow-md hover:border-teal-brand/30')}>
+              <button
+                onClick={() => handlePoolClick(p.id)}
+                className={'w-full bg-white rounded-2xl p-4 shadow-sm border text-left transition-all active:scale-[0.99] ' + (isSelected ? 'border-teal-brand shadow-md' : 'border-sand/15 hover:shadow-md hover:border-teal-brand/30')}
+              >
                 <div className="flex items-start justify-between mb-1">
                   <h3 className="text-sm font-bold text-stone-800">{p.name}</h3>
                   <div className="flex items-center gap-0.5">
@@ -188,7 +166,13 @@ export default function BookingPage() {
                     </div>
                     <p className="text-[10px] text-stone-500 mb-2">{p.address}</p>
                     <div className="w-full h-40 rounded-xl bg-stone-100 overflow-hidden relative">
-                      <iframe title={'Mapa ' + p.name} className="w-full h-full" loading="lazy" referrerPolicy="no-referrer-when-downgrade" src={'https://maps.google.com/maps?q=' + p.lat + ',' + p.lng + '&z=15&output=embed'} />
+                      <iframe
+                        title={'Mapa ' + p.name}
+                        className="w-full h-full"
+                        loading="lazy"
+                        referrerPolicy="no-referrer-when-downgrade"
+                        src={'https://maps.google.com/maps?q=' + p.lat + ',' + p.lng + '&z=15&output=embed'}
+                      />
                       <div className="absolute bottom-2 right-2 bg-white/90 backdrop-blur-sm text-[9px] px-2 py-1 rounded-lg shadow text-stone-400">&copy; Google Maps</div>
                     </div>
                   </div>
@@ -199,91 +183,106 @@ export default function BookingPage() {
         })}
       </div>
 
+      {/* Date & Time - only when pool selected */}
+
       {selectedPool && (
-        <div className="mt-5 pt-5 border-t border-sand/20">
-          <div className="flex items-center gap-2 mb-4">
+        <div className="space-y-4 mt-5 pt-5 border-t border-sand/20">
+          <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-teal-brand" />
             <p className="text-sm font-semibold text-stone-700">
               Wybrano: <span className="text-teal-brand">{currentPool?.name}</span>
             </p>
-            <button onClick={() => { setSelectedPool(null); setExpandedMap(null); resetSelection(); }} className="ml-auto text-[10px] text-stone-400 underline hover:text-stone-600">
+            <button onClick={() => { setSelectedPool(null); setExpandedMap(null); setSelectedDate(null); setSelectedSlot(null); }} className="ml-auto text-[10px] text-stone-400 underline hover:text-stone-600">
               Zmien
             </button>
           </div>
 
-          <h2 className="text-base font-bold text-stone-800 mb-3">Wybierz date i godzine</h2>
+          <h2 className="text-base font-bold text-stone-800">Wybierz date i godzine</h2>
 
           <Calendar
             selectedDate={selectedDate}
             onDateSelect={handleDateSelect}
-            availableDates={DEMO_AVAILABLE_DATES}
+            availableDates={availableDates}
+            scheduledDates={scheduledDateStrings}
             resetKey={resetKey}
           />
 
+          {/* Slots appear below calendar on date select — full width, stacked vertically */}
           {selectedDate && slotsForSelectedDate.length > 0 && (
-            <div className="mt-4">
-              <p className="text-xs font-medium text-stone-500 mb-2">
+            <div ref={slotsRef} className="space-y-2 mt-2">
+              <p className="text-xs font-medium text-stone-500 mb-1">
                 Dostepne terminy na {selectedDate.slice(8, 10)}.{selectedDate.slice(5, 7)}:
               </p>
-              <div ref={slotsRef} className="space-y-2">
-                {slotsForSelectedDate.map((slot, idx) => {
-                  const isSlotSelected = selectedSlot?.value === slot.value
-                  const icon = slot.value === 'morning' ? '\u{1F305}' : '\u{1F307}'
-                  return (
-                    <button
-                      key={idx}
-                      onClick={() => handleSlotSelect(slot)}
-                      className={'w-full text-left py-3 px-4 rounded-xl text-sm font-medium transition-all border ' + (isSlotSelected ? 'bg-teal-brand text-white border-teal-brand shadow' : 'bg-white text-stone-700 border-sand/30 hover:border-teal-brand/40 hover:shadow-sm')}
-                    >
-                      <span className="mr-2">{icon}</span>{slot.label}
-                    </button>
-                  )
-                })}
-              </div>
+              {slotsForSelectedDate.map((slot, idx) => {
+                const isSlotSelected = selectedSlot?.value === slot.value
+                return (
+                  <button
+                    key={idx}
+                    onClick={() => handleSlotSelect(slot)}
+                    className={'w-full text-left py-3.5 px-4 rounded-xl text-sm font-medium transition-all border ' + (isSlotSelected ? 'bg-teal-brand text-white border-teal-brand shadow' : 'bg-white text-stone-700 border-sand/30 hover:border-teal-brand/40 hover:shadow-sm')}
+                  >
+                    {slot.label}
+                  </button>
+                )
+              })}
             </div>
           )}
 
-          <button
-            onClick={handleAddToCart}
-            disabled={!canAddToCart}
-            className={'w-full mt-5 py-3.5 rounded-xl font-bold text-sm transition-all ' + (canAddToCart ? 'bg-teal-brand text-white shadow-lg hover:bg-teal-light active:scale-[0.98]' : 'bg-stone-200 text-stone-400 cursor-not-allowed')}
-          >
-            Dodaj do koszyka
-          </button>
-
-          <div className="text-center text-xs text-stone-400 py-2">— lub kup karnet —</div>
+          {/* Passes */}
+          <div className="text-center text-xs text-stone-400 py-1">- lub kup karnet -</div>
 
           <div className="grid grid-cols-3 gap-2">
             <button
-              onClick={() => addPass('pass8')}
+              onClick={() => {
+                if (!selectedPool) return
+                const id = "pass8-" + selectedPool + "-" + Date.now() + "-" + Math.random()
+                dispatch({ type: "ADD_ITEM", payload: { id, poolId: selectedPool, type: "pass8", label: "Karnet na 8 zajec - " + (currentPool?.name || selectedPool), price: 299, quantity: 1 } })
+                showAnimation("Karnet na 8 zajec zostal dodany do koszyka!")
+              }}
               className="bg-white border border-sand/30 rounded-xl py-3 px-2 text-center hover:border-teal-brand/40 hover:shadow transition-all active:scale-[0.98]"
             >
               <div className="text-[10px] font-bold text-teal-brand">8 zajec</div>
-              <div className="text-sm font-bold text-stone-800">{PRICES.pass8} zl</div>
+              <div className="text-sm font-bold text-stone-800">299 zl</div>
               <div className="text-[8px] text-stone-400">1 mies.</div>
             </button>
             <button
-              onClick={() => addPass('pass12')}
+              onClick={() => {
+                if (!selectedPool) return
+                const id = "pass12-" + selectedPool + "-" + Date.now() + "-" + Math.random()
+                dispatch({ type: "ADD_ITEM", payload: { id, poolId: selectedPool, type: "pass12", label: "Karnet na 12 zajec - " + (currentPool?.name || selectedPool), price: 399, quantity: 1 } })
+                showAnimation("Karnet na 12 zajec zostal dodany do koszyka!")
+              }}
               className="bg-white border-2 border-teal-brand/30 rounded-xl py-3 px-2 text-center hover:border-teal-brand hover:shadow transition-all active:scale-[0.98] relative"
             >
-              <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 bg-teal-brand text-white text-[7px] px-1.5 py-0.5 rounded-full font-bold whitespace-nowrap">
-                BEST
-              </div>
+              <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 bg-teal-brand text-white text-[7px] px-1.5 py-0.5 rounded-full font-bold whitespace-nowrap">BEST</div>
               <div className="text-[10px] font-bold text-teal-brand mt-1.5">12 zajec</div>
-              <div className="text-sm font-bold text-stone-800">{PRICES.pass12} zl</div>
+              <div className="text-sm font-bold text-stone-800">399 zl</div>
               <div className="text-[8px] text-stone-400">1,5 mies.</div>
             </button>
             <button
-              onClick={() => addPass('pass16')}
+              onClick={() => {
+                if (!selectedPool) return
+                const id = "pass16-" + selectedPool + "-" + Date.now() + "-" + Math.random()
+                dispatch({ type: "ADD_ITEM", payload: { id, poolId: selectedPool, type: "pass16", label: "Karnet Bezlimit - " + (currentPool?.name || selectedPool), price: 549, quantity: 1 } })
+                showAnimation("Karnet Bezlimit zostal dodany do koszyka!")
+              }}
               className="bg-white border border-sand/30 rounded-xl py-3 px-2 text-center hover:border-teal-brand/40 hover:shadow transition-all active:scale-[0.98]"
             >
               <div className="text-[10px] font-bold text-teal-brand">Bezlimit</div>
-              <div className="text-sm font-bold text-stone-800">{PRICES.pass16} zl</div>
+              <div className="text-sm font-bold text-stone-800">549 zl</div>
               <div className="text-[8px] text-stone-400">1 mies.</div>
             </button>
           </div>
 
-          <div className="text-center pt-3">
+          <button
+            onClick={handleAddToCart}
+            disabled={!canAddToCart}
+            className={'w-full py-3.5 rounded-xl font-bold text-sm transition-all ' + (canAddToCart ? 'bg-teal-brand text-white shadow-lg hover:bg-teal-light active:scale-[0.98]' : 'bg-stone-200 text-stone-400 cursor-not-allowed')}
+          >
+            Dodaj do koszyka
+          </button>
+
+          <div className="text-center pt-2">
             <button onClick={() => navigate('/cart')} className="text-sm text-teal-brand font-medium underline underline-offset-4 hover:text-teal-light transition-colors">
               Przejdz do koszyka
             </button>
@@ -291,6 +290,7 @@ export default function BookingPage() {
         </div>
       )}
 
+      {/* Confirmation Animation */}
       {showConfirm && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/30 backdrop-blur-sm animate-fade-in">
           <div className="bg-white rounded-2xl px-8 py-10 shadow-2xl text-center animate-bounce-in max-w-[300px] relative overflow-hidden">
@@ -299,7 +299,7 @@ export default function BookingPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <p className="text-sm font-semibold text-stone-800 mb-1">&#10003; Dodano do koszyka!</p>
+            <p className="text-sm font-semibold text-stone-800 mb-1">Dodano do koszyka!</p>
             <p className="text-xs text-stone-500">{confirmItem}</p>
           </div>
         </div>

@@ -82,7 +82,7 @@ export default function HomePage() {
         {/* WHY EXERCISE */}
         <section>
           <div className="mb-5">
-              <h2 className="text-base font-bold text-stone-800">Dlaczego jest to korzystne wlasnie teraz</h2>
+              <h2 className="text-base font-bold text-stone-800 text-center">Dlaczego jest to korzystne wlasnie teraz</h2>
             </div>
           <div className="space-y-3">
             {benefits.map((b, i) => (
