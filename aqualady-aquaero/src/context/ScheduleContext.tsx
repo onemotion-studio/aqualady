@@ -1,5 +1,6 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react'
 import type { PoolId } from '../config'
+import { loadScheduleFromServer, saveScheduleToServer, deleteScheduleFromServer } from '../lib/supabase'
 
 export interface TimeSlotDef {
   time: string
@@ -19,6 +20,7 @@ interface ScheduleContextValue {
   getSlotsForDate: (poolId: PoolId, date: string) => TimeSlotDef[]
   getScheduleForPool: (poolId: PoolId) => ScheduleEntry[]
   saveSchedule: (poolId: PoolId, date: string, slots: TimeSlotDef[]) => void
+  serverConnected: boolean
 }
 
 const ScheduleContext = createContext<ScheduleContextValue | null>(null)
@@ -41,39 +43,64 @@ function saveToStorage(data: ScheduleEntry[]) {
 
 export function ScheduleProvider({ children }: { children: ReactNode }) {
   const [schedule, setSchedule] = useState<ScheduleEntry[]>(loadFromStorage)
+  const [serverConnected, setServerConnected] = useState(false)
 
+  // Load from server on mount
+  useEffect(() => {
+    loadScheduleFromServer().then(serverData => {
+      if (serverData && Array.isArray(serverData) && serverData.length > 0) {
+        const mapped: ScheduleEntry[] = serverData.map((row: any) => ({
+          poolId: row.pool_id,
+          date: row.date,
+          slots: typeof row.slots === 'string' ? JSON.parse(row.slots) : row.slots || [],
+        }))
+        setSchedule(mapped)
+        saveToStorage(mapped)
+        setServerConnected(true)
+      }
+    }).catch(() => {
+      // Server not available, use local
+    })
+  }, [])
+
+  // Persist to localStorage
   useEffect(() => {
     saveToStorage(schedule)
   }, [schedule])
 
-  const getSlotsForDate = (poolId: PoolId, date: string): TimeSlotDef[] => {
+  const getSlotsForDate = useCallback((poolId: PoolId, date: string): TimeSlotDef[] => {
     const entry = schedule.find(s => s.poolId === poolId && s.date === date)
     return entry ? entry.slots : []
-  }
+  }, [schedule])
 
-  const getScheduleForPool = (poolId: PoolId): ScheduleEntry[] => {
+  const getScheduleForPool = useCallback((poolId: PoolId): ScheduleEntry[] => {
     return schedule.filter(s => s.poolId === poolId)
-  }
+  }, [schedule])
 
-  const saveSchedule = (poolId: PoolId, date: string, slots: TimeSlotDef[]) => {
+  const saveSchedule = useCallback((poolId: PoolId, date: string, slots: TimeSlotDef[]) => {
     setSchedule(prev => {
       const idx = prev.findIndex(s => s.poolId === poolId && s.date === date)
+      let next: ScheduleEntry[]
       if (idx >= 0) {
-        const next = [...prev]
+        next = [...prev]
         if (slots.length === 0) {
           next.splice(idx, 1)
+          deleteScheduleFromServer(poolId, date)
         } else {
           next[idx] = { poolId, date, slots }
+          saveScheduleToServer(poolId, date, slots)
         }
-        return next
+      } else {
+        if (slots.length === 0) return prev
+        next = [...prev, { poolId, date, slots }]
+        saveScheduleToServer(poolId, date, slots)
       }
-      if (slots.length === 0) return prev
-      return [...prev, { poolId, date, slots }]
+      return next
     })
-  }
+  }, [])
 
   return (
-    <ScheduleContext.Provider value={{ schedule, setSchedule, getSlotsForDate, getScheduleForPool, saveSchedule }}>
+    <ScheduleContext.Provider value={{ schedule, setSchedule, getSlotsForDate, getScheduleForPool, saveSchedule, serverConnected }}>
       {children}
     </ScheduleContext.Provider>
   )
