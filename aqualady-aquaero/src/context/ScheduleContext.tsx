@@ -1,4 +1,4 @@
-﻿import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react'
 import type { PoolId } from '../config'
 import { loadScheduleFromServer, saveScheduleToServer, deleteScheduleFromServer } from '../lib/supabase'
 
@@ -6,7 +6,6 @@ export interface TimeSlotDef {
   time: string
   label: string
   value: string
-  capacity?: number
 }
 
 export interface ScheduleEntry {
