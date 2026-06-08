@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react'
+﻿import { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { MONTHS_PL, DAYS_PL, loadPools, saveCustomPool, removeCustomPool, DEFAULT_SLOTS, type PoolConfig } from '../config'
 import { useSchedule, type TimeSlotDef } from '../context/ScheduleContext'
@@ -48,7 +48,8 @@ export default function TrainerDashboard() {
   const [editingPoolId, setEditingPoolId] = useState<string | null>(null)
   const [poolForm, setPoolForm] = useState<PoolForm>(emptyForm)
   const [customSlots, setCustomSlots] = useState<TimeSlotDef[]>(loadCustomSlots)
-  const [newSlotTime, setNewSlotTime] = useState('')
+  const [newSlotStart, setNewSlotStart] = useState('')
+  const [newSlotEnd, setNewSlotEnd] = useState('')
   const [newSlotLabel, setNewSlotLabel] = useState('')
 
   // Persist custom slots
@@ -149,15 +150,13 @@ export default function TrainerDashboard() {
   }
 
   const addCustomSlot = () => {
-    if (!newSlotTime) return
-    const value = 'slot_' + newSlotTime.replace(':', '')
-    const hour = parseInt(newSlotTime)
-    const nextHour = hour + 1
-    const nextHourStr = nextHour < 10 ? '0' + nextHour : String(nextHour)
-    const defaultLabel = newSlotTime + ' - ' + nextHourStr + ':00'
+    if (!newSlotStart || !newSlotEnd) return
+    const value = 'slot_' + newSlotStart.replace(':', '')
+    const defaultLabel = newSlotStart + ' - ' + newSlotEnd
     const label = newSlotLabel || defaultLabel
-    setCustomSlots(prev => [...prev, { time: newSlotTime, label, value }])
-    setNewSlotTime('')
+    setCustomSlots(prev => [...prev, { time: newSlotStart, label, value }])
+    setNewSlotStart('')
+    setNewSlotEnd('')
     setNewSlotLabel('')
   }
 
@@ -380,28 +379,35 @@ export default function TrainerDashboard() {
             </p>
 
             {/* Custom slot input */}
-            <div className="flex gap-2 mb-3">
+            <div className="flex gap-2 mb-2">
               <input
                 type="time"
-                value={newSlotTime}
-                onChange={e => setNewSlotTime(e.target.value)}
-                className="flex-1 px-3 py-2 rounded-xl border border-sand/30 text-xs focus:border-teal-brand focus:outline-none"
-                placeholder="Godzina"
+                value={newSlotStart}
+                onChange={e => setNewSlotStart(e.target.value)}
+                className="flex-1 px-3 py-2.5 rounded-xl border border-sand/30 text-xs focus:border-teal-brand focus:outline-none"
+                placeholder="Poczatek"
               />
               <input
-                value={newSlotLabel}
-                onChange={e => setNewSlotLabel(e.target.value)}
-                className="flex-1 px-3 py-2 rounded-xl border border-sand/30 text-xs focus:border-teal-brand focus:outline-none"
-                placeholder="Opis (opcjonalnie)"
+                type="time"
+                value={newSlotEnd}
+                onChange={e => setNewSlotEnd(e.target.value)}
+                className="flex-1 px-3 py-2.5 rounded-xl border border-sand/30 text-xs focus:border-teal-brand focus:outline-none"
+                placeholder="Koniec"
               />
-              <button
-                onClick={addCustomSlot}
-                disabled={!newSlotTime}
-                className="px-3 py-2 rounded-xl bg-teal-brand text-white text-xs font-bold disabled:bg-stone-200 disabled:text-stone-400 hover:bg-teal-light transition-all"
-              >
-                + Dodaj
-              </button>
             </div>
+            <input
+              value={newSlotLabel}
+              onChange={e => setNewSlotLabel(e.target.value)}
+              className="w-full px-3 py-2.5 rounded-xl border border-sand/30 text-xs focus:border-teal-brand focus:outline-none mb-2"
+              placeholder="Opis (opcjonalnie)"
+            />
+            <button
+              onClick={addCustomSlot}
+              disabled={!newSlotStart || !newSlotEnd}
+              className="w-full py-2.5 rounded-xl bg-teal-brand text-white text-xs font-bold disabled:bg-stone-200 disabled:text-stone-400 hover:bg-teal-light transition-all mb-4"
+            >
+              + Dodaj
+            </button>
 
             <div className="space-y-2">
               {allSlots.map((slot, si) => (
