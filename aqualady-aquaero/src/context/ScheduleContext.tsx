@@ -6,6 +6,7 @@ export interface TimeSlotDef {
   time: string
   label: string
   value: string
+  capacity?: number
 }
 
 export interface ScheduleEntry {

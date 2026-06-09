@@ -10,6 +10,7 @@ export interface TimeSlot {
 export interface AvailableDate {
   date: string
   slots: TimeSlot[]
+  allSlotsFull?: boolean
 }
 
 interface CalendarProps {
@@ -111,6 +112,8 @@ export default function Calendar({ selectedDate, onDateSelect, resetKey, availab
                     isSelected ? 'bg-red-accent text-white shadow-md hover:bg-red-700' : ''
                   } ${
                     isScheduled && !isSelected ? 'bg-teal-brand/15 text-teal-brand font-bold' : ''
+                  } ${
+                    avail?.allSlotsFull && !isSelected ? 'bg-stone-200 text-stone-400 border border-stone-200 font-medium' : ''
                   } ${
                     isToday && !isSelected && !isScheduled && !hasSlots ? 'border border-teal-brand/40 text-teal-brand font-bold' : ''
                   } ${

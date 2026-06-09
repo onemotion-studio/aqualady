@@ -51,6 +51,7 @@ export default function TrainerDashboard() {
   const [newSlotStart, setNewSlotStart] = useState('')
   const [newSlotEnd, setNewSlotEnd] = useState('')
   const [newSlotLabel, setNewSlotLabel] = useState('')
+  const [newSlotCapacity, setNewSlotCapacity] = useState('')
 
   // Persist custom slots
   useEffect(() => {
@@ -154,10 +155,12 @@ export default function TrainerDashboard() {
     const value = 'slot_' + newSlotStart.replace(':', '')
     const defaultLabel = newSlotStart + ' - ' + newSlotEnd
     const label = newSlotLabel || defaultLabel
-    setCustomSlots(prev => [...prev, { time: newSlotStart, label, value }])
+    const capacity = parseInt(newSlotCapacity) || 0
+    setCustomSlots(prev => [...prev, { time: newSlotStart, label, value, capacity }])
     setNewSlotStart('')
     setNewSlotEnd('')
     setNewSlotLabel('')
+    setNewSlotCapacity('')
   }
 
   // Calendar helpers
@@ -394,13 +397,24 @@ export default function TrainerDashboard() {
                 className="flex-1 px-3 py-2.5 rounded-xl border border-sand/30 text-xs focus:border-teal-brand focus:outline-none"
                 placeholder="Koniec"
               />
+                        </div>
+            <div className="flex gap-2 mb-2">
+              <input
+                value={newSlotLabel}
+                onChange={e => setNewSlotLabel(e.target.value)}
+                className="flex-1 px-3 py-2.5 rounded-xl border border-sand/30 text-xs focus:border-teal-brand focus:outline-none"
+                placeholder="Opis (opcjonalnie)"
+              />
+              <input
+                type="number"
+                min="1"
+                max="99"
+                value={newSlotCapacity}
+                onChange={e => setNewSlotCapacity(e.target.value)}
+                className="w-24 px-3 py-2.5 rounded-xl border border-sand/30 text-xs focus:border-teal-brand focus:outline-none"
+                placeholder="Miejsca"
+              />
             </div>
-            <input
-              value={newSlotLabel}
-              onChange={e => setNewSlotLabel(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-xl border border-sand/30 text-xs focus:border-teal-brand focus:outline-none mb-2"
-              placeholder="Opis (opcjonalnie)"
-            />
             <button
               onClick={addCustomSlot}
               disabled={!newSlotStart || !newSlotEnd}

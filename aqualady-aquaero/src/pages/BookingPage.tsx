@@ -7,7 +7,7 @@ import { BUILTIN_POOLS, loadPools, PRICES, type PoolId } from '../config'
 
 export default function BookingPage() {
   const navigate = useNavigate()
-  const { dispatch } = useCart()
+  const { dispatch, state: cartState } = useCart()
   const { schedule } = useSchedule()
 
   const [allPools] = useState(loadPools)
@@ -103,15 +103,71 @@ export default function BookingPage() {
   const currentPool = selectedPool ? Object.values(allPools).find(p => p.id === selectedPool) : null
   const canAddToCart = selectedPool !== null && selectedDate !== null && selectedSlot !== null
 
-  // Build availableDates for Calendar
+  // Count bookings from cart (current session)
+  const bookedCount = useMemo(() => {
+    const map = new Map<string, number>()
+    cartState.items.forEach(item => {
+      if (item.type === 'single' && item.poolId && item.date && item.time) {
+        const key = item.poolId + '|' + item.date + '|' + item.time
+        map.set(key, (map.get(key) || 0) + item.quantity)
+      }
+    })
+    return map
+  }, [cartState.items])
+
+  // Enhanced slots with capacity info (persisted + cart)
+  const enrichedSlots = useMemo(() => {
+    if (!selectedPool || !selectedDate) return []
+    const entry = schedule.find(s => s.poolId === selectedPool && s.date === selectedDate)
+    if (!entry) return []
+    let persisted: Record<string, number> = {}
+    try {
+      const raw = localStorage.getItem('aqualady_bookings')
+      if (raw) persisted = JSON.parse(raw)
+    } catch {}
+    return entry.slots.map(slot => {
+      const key = selectedPool + '|' + selectedDate + '|' + slot.value
+      const persistedBooked = persisted[key] || 0
+      const cartBooked = bookedCount.get(key) || 0
+      const totalBooked = persistedBooked + cartBooked
+      const capacity = slot.capacity || 0
+      const remaining = capacity > 0 ? capacity - totalBooked : -1
+      const isFull = capacity > 0 && remaining <= 0
+      return { ...slot, remaining, isFull, booked: totalBooked }
+    })
+  }, [selectedPool, selectedDate, schedule, bookedCount])
+
+  // Check if ALL slots for selected date are full
+  const allSlotsFull = useMemo(() => {
+    return enrichedSlots.length > 0 && enrichedSlots.every(s => (s as any).isFull)
+  }, [enrichedSlots])
+
+
+    // Build availableDates for Calendar
   const availableDates = useMemo(() => {
     if (!selectedPool) return []
     const entries = schedule.filter(e => e.poolId === selectedPool && e.slots.length > 0)
-    return entries.map(e => ({
-      date: e.date,
-      slots: e.slots.map(s => ({ label: s.label, time: s.time, value: s.value })),
-    }))
-  }, [selectedPool, schedule])
+    return entries.map(e => {
+      const slots = e.slots.map(s => ({ label: s.label, time: s.time, value: s.value }))
+      // Check if all slots on this date are fully booked
+      let persisted: Record<string, number> = {}
+      try {
+        const raw = localStorage.getItem('aqualady_bookings')
+        if (raw) persisted = JSON.parse(raw)
+      } catch {}
+      const allFull = slots.every(s => {
+        const key = selectedPool + '|' + e.date + '|' + s.value
+        const persistedBooked = persisted[key] || 0
+        const cartKey = selectedPool + '|' + e.date + '|' + s.value
+        const cartBooked = bookedCount.get(cartKey) || 0
+        const totalBooked = persistedBooked + cartBooked
+        const origSlot = e.slots.find(es => es.value === s.value)
+        const cap = origSlot?.capacity || 0
+        return cap > 0 && totalBooked >= cap
+      })
+      return { date: e.date, slots, allSlotsFull: allFull }
+    })
+  }, [selectedPool, schedule, bookedCount])
 
   return (
     <div className="space-y-5 pb-8 pt-4">
@@ -208,23 +264,40 @@ export default function BookingPage() {
           />
 
           {/* Slots appear below calendar on date select — full width, stacked vertically */}
-          {selectedDate && slotsForSelectedDate.length > 0 && (
+          {selectedDate && enrichedSlots.length > 0 && !allSlotsFull && (
             <div ref={slotsRef} className="space-y-2 mt-2">
               <p className="text-xs font-medium text-stone-500 mb-1">
-                Dostepne terminy na {selectedDate.slice(8, 10)}.{selectedDate.slice(5, 7)}:
+                {allSlotsFull ? 'Brak wolnych terminow na' : 'Dostepne terminy na'} {selectedDate.slice(8, 10)}.{selectedDate.slice(5, 7)}:
               </p>
-              {slotsForSelectedDate.map((slot, idx) => {
+                            {enrichedSlots.map((slot, idx) => {
                 const isSlotSelected = selectedSlot?.value === slot.value
+                const isFull = (slot as any).isFull
+                const remaining = (slot as any).remaining
+                const hasCapacity = (slot as any).capacity > 0
                 return (
                   <button
                     key={idx}
-                    onClick={() => handleSlotSelect(slot)}
-                    className={'w-full text-left py-3.5 px-4 rounded-xl text-sm font-medium transition-all border ' + (isSlotSelected ? 'bg-teal-brand text-white border-teal-brand shadow' : 'bg-white text-stone-700 border-sand/30 hover:border-teal-brand/40 hover:shadow-sm')}
+                    onClick={() => !isFull && handleSlotSelect(slot)}
+                    disabled={isFull}
+                    className={'w-full text-left py-3.5 px-4 rounded-xl text-sm font-medium transition-all border ' + (isFull ? 'bg-stone-100 text-stone-400 border-stone-200 cursor-not-allowed' : isSlotSelected ? 'bg-teal-brand text-white border-teal-brand shadow' : 'bg-white text-stone-700 border-sand/30 hover:border-teal-brand/40 hover:shadow-sm')}
                   >
-                    {slot.label}
+                    <span className={isFull ? 'line-through text-stone-400' : ''}>{slot.label}</span>
+                    {hasCapacity && (
+                      <span className={'ml-2 text-[10px] ' + (isFull ? 'text-red-400' : 'text-teal-brand')}>
+                        ({remaining}/{slot.capacity})
+                      </span>
+                    )}
                   </button>
                 )
               })}
+            </div>
+          )}
+
+                    {selectedDate && allSlotsFull && (
+            <div className="text-center py-6 bg-stone-50 rounded-2xl border border-stone-200">
+              <div className="text-2xl mb-2">😔</div>
+              <p className="text-sm font-medium text-stone-500">Wszystkie terminy na ten dzien sa zajete</p>
+              <p className="text-[11px] text-stone-400 mt-1">Wybierz inny dzien w kalendarzu</p>
             </div>
           )}
 
