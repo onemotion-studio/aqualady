@@ -49,7 +49,7 @@ export function ScheduleProvider({ children }: { children: ReactNode }) {
   // Load from server on mount
   useEffect(() => {
     loadScheduleFromServer().then(serverData => {
-      if (serverData && Array.isArray(serverData) && serverData.length > 0) {
+      if (serverData && Array.isArray(serverData)) {
         const mapped: ScheduleEntry[] = serverData.map((row: any) => ({
           poolId: row.pool_id,
           date: row.date,
@@ -62,6 +62,25 @@ export function ScheduleProvider({ children }: { children: ReactNode }) {
     }).catch(() => {
       // Server not available, use local
     })
+  }, [])
+
+  // Re-sync on window focus (e.g. after switching from trainer tab)
+  useEffect(() => {
+    const onFocus = () => {
+      loadScheduleFromServer().then(serverData => {
+        if (serverData && Array.isArray(serverData)) {
+          const mapped: ScheduleEntry[] = serverData.map((row: any) => ({
+            poolId: row.pool_id,
+            date: row.date,
+            slots: typeof row.slots === 'string' ? JSON.parse(row.slots) : row.slots || [],
+          }))
+          setSchedule(mapped)
+          saveToStorage(mapped)
+        }
+      }).catch(() => {})
+    }
+    window.addEventListener('focus', onFocus)
+    return () => window.removeEventListener('focus', onFocus)
   }, [])
 
   // Persist to localStorage

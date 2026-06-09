@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, type ReactNode } from 'react'
+import React, { createContext, useContext, useReducer, useEffect, type ReactNode } from 'react'
 import type { CartItem } from '../config'
 
 interface CartState {
@@ -18,8 +18,8 @@ const CartContext = createContext<{
 
 function cartReducer(state: CartState, action: CartAction): CartState {
   switch (action.type) {
-    case 'ADD_ITEM':
-      return { ...state, items: [...state.items, action.payload] }
+        case 'ADD_ITEM':
+      return { ...state, items: [...state.items, { ...action.payload, _expiresAt: Date.now() + 10 * 60 * 1000 } as any] }
     case 'REMOVE_ITEM':
       return { ...state, items: state.items.filter(item => item.id !== action.payload) }
     case 'UPDATE_QUANTITY':
@@ -40,6 +40,21 @@ function cartReducer(state: CartState, action: CartAction): CartState {
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(cartReducer, { items: [] })
+  // Auto-clear stale cart items after 10 minutes
+  useEffect(() => {
+    const now = Date.now()
+    const itemsWithTTL = state.items.filter(item => {
+      // @ts-ignore
+      return !item._expiresAt || item._expiresAt > now
+    })
+    if (itemsWithTTL.length !== state.items.length) {
+      dispatch({ type: 'CLEAR_CART' })
+      itemsWithTTL.forEach(item => {
+        dispatch({ type: 'ADD_ITEM', payload: item })
+      })
+    }
+  }, [])
+
   return (
     <CartContext.Provider value={{ state, dispatch }}>
       {children}

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
 import { loadPools, type PoolConfig } from '../config'
+import { addBookingToServer } from '../lib/supabase'
 
 const whatToBring = [
   { icon: '\u{1F3CA}', text: 'Czepek kapielowy' },
@@ -52,6 +53,21 @@ export default function CartPage() {
       }
     }
     return parts.join(' \u00b7 ')
+  }
+
+  const handleReserve = async () => {
+    if (!email || !accepted || items.length === 0) return
+    // Save all single-session items to server bookings
+    for (const item of items) {
+      if (item.type === 'single' && item.poolId && item.date && item.time) {
+        await addBookingToServer(item.poolId, item.date, item.time, item.quantity, email)
+      }
+    }
+    // Clear cart
+    dispatch({ type: 'CLEAR_CART' })
+    // Show confirmation
+    alert('Rezerwacja zostala zlozona! Szczegoly zostaly wyslane na ' + email)
+    navigate('/')
   }
 
   return (
@@ -195,12 +211,13 @@ export default function CartPage() {
             </span>
           </label>
 
-          {/* Pay button */}
+          {/* Reserve button */}
           <button
+            onClick={handleReserve}
             disabled={!email || !accepted || items.length === 0}
             className={'w-full py-4 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 ' + (email && accepted && items.length > 0 ? 'bg-teal-brand text-white shadow-lg hover:bg-teal-light active:scale-[0.98]' : 'bg-stone-200 text-stone-400 cursor-not-allowed')}
           >
-            Przejdz do platnosci <span className="text-base">{total} zl</span>
+            Zarezerwuj <span className="text-base">{total} zl</span>
           </button>
 
           {/* Payment methods */}

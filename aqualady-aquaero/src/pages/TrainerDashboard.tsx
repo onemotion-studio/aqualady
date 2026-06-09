@@ -439,7 +439,23 @@ export default function TrainerDashboard() {
                     onChange={() => toggleSlot(slot.value)}
                     className="w-4 h-4 accent-teal-brand rounded"
                   />
-                  {slot.label}
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <div className="flex flex-col flex-1 min-w-0">
+                      {slot.label.includes(' - ') ? (
+                        <span className="text-xs font-medium text-stone-700">{slot.label}</span>
+                      ) : (
+                        <>
+                          <span className="text-xs font-semibold text-stone-800 truncate">{slot.label}</span>
+                          <span className="text-[10px] text-stone-400">{slot.time} - {String(parseInt(slot.time) + 1).padStart(2, '0')}:00</span>
+                        </>
+                      )}
+                    </div>
+                    {slot.capacity && (
+                      <span className="text-xs font-bold text-teal-brand bg-teal-brand/10 px-3 py-1 rounded-full shrink-0">
+                        {slot.capacity}
+                      </span>
+                    )}
+                  </div>
                   {si >= DEFAULT_SLOTS.length && (
                     <button
                       onClick={() => {

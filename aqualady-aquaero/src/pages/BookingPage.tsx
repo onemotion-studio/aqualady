@@ -4,6 +4,7 @@ import Calendar from '../components/Calendar'
 import { useCart } from '../context/CartContext'
 import { useSchedule } from '../context/ScheduleContext'
 import { BUILTIN_POOLS, loadPools, PRICES, type PoolId } from '../config'
+import { loadBookingsFromServer } from '../lib/supabase'
 
 export default function BookingPage() {
   const navigate = useNavigate()
@@ -15,6 +16,7 @@ export default function BookingPage() {
   const [expandedMap, setExpandedMap] = useState<PoolId | null>(null)
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
   const [selectedSlot, setSelectedSlot] = useState<{ value: string; label: string } | null>(null)
+  const [serverBookings, setServerBookings] = useState<Record<string, number>>({})
   const [showConfirm, setShowConfirm] = useState(false)
   const [confirmItem, setConfirmItem] = useState('')
   const [resetKey, setResetKey] = useState(0)
@@ -120,16 +122,11 @@ export default function BookingPage() {
     if (!selectedPool || !selectedDate) return []
     const entry = schedule.find(s => s.poolId === selectedPool && s.date === selectedDate)
     if (!entry) return []
-    let persisted: Record<string, number> = {}
-    try {
-      const raw = localStorage.getItem('aqualady_bookings')
-      if (raw) persisted = JSON.parse(raw)
-    } catch {}
     return entry.slots.map(slot => {
       const key = selectedPool + '|' + selectedDate + '|' + slot.value
-      const persistedBooked = persisted[key] || 0
+      const serverBooked = serverBookings[key] || 0
       const cartBooked = bookedCount.get(key) || 0
-      const totalBooked = persistedBooked + cartBooked
+      const totalBooked = serverBooked + cartBooked
       const capacity = slot.capacity || 0
       const remaining = capacity > 0 ? capacity - totalBooked : -1
       const isFull = capacity > 0 && remaining <= 0
@@ -150,17 +147,12 @@ export default function BookingPage() {
     return entries.map(e => {
       const slots = e.slots.map(s => ({ label: s.label, time: s.time, value: s.value }))
       // Check if all slots on this date are fully booked
-      let persisted: Record<string, number> = {}
-      try {
-        const raw = localStorage.getItem('aqualady_bookings')
-        if (raw) persisted = JSON.parse(raw)
-      } catch {}
       const allFull = slots.every(s => {
         const key = selectedPool + '|' + e.date + '|' + s.value
-        const persistedBooked = persisted[key] || 0
+        const serverBooked = serverBookings[key] || 0
         const cartKey = selectedPool + '|' + e.date + '|' + s.value
         const cartBooked = bookedCount.get(cartKey) || 0
-        const totalBooked = persistedBooked + cartBooked
+        const totalBooked = serverBooked + cartBooked
         const origSlot = e.slots.find(es => es.value === s.value)
         const cap = origSlot?.capacity || 0
         return cap > 0 && totalBooked >= cap
@@ -281,12 +273,23 @@ export default function BookingPage() {
                     disabled={isFull}
                     className={'w-full text-left py-3.5 px-4 rounded-xl text-sm font-medium transition-all border ' + (isFull ? 'bg-stone-100 text-stone-400 border-stone-200 cursor-not-allowed' : isSlotSelected ? 'bg-teal-brand text-white border-teal-brand shadow' : 'bg-white text-stone-700 border-sand/30 hover:border-teal-brand/40 hover:shadow-sm')}
                   >
-                    <span className={isFull ? 'line-through text-stone-400' : ''}>{slot.label}</span>
-                    {hasCapacity && (
-                      <span className={'ml-2 text-[10px] ' + (isFull ? 'text-red-400' : 'text-teal-brand')}>
-                        ({remaining}/{slot.capacity})
-                      </span>
-                    )}
+                                        <div className="flex items-center gap-3 w-full">
+                                            <div className="flex flex-col flex-1 min-w-0 justify-center">
+                        {slot.label.includes(' - ') ? (
+                          <span className={'text-sm font-medium truncate ' + (isFull ? 'line-through text-stone-400' : isSlotSelected ? 'text-white' : 'text-stone-700')}>{slot.label}</span>
+                        ) : (
+                          <>
+                            <span className={'text-xs font-semibold truncate ' + (isFull ? 'line-through text-stone-400' : isSlotSelected ? 'text-white' : 'text-stone-800')}>{slot.label}</span>
+                            <span className={'text-[11px] ' + (isFull ? 'line-through text-stone-400' : isSlotSelected ? 'text-white/80' : 'text-stone-400')}>{slot.time} - {String(parseInt(slot.time) + 1).padStart(2, '0')}:00</span>
+                          </>
+                        )}
+                      </div>
+                                            {hasCapacity && (
+                        <span className={'text-base font-bold shrink-0 ' + (isFull ? 'text-red-400' : isSlotSelected ? 'text-white' : remaining <= 3 ? 'text-amber-500' : 'text-teal-brand')}>
+                          {remaining}/{slot.capacity}
+                        </span>
+                      )}
+                    </div>
                   </button>
                 )
               })}

@@ -57,3 +57,41 @@ export async function deleteScheduleFromServer(poolId: string, date: string) {
     return false
   }
 }
+
+
+// --- Bookings ---
+
+export interface BookingRow {
+  pool_id: string
+  date: string
+  time: string
+  quantity: number
+}
+
+export async function loadBookingsFromServer(): Promise<BookingRow[]> {
+  if (!supabase) return []
+  try {
+    const { data, error } = await supabase
+      .from('bookings')
+      .select('pool_id, date, time, quantity')
+    if (error) throw error
+    return data || []
+  } catch (e) {
+    console.error('Failed to load bookings:', e)
+    return []
+  }
+}
+
+export async function addBookingToServer(poolId: string, date: string, time: string, quantity: number, email?: string) {
+  if (!supabase) return false
+  try {
+    const { error } = await supabase
+      .from('bookings')
+      .insert({ pool_id: poolId, date, time, quantity, email: email || '' })
+    if (error) throw error
+    return true
+  } catch (e) {
+    console.error('Failed to add booking:', e)
+    return false
+  }
+}
