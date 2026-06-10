@@ -284,12 +284,7 @@ export default function BookingPage() {
                           </>
                         )}
                       </div>
-                                            {hasCapacity && (
-                        <span className={'text-base font-bold shrink-0 ' + (isFull ? 'text-red-400' : isSlotSelected ? 'text-white' : remaining <= 3 ? 'text-amber-500' : 'text-teal-brand')}>
-                          {remaining}/{slot.capacity}
-                        </span>
-                      )}
-                    </div>
+                                          </div>
                   </button>
                 )
               })}

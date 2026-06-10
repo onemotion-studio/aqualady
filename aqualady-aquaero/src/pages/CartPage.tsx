@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
 import { loadPools, type PoolConfig } from '../config'
-import { addBookingToServer } from '../lib/supabase'
+import { loadBookingsFromServer, addBookingToServer } from '../lib/supabase'
 
 const whatToBring = [
   { icon: '\u{1F3CA}', text: 'Czepek kapielowy' },
@@ -18,6 +18,37 @@ export default function CartPage() {
   const [promoCode, setPromoCode] = useState('')
   const [email, setEmail] = useState('')
   const [accepted, setAccepted] = useState(false)
+  const [serverBookings, setServerBookings] = useState<Record<string, number>>({})
+
+  // Load server bookings for capacity check
+  useEffect(() => {
+    loadBookingsFromServer().then(data => {
+      const map: Record<string, number> = {}
+      data.forEach(b => {
+        const key = b.pool_id + '|' + b.date + '|' + b.time
+        map[key] = (map[key] || 0) + b.quantity
+      })
+      setServerBookings(map)
+    }).catch(() => {})
+  }, [])
+
+  // Load schedule for slot capacities
+  const [slotCapacity, setSlotCapacity] = useState<Record<string, number>>({})
+  useEffect(() => {
+    fetch('https://yrkocsmphipndklgpopd.supabase.co/rest/v1/schedule', {
+      headers: { apikey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlya29jc21waGlwbmRrbGdwb3BkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4MzU0NzAsImV4cCI6MjA5NjQxMTQ3MH0.xbmnA0hSIrOm9N-pmvkBlyArFrdaBwj_-74Z4eIuR_0' }
+    }).then(r => r.json()).then(data => {
+      const map: Record<string, number> = {}
+      data.forEach((entry: any) => {
+        const slots = typeof entry.slots === 'string' ? JSON.parse(entry.slots) : entry.slots
+        slots.forEach((s: any) => {
+          const key = entry.pool_id + '|' + entry.date + '|' + s.value
+          if (s.capacity) map[key] = s.capacity
+        })
+      })
+      setSlotCapacity(map)
+    }).catch(() => {})
+  }, [])
 
   useEffect(() => {
     const doScroll = () => {
@@ -124,8 +155,9 @@ export default function CartPage() {
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M20 12H4" /></svg>
                   </button>
                   <span className="text-sm font-bold text-stone-700 min-w-[20px] text-center">{item.quantity}</span>
-                  <button
+                                    <button
                     onClick={() => dispatch({ type: 'UPDATE_QUANTITY', payload: { id: item.id, quantity: item.quantity + 1 } })}
+                    disabled={item.type === 'single' && item.poolId && item.date && item.time ? (() => { const capKey = item.poolId + '|' + item.date + '|' + item.time; const booked = serverBookings[capKey] || 0; const cap = slotCapacity[capKey] || 0; return cap > 0 && (booked + item.quantity) >= cap })() : false}
                     className="w-7 h-7 rounded-full bg-stone-100 flex items-center justify-center text-stone-500 hover:bg-stone-200 transition-all active:scale-90"
                   >
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" /></svg>

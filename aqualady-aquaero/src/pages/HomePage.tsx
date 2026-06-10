@@ -1,10 +1,15 @@
 ﻿import { Link } from 'react-router-dom'
+import { useState } from 'react'
 import heroImage from '../assets/hero_1.png'
 import musclesIcon from '../assets/Muscles.png'
 import heartIcon from '../assets/Heart.png'
 import energyIcon from '../assets/Energy.png'
 import moodIcon from '../assets/Mood.png'
 import sleepIcon from '../assets/Sleep.png'
+import GallerySlider from '../components/GallerySlider'
+
+// Auto-import all gallery media files
+const galleryImports = import.meta.glob('/src/assets/gallery/*.{png,jpg,jpeg,gif,webp,mp4,webm}', { eager: true, query: '?url' })
 
 const benefits = [
   {
@@ -49,6 +54,14 @@ const galleryImages = [
   { id: 6, alt: 'Usmiechnieci uczestnicy' },
   { id: 7, alt: 'Zajecia w Basenie Fala' },
 ]
+
+// Build gallery slides from auto-imported files
+const gallerySlides = Object.entries(galleryImports).map(([path, mod]) => {
+  const src = (mod as { default: string }).default
+  const ext = path.split('.').pop()?.toLowerCase() || ''
+  const isVideo = ['mp4', 'webm'].includes(ext)
+  return { type: isVideo ? 'video' as const : 'image' as const, src }
+})
 
 export default function HomePage() {
   return (
@@ -117,44 +130,13 @@ export default function HomePage() {
           </p>
         </section>
 
-        {/* GALLERY */}
+        {/* GALLERY - slider */}
         <section>
           <div className="flex items-center gap-2 mb-3">
             <div className="w-1 h-5 bg-teal-brand rounded-full" />
             <h2 className="text-base font-bold text-stone-800">Galeria</h2>
           </div>
-          <div className="grid grid-cols-3 gap-2">
-            {galleryImages.slice(0, 5).map((img) => (
-              <div
-                key={img.id}
-                className={'bg-sand-light rounded-xl overflow-hidden aspect-square flex items-center justify-center text-stone-400 text-[10px] text-center p-1 border border-sand/20 ' + (img.id === 1 ? 'col-span-2 row-span-2' : '')}
-              >
-                <div className="w-full h-full flex flex-col items-center justify-center">
-                  <svg className="w-6 h-6 mb-1 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                  <span>Zdjecie {img.id}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-          {galleryImages.length > 5 && (
-            <div className="grid grid-cols-3 gap-2 mt-2">
-              {galleryImages.slice(5).map((img) => (
-                <div
-                  key={img.id}
-                  className="bg-sand-light rounded-xl overflow-hidden aspect-square flex items-center justify-center text-stone-400 text-[10px] text-center p-1 border border-sand/20"
-                >
-                  <div className="w-full h-full flex flex-col items-center justify-center">
-                    <svg className="w-6 h-6 mb-1 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    <span>Zdjecie {img.id}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+          <GallerySlider slides={gallerySlides} className="w-full" />
         </section>
 
       </div>

@@ -456,7 +456,7 @@ export default function TrainerDashboard() {
                       </span>
                     )}
                   </div>
-                  {si >= DEFAULT_SLOTS.length && (
+                  {true && (
                     <button
                       onClick={() => {
                         const next = allSlots.filter((_, i) => i !== si)
