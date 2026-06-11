@@ -187,18 +187,18 @@ export default function TrainerDashboard() {
   }
   if (week.length > 0) { while (week.length < 7) week.push(null); weeks.push(week) }
 
-  return (
+    return (
     <div className="min-h-screen bg-stone-50">
-      <div className="max-w-lg mx-auto px-4 py-6">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-5">
           <div>
-            <h1 className="text-lg font-bold text-stone-800">Panel Trenera</h1>
-            <p className="text-[11px] text-stone-400">Zarzadzanie zajetosciami</p>
+            <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-stone-800">Panel Trenera</h1>
+            <p className="text-[11px] sm:text-xs text-stone-400">Zarzadzanie zajetosciami</p>
           </div>
           <button
             onClick={() => navigate('/')}
-            className="text-[10px] text-stone-400 underline hover:text-stone-600"
+            className="text-[10px] sm:text-xs text-stone-400 underline hover:text-stone-600"
           >
             Strona glowna
           </button>
@@ -206,13 +206,13 @@ export default function TrainerDashboard() {
 
         {/* Pool selector with actions */}
         <div className="mb-5">
-          <label className="text-xs font-medium text-stone-500 mb-1.5 block">Wybierz basen:</label>
+          <label className="text-xs sm:text-sm font-medium text-stone-500 mb-1.5 block">Wybierz basen:</label>
           <div className="flex gap-2">
             <div className="relative flex-1">
               <select
                 value={activePoolId}
                 onChange={e => { setActivePoolId(e.target.value); setSelectedDate(null); setCheckedSlots(new Set()) }}
-                className="w-full px-4 py-3 rounded-xl bg-white border border-sand/30 text-sm text-stone-700 focus:border-teal-brand focus:outline-none appearance-none"
+                className="w-full px-4 py-3 sm:py-3.5 rounded-xl bg-white border border-sand/30 text-sm text-stone-700 focus:border-teal-brand focus:outline-none appearance-none"
               >
                 {poolList.map(p => (
                   <option key={p.id} value={p.id}>{p.name}</option>
@@ -221,16 +221,16 @@ export default function TrainerDashboard() {
             </div>
             <button
               onClick={openEditPool}
-              className="px-3 py-3 rounded-xl bg-white border border-sand/30 text-stone-500 hover:border-teal-brand/40 hover:text-teal-brand transition-all"
+              className="px-3 sm:px-4 py-3 sm:py-3.5 rounded-xl bg-white border border-sand/30 text-stone-500 hover:border-teal-brand/40 hover:text-teal-brand transition-all"
               title="Edytuj basen"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
               </svg>
             </button>
             <button
               onClick={openAddPool}
-              className="px-3 py-3 rounded-xl bg-teal-brand text-white text-sm font-medium hover:bg-teal-light active:scale-[0.98] transition-all"
+              className="px-3 sm:px-4 py-3 sm:py-3.5 rounded-xl bg-teal-brand text-white text-sm font-medium hover:bg-teal-light active:scale-[0.98] transition-all"
               title="Dodaj nowy basen"
             >
               + Nowy
@@ -238,10 +238,10 @@ export default function TrainerDashboard() {
             <button
               onClick={() => handleDeletePool(activePoolId)}
               disabled={!activePoolId.startsWith('custom_')}
-              className="px-3 py-3 rounded-xl bg-red-50 border border-red-200 text-red-500 text-sm font-medium hover:bg-red-100 active:scale-[0.98] transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+              className="px-3 sm:px-4 py-3 sm:py-3.5 rounded-xl bg-red-50 border border-red-200 text-red-500 text-sm font-medium hover:bg-red-100 active:scale-[0.98] transition-all disabled:opacity-30 disabled:cursor-not-allowed"
               title="Usun basen"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
               </svg>
             </button>
@@ -250,25 +250,25 @@ export default function TrainerDashboard() {
 
         {/* Pool form (add / edit) */}
         {showPoolForm && (
-          <div className="bg-white rounded-2xl p-4 shadow-sm border border-sand/20 mb-5 space-y-3">
-            <p className="text-xs font-semibold text-stone-700">{editingPoolId ? 'Edytuj basen' : 'Dodaj nowy basen'}</p>
+          <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-sand/20 mb-5 space-y-3">
+            <p className="text-xs sm:text-sm font-semibold text-stone-700">{editingPoolId ? 'Edytuj basen' : 'Dodaj nowy basen'}</p>
             <input
               placeholder="Nazwa basenu"
               value={poolForm.name}
               onChange={e => setPoolForm(prev => ({ ...prev, name: e.target.value }))}
-              className="w-full px-4 py-2.5 rounded-xl border border-sand/30 text-sm focus:border-teal-brand focus:outline-none"
+              className="w-full px-4 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-sm focus:border-teal-brand focus:outline-none"
             />
             <input
               placeholder="Adres"
               value={poolForm.address}
               onChange={e => setPoolForm(prev => ({ ...prev, address: e.target.value }))}
-              className="w-full px-4 py-2.5 rounded-xl border border-sand/30 text-sm focus:border-teal-brand focus:outline-none"
+              className="w-full px-4 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-sm focus:border-teal-brand focus:outline-none"
             />
             <input
               placeholder="Ocena (np. 4.5)"
               value={poolForm.rating}
               onChange={e => setPoolForm(prev => ({ ...prev, rating: e.target.value }))}
-              className="w-full px-4 py-2.5 rounded-xl border border-sand/30 text-sm focus:border-teal-brand focus:outline-none"
+              className="w-full px-4 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-sm focus:border-teal-brand focus:outline-none"
               type="number"
               step="any"
               min="0"
@@ -279,7 +279,7 @@ export default function TrainerDashboard() {
                 placeholder="Szerokosc (lat)"
                 value={poolForm.lat}
                 onChange={e => setPoolForm(prev => ({ ...prev, lat: e.target.value }))}
-                className="flex-1 px-4 py-2.5 rounded-xl border border-sand/30 text-sm focus:border-teal-brand focus:outline-none"
+                className="flex-1 px-4 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-sm focus:border-teal-brand focus:outline-none"
                 type="number"
                 step="any"
               />
@@ -287,7 +287,7 @@ export default function TrainerDashboard() {
                 placeholder="Dlugosc (lng)"
                 value={poolForm.lng}
                 onChange={e => setPoolForm(prev => ({ ...prev, lng: e.target.value }))}
-                className="flex-1 px-4 py-2.5 rounded-xl border border-sand/30 text-sm focus:border-teal-brand focus:outline-none"
+                className="flex-1 px-4 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-sm focus:border-teal-brand focus:outline-none"
                 type="number"
                 step="any"
               />
@@ -296,13 +296,13 @@ export default function TrainerDashboard() {
               <button
                 onClick={handleSavePool}
                 disabled={!poolForm.name}
-                className="flex-1 py-2.5 rounded-xl bg-teal-brand text-white text-sm font-bold disabled:bg-stone-200 disabled:text-stone-400 hover:bg-teal-light active:scale-[0.98] transition-all"
+                className="flex-1 py-2.5 sm:py-3 rounded-xl bg-teal-brand text-white text-sm font-bold disabled:bg-stone-200 disabled:text-stone-400 hover:bg-teal-light active:scale-[0.98] transition-all"
               >
                 {editingPoolId ? 'Zapisz zmiany' : 'Dodaj basen'}
               </button>
               <button
                 onClick={closePoolForm}
-                className="px-4 py-2.5 rounded-xl border border-sand/30 text-sm text-stone-500 hover:bg-stone-50 transition-all"
+                className="px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-sm text-stone-500 hover:bg-stone-50 transition-all"
               >
                 Anuluj
               </button>
@@ -311,32 +311,32 @@ export default function TrainerDashboard() {
         )}
 
         {/* Calendar */}
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-sand/20 mb-4">
-          <div className="flex items-center justify-between mb-4">
+        <div className="bg-white rounded-2xl p-3 sm:p-4 lg:p-5 shadow-sm border border-sand/20 mb-4">
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
             <button
               onClick={() => { if (currentMonth === 0) { setCurrentMonth(11); setCurrentYear(y => y - 1) } else setCurrentMonth(m => m - 1) }}
-              className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-sand-light transition-colors text-stone-600"
+              className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center hover:bg-sand-light transition-colors text-stone-600"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
             </button>
-            <span className="text-sm font-semibold text-stone-800">{MONTHS_PL[currentMonth]} {currentYear}</span>
+            <span className="text-sm sm:text-base lg:text-lg font-semibold text-stone-800">{MONTHS_PL[currentMonth]} {currentYear}</span>
             <button
               onClick={() => { if (currentMonth === 11) { setCurrentMonth(0); setCurrentYear(y => y + 1) } else setCurrentMonth(m => m + 1) }}
-              className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-sand-light transition-colors text-stone-600"
+              className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center hover:bg-sand-light transition-colors text-stone-600"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
             </button>
           </div>
 
-          <div className="grid grid-cols-7 gap-1 mb-1">
+          <div className="grid grid-cols-7 gap-0.5 sm:gap-1 mb-0.5 sm:mb-1">
             {DAYS_PL.map(d => (
-              <div key={d} className="text-center text-[11px] font-medium text-stone-400 py-1">{d}</div>
+              <div key={d} className="text-center text-[10px] sm:text-[11px] lg:text-xs font-medium text-stone-400 py-0.5 sm:py-1">{d}</div>
             ))}
           </div>
 
-          <div className="space-y-1">
+          <div className="space-y-0.5 sm:space-y-1">
             {weeks.map((week, wi) => (
-              <div key={wi} className="grid grid-cols-7 gap-1">
+              <div key={wi} className="grid grid-cols-7 gap-0.5 sm:gap-1">
                 {week.map((day, di) => {
                   if (day === null) return <div key={di} className="aspect-square" />
                   const dateStr = formatDate(day)
@@ -350,7 +350,7 @@ export default function TrainerDashboard() {
                       key={di}
                       disabled={isPast}
                       onClick={() => handleDateClick(dateStr)}
-                      className={`aspect-square rounded-lg text-xs font-medium transition-all flex flex-col items-center justify-center relative ${
+                      className={`aspect-square rounded-lg text-[11px] sm:text-xs lg:text-sm font-medium transition-all flex flex-col items-center justify-center relative ${
                         isPast ? 'text-stone-300 cursor-not-allowed' : 'cursor-pointer hover:bg-sand-light'
                       } ${
                         isThisSelected ? 'bg-teal-brand text-white shadow-md' : ''
@@ -364,7 +364,7 @@ export default function TrainerDashboard() {
                     >
                       <span>{day}</span>
                       {hasSchedule && !isThisSelected && (
-                        <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-teal-brand" />
+                        <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-teal-brand" />
                       )}
                     </button>
                   )
@@ -376,33 +376,33 @@ export default function TrainerDashboard() {
 
         {/* Slot checkboxes */}
         {selectedDate && (
-          <div className="bg-white rounded-2xl p-4 shadow-sm border border-sand/20 mb-4">
-            <p className="text-xs font-medium text-stone-500 mb-3">
+          <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-sand/20 mb-4">
+            <p className="text-xs sm:text-sm font-medium text-stone-500 mb-3">
               Zajecia na dzien <span className="font-semibold text-stone-700">{selectedDate.slice(8, 10)}.{selectedDate.slice(5, 7)}.{selectedDate.slice(0, 4)}</span>
             </p>
 
             {/* Custom slot input */}
-            <div className="flex gap-2 mb-2">
+            <div className="flex flex-col sm:flex-row gap-2 mb-2">
               <input
                 type="time"
                 value={newSlotStart}
                 onChange={e => setNewSlotStart(e.target.value)}
-                className="flex-1 px-3 py-2.5 rounded-xl border border-sand/30 text-xs focus:border-teal-brand focus:outline-none"
+                className="flex-1 px-3 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-xs sm:text-sm focus:border-teal-brand focus:outline-none"
                 placeholder="Poczatek"
               />
               <input
                 type="time"
                 value={newSlotEnd}
                 onChange={e => setNewSlotEnd(e.target.value)}
-                className="flex-1 px-3 py-2.5 rounded-xl border border-sand/30 text-xs focus:border-teal-brand focus:outline-none"
+                className="flex-1 px-3 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-xs sm:text-sm focus:border-teal-brand focus:outline-none"
                 placeholder="Koniec"
               />
                         </div>
-            <div className="flex gap-2 mb-2">
+            <div className="flex flex-col sm:flex-row gap-2 mb-2">
               <input
                 value={newSlotLabel}
                 onChange={e => setNewSlotLabel(e.target.value)}
-                className="flex-1 px-3 py-2.5 rounded-xl border border-sand/30 text-xs focus:border-teal-brand focus:outline-none"
+                className="flex-1 px-3 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-xs sm:text-sm focus:border-teal-brand focus:outline-none"
                 placeholder="Opis (opcjonalnie)"
               />
               <input
@@ -411,14 +411,14 @@ export default function TrainerDashboard() {
                 max="99"
                 value={newSlotCapacity}
                 onChange={e => setNewSlotCapacity(e.target.value)}
-                className="w-24 px-3 py-2.5 rounded-xl border border-sand/30 text-xs focus:border-teal-brand focus:outline-none"
+                className="w-full sm:w-24 px-3 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-xs sm:text-sm focus:border-teal-brand focus:outline-none"
                 placeholder="Miejsca"
               />
             </div>
             <button
               onClick={addCustomSlot}
               disabled={!newSlotStart || !newSlotEnd}
-              className="w-full py-2.5 rounded-xl bg-teal-brand text-white text-xs font-bold disabled:bg-stone-200 disabled:text-stone-400 hover:bg-teal-light transition-all mb-4"
+              className="w-full py-2.5 sm:py-3 rounded-xl bg-teal-brand text-white text-xs sm:text-sm font-bold disabled:bg-stone-200 disabled:text-stone-400 hover:bg-teal-light transition-all mb-4"
             >
               + Dodaj
             </button>
@@ -427,7 +427,7 @@ export default function TrainerDashboard() {
               {allSlots.map((slot, si) => (
                 <label
                   key={slot.value}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl border text-sm font-medium transition-all cursor-pointer ${
+                  className={`flex items-center gap-3 px-4 py-3 sm:py-3.5 rounded-xl border text-sm font-medium transition-all cursor-pointer ${
                     checkedSlots.has(slot.value)
                       ? 'bg-teal-brand/10 border-teal-brand text-teal-brand'
                       : 'bg-white border-sand/30 text-stone-600 hover:border-teal-brand/40'
@@ -437,16 +437,16 @@ export default function TrainerDashboard() {
                     type="checkbox"
                     checked={checkedSlots.has(slot.value)}
                     onChange={() => toggleSlot(slot.value)}
-                    className="w-4 h-4 accent-teal-brand rounded"
+                    className="w-4 h-4 sm:w-5 sm:h-5 accent-teal-brand rounded"
                   />
                   <div className="flex items-center gap-3 flex-1 min-w-0">
                     <div className="flex flex-col flex-1 min-w-0">
                       {slot.label.includes(' - ') ? (
-                        <span className="text-xs font-medium text-stone-700">{slot.label}</span>
+                        <span className="text-xs sm:text-sm font-medium text-stone-700">{slot.label}</span>
                       ) : (
                         <>
-                          <span className="text-xs font-semibold text-stone-800 truncate">{slot.label}</span>
-                          <span className="text-[10px] text-stone-400">{slot.time} - {String(parseInt(slot.time) + 1).padStart(2, '0')}:00</span>
+                          <span className="text-xs sm:text-sm font-semibold text-stone-800 truncate">{slot.label}</span>
+                          <span className="text-[10px] sm:text-xs text-stone-400">{slot.time} - {String(parseInt(slot.time) + 1).padStart(2, '0')}:00</span>
                         </>
                       )}
                     </div>
@@ -464,7 +464,7 @@ export default function TrainerDashboard() {
                       }}
                       className="ml-auto text-red-400 hover:text-red-600 text-[10px] shrink-0"
                     >
-                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                       </svg>
                     </button>
@@ -475,20 +475,20 @@ export default function TrainerDashboard() {
 
             <button
               onClick={handleSave}
-              className="w-full mt-4 py-3.5 rounded-xl bg-teal-brand text-white font-bold text-sm shadow-lg hover:bg-teal-light active:scale-[0.98] transition-all"
+              className="w-full mt-4 py-3.5 sm:py-4 rounded-xl sm:rounded-2xl bg-teal-brand text-white font-bold text-sm sm:text-base shadow-lg hover:bg-teal-light active:scale-[0.98] transition-all"
             >
               Opublikuj grafik
             </button>
 
             {savedMessage && (
-              <p className="text-center text-xs text-green-accent font-medium mt-2">Grafik zostal zapisany!</p>
+              <p className="text-center text-xs sm:text-sm text-green-accent font-medium mt-2">Grafik zostal zapisany!</p>
             )}
           </div>
         )}
 
         {/* Info */}
-        <div className="bg-white/50 rounded-2xl p-3 border border-sand/10">
-          <p className="text-[10px] text-stone-400 text-center">
+        <div className="bg-white/50 rounded-2xl p-3 sm:p-4 border border-sand/10">
+          <p className="text-[10px] sm:text-xs text-stone-400 text-center">
             Daty z zajetiami sa podswietlone na birazowo. Kliknij date, aby edytowac sloty. Mozesz dodawac dowolne godziny zajec.
           </p>
         </div>

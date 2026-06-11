@@ -158,14 +158,14 @@ export default function GallerySlider({ slides, className = '' }: GallerySliderP
               <img
                 src={slide.src}
                 alt={`Galeria ${i + 1}`}
-                className="w-full aspect-square object-cover"
+                className="w-full aspect-square sm:aspect-video lg:aspect-[4/3] object-cover"
                 draggable={false}
               />
             ) : (
               <video
                 src={slide.src}
                 poster={slide.poster}
-                className="w-full aspect-square object-cover"
+                className="w-full aspect-square sm:aspect-video lg:aspect-[4/3] object-cover"
                 muted
                 loop
                 autoPlay

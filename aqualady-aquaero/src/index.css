@@ -34,59 +34,81 @@ html {
 
 body {
   margin: 0;
-  background: #e8ecec;
-  display: flex;
-  justify-content: center;
+  padding: 0;
+  background: var(--color-cream);
   min-height: 100dvh;
 }
 
 #root {
   width: 100%;
-  max-width: 430px;
   min-height: 100dvh;
   background: var(--color-cream);
-  box-shadow: 0 0 40px rgba(0, 0, 0, 0.06);
   position: relative;
 }
 
-/* Mobile-first: на десктопе центрируем как приложение */
-@media (min-width: 768px) {
+/* На больших экранах — тонкая элегантная рамка без серого фона */
+@media (min-width: 1024px) {
   body {
-    padding: 20px 0;
-    background: #dce3e3;
+    background: #f0f0ec;
   }
   #root {
-    border-radius: 24px;
-    min-height: calc(100dvh - 40px);
-    max-height: calc(100dvh - 40px);
-    overflow-y: auto;
+    max-width: 1100px;
+    margin: 0 auto;
+    border-left: 1px solid rgba(0, 0, 0, 0.06);
+    border-right: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.04);
+  }
+}
+
+@media (min-width: 1400px) {
+  #root {
+    max-width: 1200px;
   }
 }
 
 /* Scrollbar styling */
 #root::-webkit-scrollbar {
-  width: 4px;
+  width: 6px;
 }
 #root::-webkit-scrollbar-track {
   background: transparent;
 }
 #root::-webkit-scrollbar-thumb {
   background: var(--color-sand-dark);
-  border-radius: 2px;
+  border-radius: 3px;
 }
 
-/* Sticky mobile CTA button */
+/* Sticky CTA button — адаптивный */
 .sticky-cta {
   position: fixed;
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
   width: 100%;
-  max-width: 430px;
   z-index: 90;
   padding: 12px 16px 16px;
   background: linear-gradient(to top, rgba(253, 251, 247, 0.98) 60%, transparent);
   pointer-events: none;
+}
+
+@media (min-width: 640px) {
+  .sticky-cta {
+    max-width: 1200px;
+    padding: 12px 24px 20px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .sticky-cta {
+    max-width: 1100px;
+    padding: 16px 32px 24px;
+  }
+}
+
+@media (min-width: 1400px) {
+  .sticky-cta {
+    max-width: 1200px;
+  }
 }
 
 .sticky-cta > * {
@@ -123,4 +145,31 @@ body {
 }
 .animate-pulse-sparkle {
   animation: pulse-sparkle 0.6s ease-out;
+}
+
+/* Адаптивные утилиты */
+@media (min-width: 640px) {
+  .sm\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .sm\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .sm\:block { display: block; }
+  .sm\:hidden { display: none; }
+  .sm\:flex-row { flex-direction: row; }
+  .sm\:gap-4 { gap: 1rem; }
+  .sm\:gap-6 { gap: 1.5rem; }
+  .sm\:p-6 { padding: 1.5rem; }
+  .sm\:p-8 { padding: 2rem; }
+  .sm\:text-base { font-size: 1rem; }
+  .sm\:text-lg { font-size: 1.125rem; }
+}
+
+@media (min-width: 1024px) {
+  .lg\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .lg\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .lg\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .lg\:p-8 { padding: 2rem; }
+  .lg\:p-10 { padding: 2.5rem; }
+  .lg\:text-lg { font-size: 1.125rem; }
+  .lg\:text-xl { font-size: 1.25rem; }
+  .lg\:gap-6 { gap: 1.5rem; }
+  .lg\:gap-8 { gap: 2rem; }
 }

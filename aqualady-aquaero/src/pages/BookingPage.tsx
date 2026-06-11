@@ -161,13 +161,13 @@ export default function BookingPage() {
     })
   }, [selectedPool, schedule, bookedCount])
 
-  return (
-    <div className="space-y-5 pb-8 pt-4">
-      <h1 className="pt-4 text-xl font-bold text-stone-800">Wybierz zajecia</h1>
+    return (
+    <div className="space-y-5 sm:space-y-6 pb-8 sm:pb-10 pt-4 max-w-3xl mx-auto">
+      <h1 className="pt-4 text-xl sm:text-2xl lg:text-3xl font-bold text-stone-800">Wybierz zajecia</h1>
 
       {/* Pool Selection with accordion map */}
-      <div className="space-y-3">
-        <p className="text-sm font-medium text-stone-600">Wybierz basen:</p>
+      <div className="space-y-3 sm:space-y-4">
+        <p className="text-sm sm:text-base font-medium text-stone-600">Wybierz basen:</p>
         {poolList.map(p => {
           const isSelected = selectedPool === p.id
           const isExpanded = expandedMap === p.id
@@ -176,31 +176,31 @@ export default function BookingPage() {
             <div key={p.id}>
               <button
                 onClick={() => handlePoolClick(p.id)}
-                className={'w-full bg-white rounded-2xl p-4 shadow-sm border text-left transition-all active:scale-[0.99] ' + (isSelected ? 'border-teal-brand shadow-md' : 'border-sand/15 hover:shadow-md hover:border-teal-brand/30')}
+                className={'w-full bg-white rounded-2xl p-4 sm:p-5 shadow-sm border text-left transition-all active:scale-[0.99] ' + (isSelected ? 'border-teal-brand shadow-md' : 'border-sand/15 hover:shadow-md hover:border-teal-brand/30')}
               >
                 <div className="flex items-start justify-between mb-1">
-                  <h3 className="text-sm font-bold text-stone-800">{p.name}</h3>
+                  <h3 className="text-sm sm:text-base lg:text-lg font-bold text-stone-800">{p.name}</h3>
                   <div className="flex items-center gap-0.5">
                     {[1,2,3,4,5].map(i => (
-                      <svg key={i} className={'w-3 h-3 ' + (i <= Math.floor(p.rating) ? 'text-amber-400' : 'text-stone-200')} fill="currentColor" viewBox="0 0 20 20">
+                      <svg key={i} className={'w-3 h-3 sm:w-4 sm:h-4 ' + (i <= Math.floor(p.rating) ? 'text-amber-400' : 'text-stone-200')} fill="currentColor" viewBox="0 0 20 20">
                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                       </svg>
                     ))}
-                    <span className="text-[10px] text-stone-400 ml-0.5">{p.rating}</span>
+                    <span className="text-[10px] sm:text-xs text-stone-400 ml-0.5">{p.rating}</span>
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3 text-[11px] text-stone-500">
+                  <div className="flex items-center gap-3 text-[11px] sm:text-xs text-stone-500">
                     <span className="flex items-center gap-1">
-                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                      <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                       {p.address}
                     </span>
                     <span className="flex items-center gap-1">
-                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
+                      <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
                       {p.distance}
                     </span>
                   </div>
-                  <svg className={'w-4 h-4 text-stone-400 transition-transform duration-300 ' + (isExpanded ? 'rotate-180' : '')} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                  <svg className={'w-4 h-4 sm:w-5 sm:h-5 text-stone-400 transition-transform duration-300 ' + (isExpanded ? 'rotate-180' : '')} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                 </div>
               </button>
 
@@ -233,19 +233,19 @@ export default function BookingPage() {
 
       {/* Date & Time - only when pool selected */}
 
-      {selectedPool && (
-        <div className="space-y-4 mt-5 pt-5 border-t border-sand/20">
+            {selectedPool && (
+        <div className="space-y-4 sm:space-y-5 mt-5 pt-5 border-t border-sand/20">
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-teal-brand" />
-            <p className="text-sm font-semibold text-stone-700">
+            <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-teal-brand" />
+            <p className="text-sm sm:text-base font-semibold text-stone-700">
               Wybrano: <span className="text-teal-brand">{currentPool?.name}</span>
             </p>
-            <button onClick={() => { setSelectedPool(null); setExpandedMap(null); setSelectedDate(null); setSelectedSlot(null); }} className="ml-auto text-[10px] text-stone-400 underline hover:text-stone-600">
+            <button onClick={() => { setSelectedPool(null); setExpandedMap(null); setSelectedDate(null); setSelectedSlot(null); }} className="ml-auto text-[10px] sm:text-xs text-stone-400 underline hover:text-stone-600">
               Zmien
             </button>
           </div>
 
-          <h2 className="text-base font-bold text-stone-800">Wybierz date i godzine</h2>
+          <h2 className="text-base sm:text-lg lg:text-xl font-bold text-stone-800">Wybierz date i godzine</h2>
 
           <Calendar
             selectedDate={selectedDate}
@@ -257,8 +257,8 @@ export default function BookingPage() {
 
           {/* Slots appear below calendar on date select — full width, stacked vertically */}
           {selectedDate && enrichedSlots.length > 0 && !allSlotsFull && (
-            <div ref={slotsRef} className="space-y-2 mt-2">
-              <p className="text-xs font-medium text-stone-500 mb-1">
+            <div ref={slotsRef} className="space-y-2 sm:space-y-3 mt-2">
+              <p className="text-xs sm:text-sm font-medium text-stone-500 mb-1">
                 {allSlotsFull ? 'Brak wolnych terminow na' : 'Dostepne terminy na'} {selectedDate.slice(8, 10)}.{selectedDate.slice(5, 7)}:
               </p>
                             {enrichedSlots.map((slot, idx) => {
@@ -271,16 +271,16 @@ export default function BookingPage() {
                     key={idx}
                     onClick={() => !isFull && handleSlotSelect(slot)}
                     disabled={isFull}
-                    className={'w-full text-left py-3.5 px-4 rounded-xl text-sm font-medium transition-all border ' + (isFull ? 'bg-stone-100 text-stone-400 border-stone-200 cursor-not-allowed' : isSlotSelected ? 'bg-teal-brand text-white border-teal-brand shadow' : 'bg-white text-stone-700 border-sand/30 hover:border-teal-brand/40 hover:shadow-sm')}
+                    className={'w-full text-left py-3.5 sm:py-4 px-4 sm:px-5 rounded-xl text-sm sm:text-base font-medium transition-all border ' + (isFull ? 'bg-stone-100 text-stone-400 border-stone-200 cursor-not-allowed' : isSlotSelected ? 'bg-teal-brand text-white border-teal-brand shadow' : 'bg-white text-stone-700 border-sand/30 hover:border-teal-brand/40 hover:shadow-sm')}
                   >
                                         <div className="flex items-center gap-3 w-full">
                                             <div className="flex flex-col flex-1 min-w-0 justify-center">
                         {slot.label.includes(' - ') ? (
-                          <span className={'text-sm font-medium truncate ' + (isFull ? 'line-through text-stone-400' : isSlotSelected ? 'text-white' : 'text-stone-700')}>{slot.label}</span>
+                          <span className={'text-sm sm:text-base font-medium truncate ' + (isFull ? 'line-through text-stone-400' : isSlotSelected ? 'text-white' : 'text-stone-700')}>{slot.label}</span>
                         ) : (
                           <>
-                            <span className={'text-xs font-semibold truncate ' + (isFull ? 'line-through text-stone-400' : isSlotSelected ? 'text-white' : 'text-stone-800')}>{slot.label}</span>
-                            <span className={'text-[11px] ' + (isFull ? 'line-through text-stone-400' : isSlotSelected ? 'text-white/80' : 'text-stone-400')}>{slot.time} - {String(parseInt(slot.time) + 1).padStart(2, '0')}:00</span>
+                            <span className={'text-xs sm:text-sm font-semibold truncate ' + (isFull ? 'line-through text-stone-400' : isSlotSelected ? 'text-white' : 'text-stone-800')}>{slot.label}</span>
+                            <span className={'text-[11px] sm:text-xs ' + (isFull ? 'line-through text-stone-400' : isSlotSelected ? 'text-white/80' : 'text-stone-400')}>{slot.time} - {String(parseInt(slot.time) + 1).padStart(2, '0')}:00</span>
                           </>
                         )}
                       </div>
@@ -292,17 +292,17 @@ export default function BookingPage() {
           )}
 
                     {selectedDate && allSlotsFull && (
-            <div className="text-center py-6 bg-stone-50 rounded-2xl border border-stone-200">
-              <div className="text-2xl mb-2">😔</div>
-              <p className="text-sm font-medium text-stone-500">Wszystkie terminy na ten dzien sa zajete</p>
-              <p className="text-[11px] text-stone-400 mt-1">Wybierz inny dzien w kalendarzu</p>
+            <div className="text-center py-6 sm:py-8 bg-stone-50 rounded-2xl border border-stone-200">
+              <div className="text-2xl sm:text-3xl mb-2">😔</div>
+              <p className="text-sm sm:text-base font-medium text-stone-500">Wszystkie terminy na ten dzien sa zajete</p>
+              <p className="text-[11px] sm:text-xs text-stone-400 mt-1">Wybierz inny dzien w kalendarzu</p>
             </div>
           )}
 
           {/* Passes */}
-          <div className="text-center text-xs text-stone-400 py-1">- lub kup karnet -</div>
+          <div className="text-center text-xs sm:text-sm text-stone-400 py-1 sm:py-2">- lub kup karnet -</div>
 
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-3 gap-2 sm:gap-3">
             <button
               onClick={() => {
                 if (!selectedPool) return
@@ -310,11 +310,11 @@ export default function BookingPage() {
                 dispatch({ type: "ADD_ITEM", payload: { id, poolId: selectedPool, type: "pass8", label: "Karnet na 8 zajec - " + (currentPool?.name || selectedPool), price: 299, quantity: 1 } })
                 showAnimation("Karnet na 8 zajec zostal dodany do koszyka!")
               }}
-              className="bg-white border border-sand/30 rounded-xl py-3 px-2 text-center hover:border-teal-brand/40 hover:shadow transition-all active:scale-[0.98]"
+              className="bg-white border border-sand/30 rounded-xl py-3 sm:py-4 px-2 text-center hover:border-teal-brand/40 hover:shadow transition-all active:scale-[0.98]"
             >
-              <div className="text-[10px] font-bold text-teal-brand">8 zajec</div>
-              <div className="text-sm font-bold text-stone-800">299 zl</div>
-              <div className="text-[8px] text-stone-400">1 mies.</div>
+              <div className="text-[10px] sm:text-xs font-bold text-teal-brand">8 zajec</div>
+              <div className="text-sm sm:text-base font-bold text-stone-800">299 zl</div>
+              <div className="text-[8px] sm:text-[10px] text-stone-400">1 mies.</div>
             </button>
             <button
               onClick={() => {
@@ -323,12 +323,12 @@ export default function BookingPage() {
                 dispatch({ type: "ADD_ITEM", payload: { id, poolId: selectedPool, type: "pass12", label: "Karnet na 12 zajec - " + (currentPool?.name || selectedPool), price: 399, quantity: 1 } })
                 showAnimation("Karnet na 12 zajec zostal dodany do koszyka!")
               }}
-              className="bg-white border-2 border-teal-brand/30 rounded-xl py-3 px-2 text-center hover:border-teal-brand hover:shadow transition-all active:scale-[0.98] relative"
+              className="bg-white border-2 border-teal-brand/30 rounded-xl py-3 sm:py-4 px-2 text-center hover:border-teal-brand hover:shadow transition-all active:scale-[0.98] relative"
             >
-              <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 bg-teal-brand text-white text-[7px] px-1.5 py-0.5 rounded-full font-bold whitespace-nowrap">BEST</div>
-              <div className="text-[10px] font-bold text-teal-brand mt-1.5">12 zajec</div>
-              <div className="text-sm font-bold text-stone-800">399 zl</div>
-              <div className="text-[8px] text-stone-400">1,5 mies.</div>
+              <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 bg-teal-brand text-white text-[7px] sm:text-[9px] px-1.5 py-0.5 rounded-full font-bold whitespace-nowrap">BEST</div>
+              <div className="text-[10px] sm:text-xs font-bold text-teal-brand mt-1.5">12 zajec</div>
+              <div className="text-sm sm:text-base font-bold text-stone-800">399 zl</div>
+              <div className="text-[8px] sm:text-[10px] text-stone-400">1,5 mies.</div>
             </button>
             <button
               onClick={() => {
@@ -337,24 +337,24 @@ export default function BookingPage() {
                 dispatch({ type: "ADD_ITEM", payload: { id, poolId: selectedPool, type: "pass16", label: "Karnet Bezlimit - " + (currentPool?.name || selectedPool), price: 549, quantity: 1 } })
                 showAnimation("Karnet Bezlimit zostal dodany do koszyka!")
               }}
-              className="bg-white border border-sand/30 rounded-xl py-3 px-2 text-center hover:border-teal-brand/40 hover:shadow transition-all active:scale-[0.98]"
+              className="bg-white border border-sand/30 rounded-xl py-3 sm:py-4 px-2 text-center hover:border-teal-brand/40 hover:shadow transition-all active:scale-[0.98]"
             >
-              <div className="text-[10px] font-bold text-teal-brand">Bezlimit</div>
-              <div className="text-sm font-bold text-stone-800">549 zl</div>
-              <div className="text-[8px] text-stone-400">1 mies.</div>
+              <div className="text-[10px] sm:text-xs font-bold text-teal-brand">Bezlimit</div>
+              <div className="text-sm sm:text-base font-bold text-stone-800">549 zl</div>
+              <div className="text-[8px] sm:text-[10px] text-stone-400">1 mies.</div>
             </button>
           </div>
 
           <button
             onClick={handleAddToCart}
             disabled={!canAddToCart}
-            className={'w-full py-3.5 rounded-xl font-bold text-sm transition-all ' + (canAddToCart ? 'bg-teal-brand text-white shadow-lg hover:bg-teal-light active:scale-[0.98]' : 'bg-stone-200 text-stone-400 cursor-not-allowed')}
+            className={'w-full py-3.5 sm:py-4 rounded-xl sm:rounded-2xl font-bold text-sm sm:text-base transition-all ' + (canAddToCart ? 'bg-teal-brand text-white shadow-lg hover:bg-teal-light active:scale-[0.98]' : 'bg-stone-200 text-stone-400 cursor-not-allowed')}
           >
             Dodaj do koszyka
           </button>
 
           <div className="text-center pt-2">
-            <button onClick={() => navigate('/cart')} className="text-sm text-teal-brand font-medium underline underline-offset-4 hover:text-teal-light transition-colors">
+            <button onClick={() => navigate('/cart')} className="text-sm sm:text-base text-teal-brand font-medium underline underline-offset-4 hover:text-teal-light transition-colors">
               Przejdz do koszyka
             </button>
           </div>
