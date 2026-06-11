@@ -81,14 +81,12 @@ export default function HomePage() {
             alt=""
             className="absolute inset-0 w-full h-full object-cover"
           />
-          {/* Gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-r from-[#2C8889]/80 via-[#2C8889]/50 to-transparent" />
           {/* Content */}
           <div className="relative z-10 flex flex-col justify-center px-5 sm:px-8 lg:px-12 py-10 sm:py-16 lg:py-20 min-h-[320px] sm:min-h-[50vh] lg:min-h-[520px]">
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white leading-tight mb-2 drop-shadow-sm max-w-lg">
+            <h1 style={{ textShadow: "1px 1px 0 #2b8687" }} className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white leading-tight mb-2 drop-shadow-lg max-w-lg">
               Akwaaerobika<br />dla kobiet 60+
             </h1>
-            <p className="text-sm sm:text-base lg:text-lg text-white/90 leading-relaxed mb-4 max-w-[320px] sm:max-w-md drop-shadow-sm">
+            <p style={{ textShadow: "1px 1px 0 #2b8687" }} className="text-sm sm:text-base lg:text-lg text-white/90 leading-relaxed mb-4 max-w-[320px] sm:max-w-md drop-shadow-lg">
               Popraw kondycje, wzmocnij stawy i znajdz nowe przyjaciolki w przyjaznej, kobiecej atmosferze.
             </p>
           </div>
