@@ -50,23 +50,23 @@ export default function Layout() {
         <Outlet />
       </main>
 
-      {/* Sticky CTA (only on home page) */}
-      {isHome && (
-        <div className="sticky-cta">
-          <Link
-            to="/booking"
-            className="flex items-center justify-center gap-2 w-full py-3.5 sm:py-4 rounded-xl sm:rounded-2xl bg-teal-brand text-white font-bold text-base sm:text-lg shadow-lg hover:bg-teal-light active:scale-[0.98] transition-all"
-          >
-            Kup karnet
-            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
-            </svg>
-          </Link>
-        </div>
-      )}
+            {/* Sticky CTA (only on home page) — fixed снизу, но футер его перекрывает */}
+            {isHome && (
+              <div className="sticky-cta">
+                <Link
+                  to="/booking"
+                  className="flex items-center justify-center gap-2 w-full py-3.5 sm:py-4 rounded-xl sm:rounded-2xl bg-teal-brand text-white font-bold text-base sm:text-lg shadow-lg hover:bg-teal-light active:scale-[0.98] transition-all"
+                >
+                  Kup karnet
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                  </svg>
+                </Link>
+              </div>
+            )}
 
-      {/* Footer */}
-      <footer className="bg-white border-t border-sand/30 px-4 sm:px-6 lg:px-8 py-5 sm:py-6 lg:py-8 text-center">
+            {/* Footer — z-index выше, чем у CTA, чтобы перекрывать его при скролле */}
+            <footer className="relative z-90 bg-white border-t border-sand/30 px-4 sm:px-6 lg:px-8 py-5 sm:py-6 lg:py-8 text-center">
         <div className="flex items-center justify-center gap-5 mb-3">
           <a href="#" className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#1877F2] flex items-center justify-center hover:opacity-80 transition-opacity" aria-label="Facebook">
             <svg className="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
