@@ -1,23 +1,4 @@
-﻿export const BUILTIN_POOLS = {
-  SLONECZNY: {
-    id: 'sloneczny',
-    name: 'Basen Sloneczny',
-    address: 'ul. Marszalkowska 100, Warszawa',
-    rating: 4.8,
-    distance: '1,2 km',
-    lat: 52.2297,
-    lng: 21.0122,
-  },
-  FALA: {
-    id: 'fala',
-    name: 'Basen Fala',
-    address: 'ul. Wal Miedzeszynski 389, Warszawa',
-    rating: 4.6,
-    distance: '3,5 km',
-    lat: 52.2112,
-    lng: 21.0522,
-  },
-} as const
+﻿export const BUILTIN_POOLS: Record<string, PoolConfig> = {}
 
 export type PoolId = string
 
@@ -25,7 +6,7 @@ export interface PoolConfig {
   id: string
   name: string
   address: string
-  rating: number
+  temp: number
   distance: string
   lat: number
   lng: number
@@ -57,34 +38,115 @@ export const MONTHS_PL = [
 export const DAYS_PL = ['Pn', 'Wt', 'Sr', 'Cz', 'Pt', 'Sb', 'Nd'] as const
 
 const POOLS_STORAGE_KEY = 'aqualady_pools'
+let cachedPools: Record<string, PoolConfig> | null = null
+let poolLoadPromise: Promise<Record<string, PoolConfig>> | null = null
 
-export function loadPools(): Record<string, PoolConfig> {
-  try {
-    const raw = localStorage.getItem(POOLS_STORAGE_KEY)
-    const custom = raw ? JSON.parse(raw) : {}
-    return { ...BUILTIN_POOLS, ...custom }
-  } catch {
-    return { ...BUILTIN_POOLS }
-  }
+export async function loadPoolsAsync(): Promise<Record<string, PoolConfig>> {
+  if (cachedPools) return cachedPools
+  if (poolLoadPromise) return poolLoadPromise
+
+  poolLoadPromise = (async () => {
+    try {
+      // Try loading from Supabase first
+      const { loadPoolsFromServer } = await import('./lib/supabase')
+      const serverPools = await loadPoolsFromServer()
+      if (serverPools && serverPools.length > 0) {
+        const result: Record<string, PoolConfig> = {}
+        serverPools.forEach(p => {
+          // Parse temperature from "28°C" string to number
+          const tempNum = parseInt(p.temp) || 28
+          result[p.id] = {
+            id: p.id,
+            name: p.name,
+            address: p.address,
+            temp: tempNum,
+            distance: p.distance || '-',
+            lat: p.lat,
+            lng: p.lng,
+          }
+        })
+        cachedPools = result
+        // Cache in localStorage
+        try { localStorage.setItem(POOLS_STORAGE_KEY, JSON.stringify(result)) } catch {}
+        return result
+      }
+    } catch {}
+    // Fallback to localStorage
+    try {
+      const raw = localStorage.getItem(POOLS_STORAGE_KEY)
+      if (raw) {
+        const parsed = JSON.parse(raw)
+        cachedPools = parsed
+        return parsed
+      }
+    } catch {}
+    return {}
+  })()
+
+  const result = await poolLoadPromise
+  poolLoadPromise = null
+  return result
 }
 
-export function saveCustomPool(pool: PoolConfig) {
+// Synchronous version for immediate use (localStorage only)
+export function loadPools(): Record<string, PoolConfig> {
+  if (cachedPools) return cachedPools
+  try {
+    const raw = localStorage.getItem(POOLS_STORAGE_KEY)
+    if (raw) {
+      const parsed = JSON.parse(raw)
+      // Normalize temp from string to number if needed
+      Object.keys(parsed).forEach(key => {
+        if (typeof parsed[key].temp === 'string') {
+          parsed[key].temp = parseInt(parsed[key].temp) || 28
+        }
+      })
+      cachedPools = parsed
+      return cachedPools!
+    }
+  } catch {}
+  return {}
+}
+
+export async function saveCustomPool(pool: PoolConfig) {
+  const tempStr = pool.temp + '°C'
+  // Save to localStorage
   try {
     const raw = localStorage.getItem(POOLS_STORAGE_KEY)
     const custom = raw ? JSON.parse(raw) : {}
-    custom[pool.id] = pool
+    custom[pool.id] = { ...pool, temp: tempStr }
     localStorage.setItem(POOLS_STORAGE_KEY, JSON.stringify(custom))
+    cachedPools = custom
+  } catch {}
+  // Also save to Supabase
+  try {
+    const { savePoolToServer } = await import('./lib/supabase')
+    await savePoolToServer({
+      id: pool.id,
+      name: pool.name,
+      address: pool.address,
+      temp: tempStr,
+      lat: pool.lat,
+      lng: pool.lng,
+    })
   } catch {}
 }
 
-export function removeCustomPool(poolId: string) {
+export async function removeCustomPool(poolId: string) {
+  // Remove from localStorage
   try {
     const raw = localStorage.getItem(POOLS_STORAGE_KEY)
     if (raw) {
       const custom = JSON.parse(raw)
       delete custom[poolId]
       localStorage.setItem(POOLS_STORAGE_KEY, JSON.stringify(custom))
+      cachedPools = custom
     }
+  } catch {}
+  // Also remove from Supabase
+  try {
+    const { deletePoolFromServer } = await import('./lib/supabase')
+    await deletePoolFromServer(poolId)
   } catch {}
 }
 

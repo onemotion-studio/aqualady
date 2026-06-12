@@ -1,6 +1,6 @@
 ﻿import { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { MONTHS_PL, DAYS_PL, loadPools, saveCustomPool, removeCustomPool, DEFAULT_SLOTS, type PoolConfig } from '../config'
+import { MONTHS_PL, DAYS_PL, loadPoolsAsync, loadPools, saveCustomPool, removeCustomPool, DEFAULT_SLOTS, type PoolConfig } from '../config'
 import { useSchedule, type TimeSlotDef } from '../context/ScheduleContext'
 
 const CUSTOM_SLOTS_KEY = 'aqualady_custom_slots'
@@ -27,18 +27,31 @@ interface PoolForm {
   address: string
   lat: string
   lng: string
-  rating: string
+  temp: string
 }
 
-const emptyForm: PoolForm = { name: '', address: '', lat: '', lng: '', rating: '' }
+const emptyForm: PoolForm = { name: '', address: '', lat: '', lng: '', temp: '' }
 
 export default function TrainerDashboard() {
   const navigate = useNavigate()
   const { schedule, saveSchedule, getScheduleForPool } = useSchedule()
 
-  const [allPools, setAllPools] = useState<Record<string, PoolConfig>>(loadPools)
+      const [allPools, setAllPools] = useState<Record<string, PoolConfig>>({})
+  const [poolsLoaded, setPoolsLoaded] = useState(false)
   const poolList = useMemo(() => Object.values(allPools), [allPools])
-  const [activePoolId, setActivePoolId] = useState<string>(poolList[0]?.id || '')
+  const [activePoolId, setActivePoolId] = useState<string>('')
+
+  // Асинхронная загрузка бассейнов
+  useEffect(() => {
+    loadPoolsAsync().then(pools => {
+      setAllPools(pools)
+      setPoolsLoaded(true)
+      const keys = Object.keys(pools)
+      if (keys.length > 0) {
+        setActivePoolId(keys[0])
+      }
+    }).catch(() => setPoolsLoaded(true))
+  }, [])
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
   const [checkedSlots, setCheckedSlots] = useState<Set<string>>(new Set())
   const [savedMessage, setSavedMessage] = useState(false)
@@ -99,12 +112,12 @@ export default function TrainerDashboard() {
   const openEditPool = () => {
     if (!activePool) return
     setEditingPoolId(activePool.id)
-    setPoolForm({
+        setPoolForm({
       name: activePool.name,
       address: activePool.address,
       lat: String(activePool.lat),
       lng: String(activePool.lng),
-      rating: String(activePool.rating),
+      temp: String(activePool.temp),
     })
     setShowPoolForm(true)
   }
@@ -115,26 +128,26 @@ export default function TrainerDashboard() {
     setPoolForm(emptyForm)
   }
 
-  const handleSavePool = () => {
+  const handleSavePool = async () => {
     const id = editingPoolId || 'custom_' + Date.now()
-    const pool: PoolConfig = {
-      id,
-      name: poolForm.name,
-      address: poolForm.address,
-      rating: parseFloat(poolForm.rating) || 0,
-      distance: '-',
-      lat: parseFloat(poolForm.lat) || 0,
-      lng: parseFloat(poolForm.lng) || 0,
-    }
-    saveCustomPool(pool)
+        const pool: PoolConfig = {
+          id,
+          name: poolForm.name,
+          address: poolForm.address,
+          temp: parseInt(poolForm.temp) || 28,
+          distance: '-',
+          lat: parseFloat(poolForm.lat) || 0,
+          lng: parseFloat(poolForm.lng) || 0,
+        }
+        await saveCustomPool(pool)
     setAllPools(prev => ({ ...prev, [id]: pool }))
     setActivePoolId(id)
     closePoolForm()
   }
 
-  const handleDeletePool = (poolId: string) => {
+  const handleDeletePool = async (poolId: string) => {
     if (!poolId.startsWith('custom_')) return
-    removeCustomPool(poolId)
+        await removeCustomPool(poolId)
     setAllPools(prev => {
       const next = { ...prev }
       delete next[poolId]
@@ -264,16 +277,13 @@ export default function TrainerDashboard() {
               onChange={e => setPoolForm(prev => ({ ...prev, address: e.target.value }))}
               className="w-full px-4 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-sm focus:border-teal-brand focus:outline-none"
             />
-            <input
-              placeholder="Ocena (np. 4.5)"
-              value={poolForm.rating}
-              onChange={e => setPoolForm(prev => ({ ...prev, rating: e.target.value }))}
-              className="w-full px-4 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-sm focus:border-teal-brand focus:outline-none"
-              type="number"
-              step="any"
-              min="0"
-              max="5"
-            />
+                        <input
+                          placeholder="Temperatura (np. 28)"
+                          value={poolForm.temp}
+                          onChange={e => setPoolForm(prev => ({ ...prev, temp: e.target.value }))}
+                          className="w-full px-4 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-sm focus:border-teal-brand focus:outline-none"
+                          type="number"
+                        />
             <div className="flex gap-2">
               <input
                 placeholder="Szerokosc (lat)"
@@ -363,10 +373,7 @@ export default function TrainerDashboard() {
                       }`}
                     >
                       <span>{day}</span>
-                      {hasSchedule && !isThisSelected && (
-                        <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-teal-brand" />
-                      )}
-                    </button>
+                      </button>
                   )
                 })}
               </div>

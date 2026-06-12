@@ -1,9 +1,9 @@
-﻿import { useState, useMemo, useRef, useEffect } from 'react'
+﻿import { useState, useMemo, useRef, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Calendar from '../components/Calendar'
 import { useCart } from '../context/CartContext'
 import { useSchedule } from '../context/ScheduleContext'
-import { BUILTIN_POOLS, loadPools, PRICES, type PoolId } from '../config'
+import { loadPoolsAsync, loadPools, PRICES, type PoolId, type PoolConfig } from '../config'
 import { loadBookingsFromServer } from '../lib/supabase'
 
 export default function BookingPage() {
@@ -11,37 +11,62 @@ export default function BookingPage() {
   const { dispatch, state: cartState } = useCart()
   const { schedule } = useSchedule()
 
-  const [allPools] = useState(loadPools)
+  const [allPools, setAllPools] = useState<Record<string, PoolConfig>>(loadPools())
+  const [poolsLoaded, setPoolsLoaded] = useState(false)
   const [selectedPool, setSelectedPool] = useState<PoolId | null>(null)
   const [expandedMap, setExpandedMap] = useState<PoolId | null>(null)
-  const [selectedDate, setSelectedDate] = useState<string | null>(null)
-  const [selectedSlot, setSelectedSlot] = useState<{ value: string; label: string } | null>(null)
-  const [serverBookings, setServerBookings] = useState<Record<string, number>>({})
+    const [selectedDate, setSelectedDate] = useState<string | null>(null)
+    const [serverBookings, setServerBookings] = useState<Record<string, number>>({})
   const [showConfirm, setShowConfirm] = useState(false)
   const [confirmItem, setConfirmItem] = useState('')
   const [resetKey, setResetKey] = useState(0)
   const slotsRef = useRef<HTMLDivElement>(null)
 
-  const poolList = useMemo(() => Object.values(allPools), [allPools])
+    const poolList = useMemo(() => Object.values(allPools), [allPools])
+
+  // Асинхронная загрузка бассейнов с сервера
+  useEffect(() => {
+    loadPoolsAsync().then(pools => {
+      setAllPools(pools)
+      setPoolsLoaded(true)
+    }).catch(() => setPoolsLoaded(true))
+  }, [])
+
+  // Загрузка броней с сервера
+  const loadBookings = useCallback(() => {
+    loadBookingsFromServer().then(data => {
+      const map: Record<string, number> = {}
+      data.forEach(b => {
+        const key = b.pool_id + '|' + b.date + '|' + b.time
+        map[key] = (map[key] || 0) + b.quantity
+      })
+      setServerBookings(map)
+    }).catch(() => {})
+  }, [])
+
+  useEffect(() => { loadBookings() }, [loadBookings])
+
+  // Re-sync on window focus (e.g. after returning from cart)
+  useEffect(() => {
+    window.addEventListener('focus', loadBookings)
+    return () => window.removeEventListener('focus', loadBookings)
+  }, [loadBookings])
 
   const handlePoolClick = (poolId: PoolId) => {
     if (selectedPool === poolId) {
       setExpandedMap(null)
-      setSelectedPool(null)
+            setSelectedPool(null)
       setSelectedDate(null)
-      setSelectedSlot(null)
-    } else {
+        } else {
       setSelectedPool(poolId)
       setExpandedMap(poolId)
       setSelectedDate(null)
-      setSelectedSlot(null)
       setResetKey(k => k + 1)
     }
   }
 
   const handleDateSelect = (date: string) => {
     setSelectedDate(date)
-    setSelectedSlot(null)
   }
 
   useEffect(() => {
@@ -52,10 +77,6 @@ export default function BookingPage() {
     }
   }, [selectedDate])
 
-  const handleSlotSelect = (slot: { value: string; label: string }) => {
-    setSelectedSlot(slot)
-  }
-
   const showAnimation = (label: string) => {
     setConfirmItem(label)
     setShowConfirm(true)
@@ -65,28 +86,6 @@ export default function BookingPage() {
     }, 1800)
   }
 
-  const handleAddToCart = () => {
-    if (!selectedPool || !selectedDate || !selectedSlot) return
-    const id = 'single-' + selectedPool + '-' + selectedDate + '-' + selectedSlot.value + '-' + Date.now() + '-' + Math.random()
-    const pool = allPools[selectedPool]
-    dispatch({
-      type: 'ADD_ITEM',
-      payload: {
-        id,
-        poolId: selectedPool,
-        type: 'single',
-        label: selectedSlot.label,
-        date: selectedDate,
-        time: selectedSlot.value,
-        price: PRICES.single,
-        quantity: 1,
-      },
-    })
-    showAnimation('Dodano: ' + selectedSlot.label)
-    setSelectedDate(null)
-    setSelectedSlot(null)
-  }
-
   // Slots for selected date from schedule
   const slotsForSelectedDate = useMemo(() => {
     if (!selectedPool || !selectedDate) return []
@@ -94,7 +93,7 @@ export default function BookingPage() {
     return entry ? entry.slots : []
   }, [selectedPool, selectedDate, schedule])
 
-  // Scheduled date strings for the calendar highlight
+    // Scheduled date strings for the calendar highlight
   const scheduledDateStrings = useMemo(() => {
     if (!selectedPool) return []
     return schedule
@@ -102,8 +101,20 @@ export default function BookingPage() {
       .map(e => e.date)
   }, [selectedPool, schedule])
 
-  const currentPool = selectedPool ? Object.values(allPools).find(p => p.id === selectedPool) : null
-  const canAddToCart = selectedPool !== null && selectedDate !== null && selectedSlot !== null
+    // Даты, в которых есть забронированные слоты (только подтверждённые с сервера)
+  const bookedDateStrings = useMemo(() => {
+    if (!selectedPool) return []
+    const bookedDates = new Set<string>()
+    Object.keys(serverBookings).forEach(key => {
+      const [poolId, date] = key.split('|')
+      if (poolId === selectedPool && date) {
+        bookedDates.add(date)
+      }
+    })
+    return Array.from(bookedDates)
+  }, [selectedPool, serverBookings])
+
+    const currentPool = selectedPool ? Object.values(allPools).find(p => p.id === selectedPool) : null
 
   // Count bookings from cart (current session)
   const bookedCount = useMemo(() => {
@@ -117,7 +128,7 @@ export default function BookingPage() {
     return map
   }, [cartState.items])
 
-  // Enhanced slots with capacity info (persisted + cart)
+    // Enhanced slots with capacity info (persisted bookings only)
   const enrichedSlots = useMemo(() => {
     if (!selectedPool || !selectedDate) return []
     const entry = schedule.find(s => s.poolId === selectedPool && s.date === selectedDate)
@@ -130,7 +141,8 @@ export default function BookingPage() {
       const capacity = slot.capacity || 0
       const remaining = capacity > 0 ? capacity - totalBooked : -1
       const isFull = capacity > 0 && remaining <= 0
-      return { ...slot, remaining, isFull, booked: totalBooked }
+      const isBookedByMe = serverBooked > 0
+      return { ...slot, remaining, isFull, booked: totalBooked, isBookedByMe }
     })
   }, [selectedPool, selectedDate, schedule, bookedCount])
 
@@ -180,13 +192,11 @@ export default function BookingPage() {
               >
                 <div className="flex items-start justify-between mb-1">
                   <h3 className="text-sm sm:text-base lg:text-lg font-bold text-stone-800">{p.name}</h3>
-                  <div className="flex items-center gap-0.5">
-                    {[1,2,3,4,5].map(i => (
-                      <svg key={i} className={'w-3 h-3 sm:w-4 sm:h-4 ' + (i <= Math.floor(p.rating) ? 'text-amber-400' : 'text-stone-200')} fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                      </svg>
-                    ))}
-                    <span className="text-[10px] sm:text-xs text-stone-400 ml-0.5">{p.rating}</span>
+                                    <div className="flex items-center gap-1.5">
+                    <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 2C10.34 2 9 3.34 9 5v6.26A4.99 4.99 0 007 16c0 2.76 2.24 5 5 5s5-2.24 5-5c0-1.7-.85-3.22-2.15-4.14L15 12V5c0-1.66-1.34-3-3-3zm0 2c.55 0 1 .45 1 1v1h-2V5c0-.55.45-1 1-1z"/>
+                    </svg>
+                    <span className="text-[11px] sm:text-xs font-semibold text-stone-600">{p.temp}°C</span>
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
@@ -240,52 +250,86 @@ export default function BookingPage() {
             <p className="text-sm sm:text-base font-semibold text-stone-700">
               Wybrano: <span className="text-teal-brand">{currentPool?.name}</span>
             </p>
-            <button onClick={() => { setSelectedPool(null); setExpandedMap(null); setSelectedDate(null); setSelectedSlot(null); }} className="ml-auto text-[10px] sm:text-xs text-stone-400 underline hover:text-stone-600">
+            <button onClick={() => { setSelectedPool(null); setExpandedMap(null); setSelectedDate(null); }} className="ml-auto text-[10px] sm:text-xs text-stone-400 underline hover:text-stone-600">
               Zmien
             </button>
           </div>
 
           <h2 className="text-base sm:text-lg lg:text-xl font-bold text-stone-800">Wybierz date i godzine</h2>
 
-          <Calendar
+                    <Calendar
             selectedDate={selectedDate}
             onDateSelect={handleDateSelect}
             availableDates={availableDates}
             scheduledDates={scheduledDateStrings}
+            bookedDates={bookedDateStrings}
             resetKey={resetKey}
           />
 
-          {/* Slots appear below calendar on date select — full width, stacked vertically */}
+                    {/* Slots appear below calendar on date select — full width, stacked vertically */}
           {selectedDate && enrichedSlots.length > 0 && !allSlotsFull && (
             <div ref={slotsRef} className="space-y-2 sm:space-y-3 mt-2">
               <p className="text-xs sm:text-sm font-medium text-stone-500 mb-1">
                 {allSlotsFull ? 'Brak wolnych terminow na' : 'Dostepne terminy na'} {selectedDate.slice(8, 10)}.{selectedDate.slice(5, 7)}:
               </p>
-                            {enrichedSlots.map((slot, idx) => {
-                const isSlotSelected = selectedSlot?.value === slot.value
+                                                        {enrichedSlots.map((slot, idx) => {
                 const isFull = (slot as any).isFull
                 const remaining = (slot as any).remaining
                 const hasCapacity = (slot as any).capacity > 0
+                const isBookedByMe = (slot as any).isBookedByMe
                 return (
-                  <button
+                  <div
                     key={idx}
-                    onClick={() => !isFull && handleSlotSelect(slot)}
-                    disabled={isFull}
-                    className={'w-full text-left py-3.5 sm:py-4 px-4 sm:px-5 rounded-xl text-sm sm:text-base font-medium transition-all border ' + (isFull ? 'bg-stone-100 text-stone-400 border-stone-200 cursor-not-allowed' : isSlotSelected ? 'bg-teal-brand text-white border-teal-brand shadow' : 'bg-white text-stone-700 border-sand/30 hover:border-teal-brand/40 hover:shadow-sm')}
+                    className={'w-full rounded-xl border transition-all ' + (isFull ? 'bg-stone-100 border-stone-200' : isBookedByMe ? 'bg-amber-50 border-amber-300' : 'bg-white border-sand/30')}
                   >
-                                        <div className="flex items-center gap-3 w-full">
-                                            <div className="flex flex-col flex-1 min-w-0 justify-center">
+                    <div className="flex items-center gap-3 px-4 sm:px-5 py-3 sm:py-3.5">
+                      {/* Time info */}
+                      <div className="flex flex-col flex-1 min-w-0 justify-center">
                         {slot.label.includes(' - ') ? (
-                          <span className={'text-sm sm:text-base font-medium truncate ' + (isFull ? 'line-through text-stone-400' : isSlotSelected ? 'text-white' : 'text-stone-700')}>{slot.label}</span>
+                          <span className={'text-sm sm:text-base font-medium truncate ' + (isFull ? 'line-through text-stone-400' : isBookedByMe ? 'text-amber-800' : 'text-stone-700')}>{slot.label}</span>
                         ) : (
                           <>
-                            <span className={'text-xs sm:text-sm font-semibold truncate ' + (isFull ? 'line-through text-stone-400' : isSlotSelected ? 'text-white' : 'text-stone-800')}>{slot.label}</span>
-                            <span className={'text-[11px] sm:text-xs ' + (isFull ? 'line-through text-stone-400' : isSlotSelected ? 'text-white/80' : 'text-stone-400')}>{slot.time} - {String(parseInt(slot.time) + 1).padStart(2, '0')}:00</span>
+                            <span className={'text-xs sm:text-sm font-semibold truncate ' + (isFull ? 'line-through text-stone-400' : isBookedByMe ? 'text-amber-800' : 'text-stone-800')}>{slot.label}</span>
+                            <span className={'text-[11px] sm:text-xs ' + (isFull ? 'line-through text-stone-400' : isBookedByMe ? 'text-amber-600' : 'text-stone-400')}>{slot.time} - {String(parseInt(slot.time) + 1).padStart(2, '0')}:00</span>
                           </>
                         )}
                       </div>
-                                          </div>
-                  </button>
+                      {/* Availability badge */}
+                      {hasCapacity && remaining > 0 && !isBookedByMe && (
+                        <span className="text-[10px] sm:text-xs text-green-600 font-medium whitespace-nowrap">Zostało {remaining}</span>
+                      )}
+                      {isBookedByMe && (
+                        <span className="text-[10px] sm:text-xs text-amber-600 font-medium whitespace-nowrap">Zarezerwowano</span>
+                      )}
+                      {/* Add to cart button — on each available slot */}
+                      {!isFull && !isBookedByMe && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            if (!selectedPool || !selectedDate) return
+                            const id = 'single-' + selectedPool + '-' + selectedDate + '-' + slot.value + '-' + Date.now() + '-' + Math.random()
+                            dispatch({
+                              type: 'ADD_ITEM',
+                              payload: {
+                                id,
+                                poolId: selectedPool,
+                                type: 'single',
+                                label: slot.label,
+                                date: selectedDate,
+                                time: slot.value,
+                                price: PRICES.single,
+                                quantity: 1,
+                              },
+                            })
+                            showAnimation('Dodano: ' + slot.label)
+                          }}
+                          className="shrink-0 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg bg-teal-brand text-white text-xs sm:text-sm font-bold shadow hover:bg-teal-light active:scale-[0.97] transition-all"
+                        >
+                          Dodaj
+                        </button>
+                      )}
+                    </div>
+                  </div>
                 )
               })}
             </div>
@@ -345,17 +389,12 @@ export default function BookingPage() {
             </button>
           </div>
 
-          <button
-            onClick={handleAddToCart}
-            disabled={!canAddToCart}
-            className={'w-full py-3.5 sm:py-4 rounded-xl sm:rounded-2xl font-bold text-sm sm:text-base transition-all ' + (canAddToCart ? 'bg-teal-brand text-white shadow-lg hover:bg-teal-light active:scale-[0.98]' : 'bg-stone-200 text-stone-400 cursor-not-allowed')}
-          >
-            Dodaj do koszyka
-          </button>
-
-          <div className="text-center pt-2">
-            <button onClick={() => navigate('/cart')} className="text-sm sm:text-base text-teal-brand font-medium underline underline-offset-4 hover:text-teal-light transition-colors">
+                    <div className="text-center pt-2">
+            <button onClick={() => navigate('/cart')} className="w-full py-3.5 sm:py-4 rounded-xl sm:rounded-2xl bg-teal-brand text-white font-bold text-sm sm:text-base shadow-lg hover:bg-teal-light active:scale-[0.98] transition-all flex items-center justify-center gap-2">
               Przejdz do koszyka
+              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+              </svg>
             </button>
           </div>
         </div>

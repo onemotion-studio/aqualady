@@ -95,3 +95,65 @@ export async function addBookingToServer(poolId: string, date: string, time: str
     return false
   }
 }
+
+
+// --- Pools ---
+
+export interface PoolRow {
+  id: string
+  name: string
+  address: string
+  temp: string
+  distance: string
+  lat: number
+  lng: number
+  is_builtin: boolean
+}
+
+export async function loadPoolsFromServer(): Promise<PoolRow[] | null> {
+  if (!supabase) return null
+  try {
+    const { data, error } = await supabase
+      .from('pools')
+      .select('id, name, address, temp, distance, lat, lng, is_builtin')
+      .order('name')
+    if (error) throw error
+    return data || []
+  } catch (e) {
+    console.error('Failed to load pools:', e)
+    return null
+  }
+}
+
+export async function savePoolToServer(pool: { id: string; name: string; address: string; temp: string; lat: number; lng: number }) {
+  if (!supabase) return false
+  try {
+    const { error } = await supabase
+      .from('pools')
+      .upsert(
+        { id: pool.id, name: pool.name, address: pool.address, temp: pool.temp, lat: pool.lat, lng: pool.lng, is_builtin: false },
+        { onConflict: 'id' }
+      )
+    if (error) throw error
+    return true
+  } catch (e) {
+    console.error('Failed to save pool:', e)
+    return false
+  }
+}
+
+export async function deletePoolFromServer(poolId: string) {
+  if (!supabase) return false
+  try {
+    const { error } = await supabase
+      .from('pools')
+      .delete()
+      .match({ id: poolId, is_builtin: false })
+    if (error) throw error
+    return true
+  } catch (e) {
+    console.error('Failed to delete pool:', e)
+    return false
+  }
+}
+

@@ -176,6 +176,30 @@ export default function GallerySlider({ slides, className = '' }: GallerySliderP
         ))}
       </div>
 
+      {/* Стрелки навигации — только на десктопе */}
+      {total > 1 && (
+        <>
+          <button
+            onClick={(e) => { e.stopPropagation(); goTo(current - 1); }}
+            className="gallery-arrow gallery-arrow-left"
+            aria-label="Poprzedni"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); goTo(current + 1); }}
+            className="gallery-arrow gallery-arrow-right"
+            aria-label="Nastepny"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </>
+      )}
+
       {/* Dots */}
       {total > 1 && (
         <div className="slide-dots absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
@@ -198,6 +222,50 @@ export default function GallerySlider({ slides, className = '' }: GallerySliderP
         }
         .gallery-slider {
           cursor: pointer;
+        }
+        .gallery-arrow {
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          z-index: 20;
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          background: rgba(255,255,255,0.85);
+          border: none;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #2C8889;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+          cursor: pointer;
+          transition: all 0.2s;
+          opacity: 0;
+          pointer-events: none;
+        }
+        .gallery-slider:hover .gallery-arrow {
+          opacity: 1;
+          pointer-events: auto;
+        }
+        .gallery-arrow:hover {
+          background: white;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+          transform: translateY(-50%) scale(1.08);
+        }
+        .gallery-arrow:active {
+          transform: translateY(-50%) scale(0.95);
+        }
+        .gallery-arrow-left {
+          left: 12px;
+        }
+        .gallery-arrow-right {
+          right: 12px;
+        }
+        /* Скрываем стрелки на мобильных */
+        @media (max-width: 1023px) {
+          .gallery-arrow {
+            display: none;
+          }
         }
       `}</style>
     </div>

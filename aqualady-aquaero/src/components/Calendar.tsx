@@ -19,9 +19,10 @@ interface CalendarProps {
   resetKey?: number
   availableDates?: AvailableDate[]
   scheduledDates?: string[]
+  bookedDates?: string[]
 }
 
-export default function Calendar({ selectedDate, onDateSelect, resetKey, availableDates, scheduledDates }: CalendarProps) {
+export default function Calendar({ selectedDate, onDateSelect, resetKey, availableDates, scheduledDates, bookedDates }: CalendarProps) {
   const now = new Date()
   const [currentMonth, setCurrentMonth] = useState(now.getMonth())
   const [currentYear, setCurrentYear] = useState(now.getFullYear())
@@ -39,7 +40,8 @@ export default function Calendar({ selectedDate, onDateSelect, resetKey, availab
 
   const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
 
-  const scheduledSet = scheduledDates ? new Set(scheduledDates) : null
+    const scheduledSet = scheduledDates ? new Set(scheduledDates) : null
+  const bookedSet = bookedDates ? new Set(bookedDates) : null
 
   const prevMonth = () => {
     if (currentMonth === 0) { setCurrentMonth(11); setCurrentYear(y => y - 1) }
@@ -98,38 +100,35 @@ export default function Calendar({ selectedDate, onDateSelect, resetKey, availab
               const isToday = dateStr === todayStr
               const avail = getAvailableDate(day)
               const hasSlots = avail && avail.slots.length > 0
-              const isScheduled = scheduledSet ? scheduledSet.has(dateStr) : false
-              const isClickable = !isPast && (isScheduled || hasSlots)
+                            const isScheduled = scheduledSet ? scheduledSet.has(dateStr) : false
+                            const isBooked = bookedSet ? bookedSet.has(dateStr) : false
+                            const isClickable = !isPast && (isScheduled || hasSlots)
 
-              return (
-                <button
-                  key={di}
-                  disabled={!isClickable}
-                  onClick={() => isClickable && onDateSelect(dateStr)}
-                  className={`aspect-square rounded-lg text-[11px] sm:text-xs lg:text-sm font-medium transition-all flex flex-col items-center justify-center relative ${
-                    !isClickable ? 'text-stone-300 cursor-not-allowed' : 'cursor-pointer hover:bg-sand-light'
-                  } ${
-                    isSelected ? 'bg-red-accent text-white shadow-md hover:bg-red-700' : ''
-                  } ${
-                    isScheduled && !isSelected ? 'bg-teal-brand/15 text-teal-brand font-bold' : ''
-                  } ${
-                    avail?.allSlotsFull && !isSelected ? 'bg-stone-200 text-stone-400 border border-stone-200 font-medium' : ''
-                  } ${
-                    isToday && !isSelected && !isScheduled && !hasSlots ? 'border border-teal-brand/40 text-teal-brand font-bold' : ''
-                  } ${
-                    !isSelected && !isPast && !isScheduled && !hasSlots && !isToday ? 'text-stone-300' : ''
-                  } ${
-                    !isSelected && !isPast && isScheduled ? 'text-teal-brand font-bold' : ''
-                  }`}
-                >
-                  <span>{day}</span>
-                  {isScheduled && !isSelected && (
-                    <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-teal-brand" />
-                  )}
-                  {hasSlots && !isScheduled && !isSelected && (
-                    <span className="text-[6px] sm:text-[8px] text-teal-brand mt-0.5 leading-none">&bull;</span>
-                  )}
-                </button>
+                            return (
+                              <button
+                                key={di}
+                                disabled={!isClickable}
+                                onClick={() => isClickable && onDateSelect(dateStr)}
+                                className={`aspect-square rounded-lg text-[11px] sm:text-xs lg:text-sm font-medium transition-all flex flex-col items-center justify-center relative ${
+                                  !isClickable ? 'text-stone-300 cursor-not-allowed' : 'cursor-pointer hover:brightness-95'
+                                } ${
+                                  isSelected ? 'bg-teal-brand text-white shadow-md hover:bg-teal-light' : ''
+                                } ${
+                                  hasSlots && !isPast && !isSelected && !isBooked ? 'bg-green-100 text-green-800 font-bold' : ''
+                                } ${
+                                  isBooked && !isSelected ? 'bg-amber-100 text-amber-800 font-bold' : ''
+                                } ${
+                                  isScheduled && !isPast && !isSelected && !isBooked && !hasSlots ? 'bg-green-100 text-green-800 font-bold' : ''
+                                } ${
+                                  avail?.allSlotsFull && !isSelected ? 'bg-stone-200 text-stone-400 font-medium' : ''
+                                } ${
+                                  isToday && !isSelected && !hasSlots && !isScheduled && !isBooked ? 'border border-teal-brand/40 text-teal-brand font-bold' : ''
+                                } ${
+                                  !isSelected && !isPast && !hasSlots && !isScheduled && !isToday && !isBooked ? 'text-stone-300' : ''
+                                }`}
+                                                            >
+                                <span>{day}</span>
+                              </button>
               )
             })}
           </div>

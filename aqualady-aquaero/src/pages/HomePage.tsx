@@ -83,12 +83,21 @@ export default function HomePage() {
           />
           {/* Content */}
           <div className="relative z-10 flex flex-col justify-center px-5 sm:px-8 lg:px-12 py-10 sm:py-16 lg:py-20 min-h-[320px] sm:min-h-[50vh] lg:min-h-[520px]">
-            <h1 style={{ textShadow: "1px 1px 0 #2b8687" }} className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white leading-tight mb-2 drop-shadow-lg max-w-lg">
+                                                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#2B878A] leading-tight mb-3 max-w-lg">
               Akwaaerobika<br />dla kobiet 60+
             </h1>
-            <p style={{ textShadow: "1px 1px 0 #2b8687" }} className="text-sm sm:text-base lg:text-lg text-white/90 leading-relaxed mb-4 max-w-[320px] sm:max-w-md drop-shadow-lg">
+                        <p className="text-base sm:text-lg lg:text-xl text-[#2B878A]/85 leading-relaxed max-w-[360px] sm:max-w-lg">
               Popraw kondycje, wzmocnij stawy i znajdz nowe przyjaciolki w przyjaznej, kobiecej atmosferze.
             </p>
+            <Link
+              to="/booking"
+              className="inline-flex items-center gap-2 mt-4 sm:mt-5 px-6 sm:px-8 py-3 sm:py-3.5 rounded-xl bg-teal-brand text-white font-bold text-sm sm:text-base shadow-md hover:bg-teal-light active:scale-[0.97] transition-all self-start"
+            >
+              Zobacz zajęcia
+              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+              </svg>
+            </Link>
           </div>
         </section>
       </div>
