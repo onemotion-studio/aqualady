@@ -15,7 +15,8 @@ export default function CartPage() {
   const { state, dispatch } = useCart()
   const { items } = state
   const [allPools] = useState<Record<string, PoolConfig>>(loadPools)
-  const [promoCode, setPromoCode] = useState('')
+    const [promoCode, setPromoCode] = useState('')
+  const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [accepted, setAccepted] = useState(false)
   const [serverBookings, setServerBookings] = useState<Record<string, number>>({})
@@ -86,12 +87,12 @@ export default function CartPage() {
     return parts.join(' \u00b7 ')
   }
 
-  const handleReserve = async () => {
-    if (!email || !accepted || items.length === 0) return
+    const handleReserve = async () => {
+    if (!email || !name || !accepted || items.length === 0) return
     // Save all single-session items to server bookings
     for (const item of items) {
       if (item.type === 'single' && item.poolId && item.date && item.time) {
-        await addBookingToServer(item.poolId, item.date, item.time, item.quantity, email)
+        await addBookingToServer(item.poolId, item.date, item.time, item.quantity, email, name)
       }
     }
     // Clear cart
@@ -214,6 +215,18 @@ export default function CartPage() {
             </div>
           </div>
 
+          {/* Name */}
+          <div className="space-y-1">
+            <label className="text-xs sm:text-sm font-medium text-stone-600">Imię i nazwisko</label>
+            <input
+              type="text"
+              value={name}
+              onChange={e => setName(e.target.value)}
+              placeholder="Jan Kowalski"
+              className="w-full px-4 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-sm focus:border-teal-brand focus:outline-none"
+            />
+          </div>
+
           {/* Email */}
           <div className="space-y-1">
             <label className="text-xs sm:text-sm font-medium text-stone-600">E-mail do potwierdzenia</label>
@@ -246,8 +259,8 @@ export default function CartPage() {
           {/* Reserve button */}
           <button
             onClick={handleReserve}
-            disabled={!email || !accepted || items.length === 0}
-            className={'w-full py-4 sm:py-5 rounded-2xl sm:rounded-3xl font-bold text-sm sm:text-base transition-all flex items-center justify-center gap-2 ' + (email && accepted && items.length > 0 ? 'bg-teal-brand text-white shadow-lg hover:bg-teal-light active:scale-[0.98]' : 'bg-stone-200 text-stone-400 cursor-not-allowed')}
+                        disabled={!email || !name || !accepted || items.length === 0}
+            className={'w-full py-4 sm:py-5 rounded-2xl sm:rounded-3xl font-bold text-sm sm:text-base transition-all flex items-center justify-center gap-2 ' + (email && name && accepted && items.length > 0 ? 'bg-teal-brand text-white shadow-lg hover:bg-teal-light active:scale-[0.98]' : 'bg-stone-200 text-stone-400 cursor-not-allowed')}
           >
             Zarezerwuj <span className="text-base sm:text-lg">{total} zl</span>
           </button>

@@ -66,6 +66,8 @@ export interface BookingRow {
   date: string
   time: string
   quantity: number
+  email?: string
+  name?: string
 }
 
 export async function loadBookingsFromServer(): Promise<BookingRow[]> {
@@ -73,7 +75,7 @@ export async function loadBookingsFromServer(): Promise<BookingRow[]> {
   try {
     const { data, error } = await supabase
       .from('bookings')
-      .select('pool_id, date, time, quantity')
+      .select('pool_id, date, time, quantity, email, name')
     if (error) throw error
     return data || []
   } catch (e) {
@@ -82,12 +84,12 @@ export async function loadBookingsFromServer(): Promise<BookingRow[]> {
   }
 }
 
-export async function addBookingToServer(poolId: string, date: string, time: string, quantity: number, email?: string) {
+export async function addBookingToServer(poolId: string, date: string, time: string, quantity: number, email?: string, name?: string) {
   if (!supabase) return false
   try {
     const { error } = await supabase
       .from('bookings')
-      .insert({ pool_id: poolId, date, time, quantity, email: email || '' })
+      .insert({ pool_id: poolId, date, time, quantity, email: email || '', name: name || '' })
     if (error) throw error
     return true
   } catch (e) {

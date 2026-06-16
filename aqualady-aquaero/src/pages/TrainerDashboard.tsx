@@ -2,6 +2,7 @@
 import { useNavigate } from 'react-router-dom'
 import { MONTHS_PL, DAYS_PL, loadPoolsAsync, loadPools, saveCustomPool, removeCustomPool, DEFAULT_SLOTS, type PoolConfig } from '../config'
 import { useSchedule, type TimeSlotDef } from '../context/ScheduleContext'
+import { loadBookingsFromServer, type BookingRow } from '../lib/supabase'
 
 const CUSTOM_SLOTS_KEY = 'aqualady_custom_slots'
 
@@ -65,6 +66,20 @@ export default function TrainerDashboard() {
   const [newSlotEnd, setNewSlotEnd] = useState('')
   const [newSlotLabel, setNewSlotLabel] = useState('')
   const [newSlotCapacity, setNewSlotCapacity] = useState('')
+  const [bookings, setBookings] = useState<BookingRow[]>([])
+  const [expandedSlot, setExpandedSlot] = useState<string | null>(null)
+  const [editingSlotIdx, setEditingSlotIdx] = useState<number | null>(null)
+  const [editSlotStart, setEditSlotStart] = useState('')
+  const [editSlotEnd, setEditSlotEnd] = useState('')
+  const [editSlotLabel, setEditSlotLabel] = useState('')
+  const [editSlotCapacity, setEditSlotCapacity] = useState('')
+
+  // Load bookings from server
+  useEffect(() => {
+    loadBookingsFromServer().then(data => {
+      setBookings(data)
+    }).catch(() => {})
+  }, [])
 
   // Persist custom slots
   useEffect(() => {
@@ -74,7 +89,18 @@ export default function TrainerDashboard() {
   const activePool = poolList.find(p => p.id === activePoolId)
   const poolSchedule = getScheduleForPool(activePoolId)
   const scheduledDates = useMemo(() => new Set(poolSchedule.map(s => s.date)), [poolSchedule])
-  const allSlots = customSlots
+    const allSlots = customSlots
+
+  // Даты с бронированиями для подсветки
+  const bookedDates = useMemo(() => {
+    const dates = new Set<string>()
+    bookings.forEach(b => {
+      if (b.pool_id === activePoolId) {
+        dates.add(b.date)
+      }
+    })
+    return dates
+  }, [bookings, activePoolId])
 
   const handleDateClick = (date: string) => {
     setSelectedDate(date)
@@ -163,7 +189,7 @@ export default function TrainerDashboard() {
     setCheckedSlots(new Set())
   }
 
-  const addCustomSlot = () => {
+    const addCustomSlot = () => {
     if (!newSlotStart || !newSlotEnd) return
     const value = 'slot_' + newSlotStart.replace(':', '')
     const defaultLabel = newSlotStart + ' - ' + newSlotEnd
@@ -174,6 +200,37 @@ export default function TrainerDashboard() {
     setNewSlotEnd('')
     setNewSlotLabel('')
     setNewSlotCapacity('')
+  }
+
+  const startEditSlot = (slot: TimeSlotDef, idx: number) => {
+    setEditingSlotIdx(idx)
+    const parts = slot.label.split(' - ')
+    setEditSlotStart(parts[0] || slot.time)
+    setEditSlotEnd(parts[1] || '')
+    setEditSlotLabel(slot.label)
+    setEditSlotCapacity(String(slot.capacity || ''))
+  }
+
+  const cancelEditSlot = () => {
+    setEditingSlotIdx(null)
+    setEditSlotStart('')
+    setEditSlotEnd('')
+    setEditSlotLabel('')
+    setEditSlotCapacity('')
+  }
+
+  const saveEditSlot = (idx: number) => {
+    if (!editSlotStart || !editSlotEnd) return
+    const value = 'slot_' + editSlotStart.replace(':', '')
+    const defaultLabel = editSlotStart + ' - ' + editSlotEnd
+    const label = editSlotLabel || defaultLabel
+    const capacity = parseInt(editSlotCapacity) || 0
+    setCustomSlots(prev => {
+      const next = [...prev]
+      next[idx] = { time: editSlotStart, label, value, capacity }
+      return next
+    })
+    cancelEditSlot()
   }
 
   // Calendar helpers
@@ -349,10 +406,11 @@ export default function TrainerDashboard() {
               <div key={wi} className="grid grid-cols-7 gap-0.5 sm:gap-1">
                 {week.map((day, di) => {
                   if (day === null) return <div key={di} className="aspect-square" />
-                  const dateStr = formatDate(day)
+                                    const dateStr = formatDate(day)
                   const isPast = isPastDate(day)
                   const isThisSelected = selectedDate === dateStr
                   const hasSchedule = scheduledDates.has(dateStr)
+                  const hasBookings = bookedDates.has(dateStr)
                   const isToday = dateStr === todayStr
 
                   return (
@@ -365,11 +423,13 @@ export default function TrainerDashboard() {
                       } ${
                         isThisSelected ? 'bg-teal-brand text-white shadow-md' : ''
                       } ${
-                        hasSchedule && !isThisSelected ? 'bg-teal-brand/15 text-teal-brand font-bold' : ''
+                        hasBookings && !isThisSelected ? 'bg-amber-700/15 text-amber-700 font-bold' : ''
                       } ${
-                        isToday && !isThisSelected && !hasSchedule ? 'border border-teal-brand/40 text-teal-brand font-bold' : ''
+                        hasSchedule && !isThisSelected && !hasBookings ? 'bg-teal-brand/15 text-teal-brand font-bold' : ''
                       } ${
-                        !isThisSelected && !isPast && !hasSchedule && !isToday ? 'text-stone-700' : ''
+                        isToday && !isThisSelected && !hasSchedule && !hasBookings ? 'border border-teal-brand/40 text-teal-brand font-bold' : ''
+                      } ${
+                        !isThisSelected && !isPast && !hasSchedule && !hasBookings && !isToday ? 'text-stone-700' : ''
                       }`}
                     >
                       <span>{day}</span>
@@ -430,64 +490,100 @@ export default function TrainerDashboard() {
               + Dodaj
             </button>
 
-            <div className="space-y-2">
-              {allSlots.map((slot, si) => (
-                <label
-                  key={slot.value}
-                  className={`flex items-center gap-3 px-4 py-3 sm:py-3.5 rounded-xl border text-sm font-medium transition-all cursor-pointer ${
-                    checkedSlots.has(slot.value)
-                      ? 'bg-teal-brand/10 border-teal-brand text-teal-brand'
-                      : 'bg-white border-sand/30 text-stone-600 hover:border-teal-brand/40'
-                  }`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={checkedSlots.has(slot.value)}
-                    onChange={() => toggleSlot(slot.value)}
-                    className="w-4 h-4 sm:w-5 sm:h-5 accent-teal-brand rounded"
-                  />
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className="flex flex-col flex-1 min-w-0">
-                      {slot.label.includes(' - ') ? (
-                        <span className="text-xs sm:text-sm font-medium text-stone-700">{slot.label}</span>
-                      ) : (
-                        <>
-                          <span className="text-xs sm:text-sm font-semibold text-stone-800 truncate">{slot.label}</span>
-                          <span className="text-xs sm:text-sm text-stone-400">{slot.time} - {String(parseInt(slot.time) + 1).padStart(2, '0')}:00</span>
-                        </>
-                      )}
+                        <div className="space-y-2">
+              {allSlots.map((slot, si) => {
+                const isChecked = checkedSlots.has(slot.value)
+                const slotBookings = selectedDate ? bookings.filter(b => b.pool_id === activePoolId && b.date === selectedDate && b.time === slot.value) : []
+                const totalBooked = slotBookings.reduce((s, r) => s + r.quantity, 0)
+                const isExpanded = expandedSlot === slot.value
+
+                // Режим редактирования слота
+                if (editingSlotIdx === si) {
+                  return (
+                    <div key={slot.value} className="bg-amber-50 rounded-xl p-3 sm:p-4 border border-amber-200 space-y-2">
+                      <p className="text-xs font-semibold text-amber-800">Edytuj slot</p>
+                      <div className="flex flex-col sm:flex-row gap-2">
+                        <input type="time" value={editSlotStart} onChange={e => setEditSlotStart(e.target.value)} className="flex-1 px-3 py-2 rounded-lg border border-amber-200 text-xs focus:border-teal-brand focus:outline-none" />
+                        <input type="time" value={editSlotEnd} onChange={e => setEditSlotEnd(e.target.value)} className="flex-1 px-3 py-2 rounded-lg border border-amber-200 text-xs focus:border-teal-brand focus:outline-none" />
+                      </div>
+                      <input value={editSlotLabel} onChange={e => setEditSlotLabel(e.target.value)} className="w-full px-3 py-2 rounded-lg border border-amber-200 text-xs focus:border-teal-brand focus:outline-none" placeholder="Opis" />
+                      <input type="number" min="1" max="99" value={editSlotCapacity} onChange={e => setEditSlotCapacity(e.target.value)} className="w-full sm:w-24 px-3 py-2 rounded-lg border border-amber-200 text-xs focus:border-teal-brand focus:outline-none" placeholder="Miejsca" />
+                      <div className="flex gap-2">
+                        <button onClick={() => saveEditSlot(si)} disabled={!editSlotStart || !editSlotEnd} className="flex-1 py-2 rounded-lg bg-teal-brand text-white text-xs font-bold disabled:bg-stone-300 hover:bg-teal-light transition-all">Zapisz</button>
+                        <button onClick={cancelEditSlot} className="px-4 py-2 rounded-lg border border-stone-300 text-xs text-stone-500 hover:bg-stone-50 transition-all">Anuluj</button>
+                      </div>
                     </div>
-                    {slot.capacity && (
-                      <span className="text-xs font-bold text-teal-brand bg-teal-brand/10 px-3 py-1 rounded-full shrink-0">
-                        {slot.capacity}
-                      </span>
+                  )
+                }
+
+                return (
+                  <div key={slot.value}>
+                    <label className={`flex items-center gap-3 px-4 py-3 sm:py-3.5 rounded-xl border text-sm font-medium transition-all cursor-pointer ${
+                      isChecked ? 'bg-teal-brand/10 border-teal-brand text-teal-brand' : 'bg-white border-sand/30 text-stone-600 hover:border-teal-brand/40'
+                    }`}>
+                      <input type="checkbox" checked={isChecked} onChange={() => toggleSlot(slot.value)} className="w-4 h-4 sm:w-5 sm:h-5 accent-teal-brand rounded" />
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <div className="flex flex-col flex-1 min-w-0">
+                          {slot.label.includes(' - ') ? (
+                            <span className="text-xs sm:text-sm font-medium text-stone-700">{slot.label}</span>
+                          ) : (
+                            <>
+                              <span className="text-xs sm:text-sm font-semibold text-stone-800 truncate">{slot.label}</span>
+                              <span className="text-xs sm:text-sm text-stone-400">{slot.time} - {String(parseInt(slot.time) + 1).padStart(2, '0')}:00</span>
+                            </>
+                          )}
+                        </div>
+                        {slot.capacity ? (
+                          <span className="text-xs font-bold text-teal-brand bg-teal-brand/10 px-3 py-1 rounded-full shrink-0">{slot.capacity}</span>
+                        ) : null}
+                        {/* Индикатор бронирований */}
+                        {totalBooked > 0 && (
+                          <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0" title={`${totalBooked} os. zapisanych`} />
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1 shrink-0">
+                        {totalBooked > 0 && (
+                          <span className="text-xs font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">{totalBooked}</span>
+                        )}
+                        <button type="button" onClick={(e) => { e.preventDefault(); startEditSlot(slot, si) }} className="text-stone-400 hover:text-teal-brand transition-colors" title="Edytuj">
+                          <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                        </button>
+                        <button type="button" onClick={(e) => { e.preventDefault(); const next = allSlots.filter((_, i) => i !== si); setCustomSlots(next) }} className="text-red-400 hover:text-red-600 transition-colors" title="Usun">
+                          <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        </button>
+                        {slotBookings.length > 0 && (
+                          <button type="button" onClick={(e) => { e.preventDefault(); setExpandedSlot(isExpanded ? null : slot.value) }} className="text-stone-400 hover:text-stone-600 transition-colors">
+                            <svg className={'w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform ' + (isExpanded ? 'rotate-180' : '')} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                          </button>
+                        )}
+                      </div>
+                    </label>
+                    {/* Раскрывающийся список клиентов */}
+                    {isExpanded && slotBookings.length > 0 && (
+                      <div className="bg-stone-50 rounded-xl mx-2 mb-2 p-3 space-y-1.5 border border-stone-200">
+                        <p className="text-xs font-medium text-stone-500 mb-1">Zapisani ({totalBooked} os.):</p>
+                        {slotBookings.map((r, i) => (
+                          <div key={i} className="flex items-center gap-2 text-xs sm:text-sm">
+                            <span className="w-5 h-5 rounded-full bg-teal-brand/10 text-teal-brand font-bold flex items-center justify-center shrink-0 text-[10px]">{r.quantity}</span>
+                            <span className="font-medium text-stone-700">{r.name || '—'}</span>
+                            {r.email && <span className="text-stone-400 text-xs truncate">{r.email}</span>}
+                          </div>
+                        ))}
+                      </div>
                     )}
                   </div>
-                  {true && (
-                    <button
-                      onClick={() => {
-                        const next = allSlots.filter((_, i) => i !== si)
-                        setCustomSlots(next)
-                      }}
-                      className="ml-auto text-red-400 hover:text-red-600 text-xs shrink-0"
-                    >
-                      <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                    </button>
-                  )}
-                </label>
-              ))}
+                )
+              })}
             </div>
 
-            <button
+                        <button
               onClick={handleSave}
               className="w-full mt-4 py-3.5 sm:py-4 rounded-xl sm:rounded-2xl bg-teal-brand text-white font-bold text-sm sm:text-base shadow-lg hover:bg-teal-light active:scale-[0.98] transition-all"
             >
               Opublikuj grafik
             </button>
 
-            {savedMessage && (
+                        {savedMessage && (
               <p className="text-center text-xs sm:text-sm text-green-accent font-medium mt-2">Grafik zostal zapisany!</p>
             )}
           </div>
