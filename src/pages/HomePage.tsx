@@ -49,7 +49,7 @@ export default function HomePage() {
               Akwaaerobika<br />dla kobiet 60+
             </h1>
             <p className="text-sm text-white/90 leading-relaxed mb-4 max-w-[280px] drop-shadow-sm">
-              Popraw kondycję, wzmocnij stawy i znajdź nowe przyjaciółki w przyjaznej, kobiecej atmosferze.
+              Efektywny i bezpieczny fitness dla seniorów.
             </p>
             <div className="flex items-center gap-2 mb-3">
               <div className="flex">

@@ -129,7 +129,7 @@ export default function CartPage() {
               <div key={item.id} className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-sand/10">
                 <div className="flex items-start justify-between">
                   <div className="flex-1 min-w-0 mr-2">
-                    <p className="text-[11px] sm:text-xs text-teal-brand font-semibold capitalize mb-0.5">{getPoolName(item.poolId)}</p>
+                    <p className="text-xs sm:text-sm text-teal-brand font-semibold capitalize mb-0.5">{getPoolName(item.poolId)}</p>
                     <h3 className="text-sm sm:text-base font-semibold text-stone-800">{item.label}</h3>
                     <p className="text-xs sm:text-sm text-stone-400 mt-0.5">{getItemSubtitle(item)}</p>
                   </div>
@@ -162,7 +162,7 @@ export default function CartPage() {
                   >
                     <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" /></svg>
                   </button>
-                  <span className="text-[10px] sm:text-xs text-stone-400 ml-1">{item.price} zl / szt.</span>
+                  <span className="text-xs sm:text-sm text-stone-400 ml-1">{item.price} zl / szt.</span>
                 </div>
               </div>
             ))}
@@ -201,7 +201,7 @@ export default function CartPage() {
             <p className="text-xs sm:text-sm font-semibold text-amber-800 mb-3">Co zabrac ze soba?</p>
             <div className="flex flex-col gap-2 sm:gap-3">
               {whatToBring.map((item, i) => (
-                <span key={i} className="text-xs sm:text-sm text-amber-700 flex items-center gap-2">
+                <span key={i} className="text-sm sm:text-base text-amber-700 flex items-center gap-2">
                   <span className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-green-100 flex items-center justify-center shrink-0">
                     <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" stroke="#16a34a" />
@@ -224,11 +224,11 @@ export default function CartPage() {
               placeholder="twoj@email.pl"
               className="w-full px-4 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-sm focus:border-teal-brand focus:outline-none"
             />
-            <p className="text-[10px] sm:text-xs text-stone-400">Na ten adres wyslemy paragon z kodem dostepu. Rejestracja nie jest wymagana.</p>
+            <p className="text-xs sm:text-sm text-stone-400">Na ten adres wyslemy paragon z kodem dostepu. Rejestracja nie jest wymagana.</p>
           </div>
 
           {/* Checkbox */}
-          <label className="flex items-start gap-2 text-[11px] sm:text-sm text-stone-500">
+          <label className="flex items-start gap-2 text-xs sm:text-sm text-stone-500">
             <input
               type="checkbox"
               checked={accepted}
@@ -253,7 +253,7 @@ export default function CartPage() {
           </button>
 
           {/* Payment methods */}
-          <div className="flex items-center justify-center gap-3 sm:gap-4 text-[10px] sm:text-xs text-stone-400">
+          <div className="flex items-center justify-center gap-3 sm:gap-4 text-xs sm:text-sm text-stone-400">
             <span>Bezpieczna platnosc</span>
             <span className="flex items-center gap-1">
               <svg className="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="6" width="20" height="12" rx="2" stroke="currentColor" strokeWidth="0.5" fill="none"/><text x="5" y="15" fontSize="6" fontWeight="bold">BLIK</text></svg>

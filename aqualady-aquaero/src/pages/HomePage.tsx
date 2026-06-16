@@ -62,12 +62,19 @@ const galleryImages = [
 ]
 
 // Build gallery slides from auto-imported files
-const gallerySlides = Object.entries(galleryImports).map(([path, mod]) => {
-  const src = (mod as { default: string }).default
-  const ext = path.split('.').pop()?.toLowerCase() || ''
-  const isVideo = ['mp4', 'webm'].includes(ext)
-  return { type: isVideo ? 'video' as const : 'image' as const, src }
-})
+const gallerySlides = Object.entries(galleryImports)
+  .map(([path, mod]) => {
+    const src = (mod as { default: string }).default
+    const ext = path.split('.').pop()?.toLowerCase() || ''
+    const isVideo = ['mp4', 'webm'].includes(ext)
+    return { type: isVideo ? 'video' as const : 'image' as const, src }
+  })
+  .sort((a, b) => {
+    // Videos first, then images
+    if (a.type === 'video' && b.type !== 'video') return -1
+    if (a.type !== 'video' && b.type === 'video') return 1
+    return 0
+  })
 
 export default function HomePage() {
   return (
@@ -108,7 +115,7 @@ export default function HomePage() {
         {/* WHY EXERCISE - адаптивная сетка */}
         <section>
           <div className="mb-5 sm:mb-6">
-              <h2 className="text-base sm:text-lg lg:text-xl font-bold text-stone-800 text-center">Dlaczego jest to korzystne wlasnie teraz</h2>
+              <h2 className="text-base sm:text-lg lg:text-xl font-bold text-stone-800 text-center">Korzyści zdrowotne dla seniorów</h2>
             </div>
           <div className="space-y-3 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:gap-4 sm:space-y-0">
             {benefits.map((b, i) => (
@@ -125,22 +132,40 @@ export default function HomePage() {
                 </div>
                 <div className="min-w-0 flex-1 pt-0.5">
                   <h3 className="text-sm sm:text-base font-semibold text-stone-800 mb-0.5">{b.title}</h3>
-                  <p className="text-[12px] sm:text-sm text-stone-500 leading-relaxed">{b.desc}</p>
+                  <p className="text-sm sm:text-base text-stone-500 leading-relaxed">{b.desc}</p>
                 </div>
               </div>
             ))}
+                    </div>
+        </section>
+
+                {/* INFO ORGANIZACYJNE */}
+        <section className="bg-gradient-to-br from-teal-brand/5 to-white rounded-2xl p-5 sm:p-6 lg:p-8 border border-sand/10">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-1 h-5 bg-teal-brand rounded-full" />
+            <h2 className="text-base sm:text-lg lg:text-xl font-bold text-stone-800">Informacje organizacyjne</h2>
+          </div>
+          <div className="space-y-3 text-sm sm:text-base lg:text-lg text-stone-600 leading-relaxed">
+            <p>
+              <span className="font-semibold text-stone-800">Czas trwania:</span> Zajęcia trwają 45 minut.
+            </p>
+            <p>
+              <span className="font-semibold text-stone-800">Poziom trudności:</span> Dostosowany do możliwości seniorów – ćwiczymy we własnym tempie.
+            </p>
+            <p>
+              <span className="font-semibold text-stone-800">Głębokość wody:</span> Ćwiczenia odbywają się na bezpiecznej głębokości (woda do klatki piersiowej), umiejętność pływania nie jest wymagana!
+            </p>
           </div>
         </section>
 
-                {/* ABOUT + GALLERY — на десктопе в одну строку */}
                 <div className="lg:flex lg:gap-6 lg:items-stretch">
                   <section className="bg-gradient-to-br from-teal-brand/5 to-white rounded-2xl p-5 sm:p-6 lg:p-8 border border-sand/10 lg:w-[40%] shrink-0">
                     <div className="flex items-center gap-2 mb-3">
                       <div className="w-1 h-5 bg-teal-brand rounded-full" />
                       <h2 className="text-base sm:text-lg lg:text-xl font-bold text-stone-800">O nas</h2>
                     </div>
-                    <p className="text-[13px] sm:text-sm lg:text-base text-stone-600 leading-relaxed max-w-2xl">
-                      Aqualady Aquaero zaprasza seniorow na zdrowe, poranne zajecia w Warszawie. Nasza akwaaerobika poprawia sprawnosc stawow i dodaje energii bez nadmiernego obciazenia organizmu. To idealny sposob na zachowanie aktywnosci fizycznej oraz spotkanie nowych osob w przyjaznej atmosferze. Wybierz swoj basen, zarezerwuj dogodne terminy w kalendarzu i dolacz do naszej spolecznosci juz dzis. Poczuj sie mlodziej z nami!
+                    <p className="text-sm sm:text-base lg:text-lg text-stone-600 leading-relaxed max-w-2xl">
+                      Zapraszamy na wyjątkowe zajęcia aqua aerobiku, stworzone specjalnie z myślą o seniorach! Ćwiczenia odbywają się bez obciążania stawów i kręgosłupa, a wszystko to pod okiem certyfikowanych instruktorów.
                     </p>
                   </section>
 

@@ -85,7 +85,7 @@ export default function Calendar({ selectedDate, onDateSelect, resetKey, availab
 
       <div className="grid grid-cols-7 gap-0.5 sm:gap-1 mb-0.5 sm:mb-1">
         {DAYS_PL.map(d => (
-          <div key={d} className="text-center text-[10px] sm:text-[11px] lg:text-xs font-medium text-stone-400 py-0.5 sm:py-1">{d}</div>
+          <div key={d} className="text-center text-xs sm:text-sm lg:text-sm font-medium text-stone-400 py-0.5 sm:py-1">{d}</div>
         ))}
       </div>
 
@@ -109,7 +109,7 @@ export default function Calendar({ selectedDate, onDateSelect, resetKey, availab
                                 key={di}
                                 disabled={!isClickable}
                                 onClick={() => isClickable && onDateSelect(dateStr)}
-                                className={`aspect-square rounded-lg text-[11px] sm:text-xs lg:text-sm font-medium transition-all flex flex-col items-center justify-center relative ${
+                                className={`aspect-square rounded-lg text-xs sm:text-sm lg:text-base font-medium transition-all flex flex-col items-center justify-center relative ${
                                   !isClickable ? 'text-stone-300 cursor-not-allowed' : 'cursor-pointer hover:brightness-95'
                                 } ${
                                   isSelected ? 'bg-teal-brand text-white shadow-md hover:bg-teal-light' : ''

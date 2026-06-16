@@ -94,25 +94,29 @@ export default function BookingPage() {
   }, [selectedPool, selectedDate, schedule])
 
     // Scheduled date strings for the calendar highlight
-  const scheduledDateStrings = useMemo(() => {
-    if (!selectedPool) return []
-    return schedule
-      .filter(e => e.poolId === selectedPool && e.slots.length > 0)
-      .map(e => e.date)
-  }, [selectedPool, schedule])
+    const scheduledDateStrings = useMemo(() => {
+      if (!selectedPool) return []
+      const today = new Date()
+      const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+      return schedule
+        .filter(e => e.poolId === selectedPool && e.slots.length > 0 && e.date >= todayStr)
+        .map(e => e.date)
+    }, [selectedPool, schedule])
 
-    // Даты, в которых есть забронированные слоты (только подтверждённые с сервера)
-  const bookedDateStrings = useMemo(() => {
-    if (!selectedPool) return []
-    const bookedDates = new Set<string>()
-    Object.keys(serverBookings).forEach(key => {
-      const [poolId, date] = key.split('|')
-      if (poolId === selectedPool && date) {
-        bookedDates.add(date)
-      }
-    })
-    return Array.from(bookedDates)
-  }, [selectedPool, serverBookings])
+      // Даты, в которых есть забронированные слоты (только подтверждённые с сервера)
+    const bookedDateStrings = useMemo(() => {
+      if (!selectedPool) return []
+      const today = new Date()
+      const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+      const bookedDates = new Set<string>()
+      Object.keys(serverBookings).forEach(key => {
+        const [poolId, date] = key.split('|')
+        if (poolId === selectedPool && date && date >= todayStr) {
+          bookedDates.add(date)
+        }
+      })
+      return Array.from(bookedDates)
+    }, [selectedPool, serverBookings])
 
     const currentPool = selectedPool ? Object.values(allPools).find(p => p.id === selectedPool) : null
 
@@ -128,9 +132,13 @@ export default function BookingPage() {
     return map
   }, [cartState.items])
 
-    // Enhanced slots with capacity info (persisted bookings only)
+        // Enhanced slots with capacity info (persisted bookings only)
   const enrichedSlots = useMemo(() => {
     if (!selectedPool || !selectedDate) return []
+    const today = new Date()
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+    // If the selected date is in the past, return no slots
+    if (selectedDate < todayStr) return []
     const entry = schedule.find(s => s.poolId === selectedPool && s.date === selectedDate)
     if (!entry) return []
     return entry.slots.map(slot => {
@@ -152,10 +160,12 @@ export default function BookingPage() {
   }, [enrichedSlots])
 
 
-    // Build availableDates for Calendar
+        // Build availableDates for Calendar
   const availableDates = useMemo(() => {
     if (!selectedPool) return []
-    const entries = schedule.filter(e => e.poolId === selectedPool && e.slots.length > 0)
+    const today = new Date()
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+    const entries = schedule.filter(e => e.poolId === selectedPool && e.slots.length > 0 && e.date >= todayStr)
     return entries.map(e => {
       const slots = e.slots.map(s => ({ label: s.label, time: s.time, value: s.value }))
       // Check if all slots on this date are fully booked
@@ -190,17 +200,11 @@ export default function BookingPage() {
                 onClick={() => handlePoolClick(p.id)}
                 className={'w-full bg-white rounded-2xl p-4 sm:p-5 shadow-sm border text-left transition-all active:scale-[0.99] ' + (isSelected ? 'border-teal-brand shadow-md' : 'border-sand/15 hover:shadow-md hover:border-teal-brand/30')}
               >
-                <div className="flex items-start justify-between mb-1">
+                                <div className="flex items-start justify-between mb-1">
                   <h3 className="text-sm sm:text-base lg:text-lg font-bold text-stone-800">{p.name}</h3>
-                                    <div className="flex items-center gap-1.5">
-                    <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-red-500" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 2C10.34 2 9 3.34 9 5v6.26A4.99 4.99 0 007 16c0 2.76 2.24 5 5 5s5-2.24 5-5c0-1.7-.85-3.22-2.15-4.14L15 12V5c0-1.66-1.34-3-3-3zm0 2c.55 0 1 .45 1 1v1h-2V5c0-.55.45-1 1-1z"/>
-                    </svg>
-                    <span className="text-[11px] sm:text-xs font-semibold text-stone-600">{p.temp}°C</span>
-                  </div>
                 </div>
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3 text-[11px] sm:text-xs text-stone-500">
+                  <div className="flex items-center gap-3 text-xs sm:text-sm text-stone-500">
                     <span className="flex items-center gap-1">
                       <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                       {p.address}
@@ -219,10 +223,10 @@ export default function BookingPage() {
                   <div className="bg-white rounded-2xl p-3 shadow-sm border border-teal-brand/20 mt-2 mx-1">
                     <div className="flex items-center gap-2 mb-2">
                       <div className="w-2 h-2 rounded-full bg-green-accent" />
-                      <span className="text-xs font-medium text-stone-700">{p.name}</span>
-                      <span className="text-[11px] text-stone-400 ml-auto">{p.distance}</span>
+                                            <span className="text-xs font-medium text-stone-700">{p.name}</span>
+                      <span className="text-xs text-stone-400 ml-auto">{p.distance}</span>
                     </div>
-                    <p className="text-[10px] text-stone-500 mb-2">{p.address}</p>
+                    <p className="text-[11px] text-stone-500 mb-2">{p.address}</p>
                     <div className="w-full h-40 rounded-xl bg-stone-100 overflow-hidden relative">
                       <iframe
                         title={'Mapa ' + p.name}
@@ -231,7 +235,7 @@ export default function BookingPage() {
                         referrerPolicy="no-referrer-when-downgrade"
                         src={'https://maps.google.com/maps?q=' + p.lat + ',' + p.lng + '&z=15&output=embed'}
                       />
-                      <div className="absolute bottom-2 right-2 bg-white/90 backdrop-blur-sm text-[9px] px-2 py-1 rounded-lg shadow text-stone-400">&copy; Google Maps</div>
+                      <div className="absolute bottom-2 right-2 bg-white/90 backdrop-blur-sm text-[10px] px-2 py-1 rounded-lg shadow text-stone-400">&copy; Google Maps</div>
                     </div>
                   </div>
                 </div>
@@ -250,7 +254,7 @@ export default function BookingPage() {
             <p className="text-sm sm:text-base font-semibold text-stone-700">
               Wybrano: <span className="text-teal-brand">{currentPool?.name}</span>
             </p>
-            <button onClick={() => { setSelectedPool(null); setExpandedMap(null); setSelectedDate(null); }} className="ml-auto text-[10px] sm:text-xs text-stone-400 underline hover:text-stone-600">
+            <button onClick={() => { setSelectedPool(null); setExpandedMap(null); setSelectedDate(null); }} className="ml-auto text-xs sm:text-sm text-stone-400 underline hover:text-stone-600">
               Zmien
             </button>
           </div>
@@ -290,16 +294,16 @@ export default function BookingPage() {
                         ) : (
                           <>
                             <span className={'text-xs sm:text-sm font-semibold truncate ' + (isFull ? 'line-through text-stone-400' : isBookedByMe ? 'text-amber-800' : 'text-stone-800')}>{slot.label}</span>
-                            <span className={'text-[11px] sm:text-xs ' + (isFull ? 'line-through text-stone-400' : isBookedByMe ? 'text-amber-600' : 'text-stone-400')}>{slot.time} - {String(parseInt(slot.time) + 1).padStart(2, '0')}:00</span>
+                            <span className={'text-xs sm:text-sm text-stone-400 ' + (isFull ? 'line-through text-stone-400' : isBookedByMe ? 'text-amber-600' : 'text-stone-400')}>{slot.time} - {String(parseInt(slot.time) + 1).padStart(2, '0')}:00</span>
                           </>
                         )}
                       </div>
                       {/* Availability badge */}
                       {hasCapacity && remaining > 0 && !isBookedByMe && (
-                        <span className="text-[10px] sm:text-xs text-green-600 font-medium whitespace-nowrap">Zostało {remaining}</span>
+                        <span className="text-xs sm:text-sm text-green-600 font-medium whitespace-nowrap">Zostało {remaining}</span>
                       )}
                       {isBookedByMe && (
-                        <span className="text-[10px] sm:text-xs text-amber-600 font-medium whitespace-nowrap">Zarezerwowano</span>
+                        <span className="text-xs sm:text-sm text-amber-600 font-medium whitespace-nowrap">Zarezerwowano</span>
                       )}
                       {/* Add to cart button — on each available slot */}
                       {!isFull && !isBookedByMe && (
@@ -339,7 +343,7 @@ export default function BookingPage() {
             <div className="text-center py-6 sm:py-8 bg-stone-50 rounded-2xl border border-stone-200">
               <div className="text-2xl sm:text-3xl mb-2">😔</div>
               <p className="text-sm sm:text-base font-medium text-stone-500">Wszystkie terminy na ten dzien sa zajete</p>
-              <p className="text-[11px] sm:text-xs text-stone-400 mt-1">Wybierz inny dzien w kalendarzu</p>
+              <p className="text-xs sm:text-sm text-stone-400 mt-1">Wybierz inny dzien w kalendarzu</p>
             </div>
           )}
 
@@ -356,9 +360,9 @@ export default function BookingPage() {
               }}
               className="bg-white border border-sand/30 rounded-xl py-3 sm:py-4 px-2 text-center hover:border-teal-brand/40 hover:shadow transition-all active:scale-[0.98]"
             >
-              <div className="text-[10px] sm:text-xs font-bold text-teal-brand">8 zajec</div>
+              <div className="text-xs sm:text-sm font-bold text-teal-brand">8 zajec</div>
               <div className="text-sm sm:text-base font-bold text-stone-800">299 zl</div>
-              <div className="text-[8px] sm:text-[10px] text-stone-400">1 mies.</div>
+              <div className="text-[9px] sm:text-[11px] text-stone-400">1 mies.</div>
             </button>
             <button
               onClick={() => {
@@ -369,10 +373,10 @@ export default function BookingPage() {
               }}
               className="bg-white border-2 border-teal-brand/30 rounded-xl py-3 sm:py-4 px-2 text-center hover:border-teal-brand hover:shadow transition-all active:scale-[0.98] relative"
             >
-              <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 bg-teal-brand text-white text-[7px] sm:text-[9px] px-1.5 py-0.5 rounded-full font-bold whitespace-nowrap">BEST</div>
-              <div className="text-[10px] sm:text-xs font-bold text-teal-brand mt-1.5">12 zajec</div>
+              <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 bg-teal-brand text-white text-[8px] sm:text-[10px] px-1.5 py-0.5 rounded-full font-bold whitespace-nowrap">BEST</div>
+              <div className="text-xs sm:text-sm font-bold text-teal-brand mt-1.5">12 zajec</div>
               <div className="text-sm sm:text-base font-bold text-stone-800">399 zl</div>
-              <div className="text-[8px] sm:text-[10px] text-stone-400">1,5 mies.</div>
+              <div className="text-[9px] sm:text-[11px] text-stone-400">1,5 mies.</div>
             </button>
             <button
               onClick={() => {
@@ -383,9 +387,9 @@ export default function BookingPage() {
               }}
               className="bg-white border border-sand/30 rounded-xl py-3 sm:py-4 px-2 text-center hover:border-teal-brand/40 hover:shadow transition-all active:scale-[0.98]"
             >
-              <div className="text-[10px] sm:text-xs font-bold text-teal-brand">Bezlimit</div>
+              <div className="text-xs sm:text-sm font-bold text-teal-brand">Bezlimit</div>
               <div className="text-sm sm:text-base font-bold text-stone-800">549 zl</div>
-              <div className="text-[8px] sm:text-[10px] text-stone-400">1 mies.</div>
+              <div className="text-[9px] sm:text-[11px] text-stone-400">1 mies.</div>
             </button>
           </div>
 

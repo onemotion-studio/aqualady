@@ -207,11 +207,11 @@ export default function TrainerDashboard() {
         <div className="flex items-center justify-between mb-5">
           <div>
             <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-stone-800">Panel Trenera</h1>
-            <p className="text-[11px] sm:text-xs text-stone-400">Zarzadzanie zajetosciami</p>
+            <p className="text-xs sm:text-sm text-stone-400">Zarzadzanie zajetosciami</p>
           </div>
           <button
             onClick={() => navigate('/')}
-            className="text-[10px] sm:text-xs text-stone-400 underline hover:text-stone-600"
+            className="text-xs sm:text-sm text-stone-400 underline hover:text-stone-600"
           >
             Strona glowna
           </button>
@@ -340,7 +340,7 @@ export default function TrainerDashboard() {
 
           <div className="grid grid-cols-7 gap-0.5 sm:gap-1 mb-0.5 sm:mb-1">
             {DAYS_PL.map(d => (
-              <div key={d} className="text-center text-[10px] sm:text-[11px] lg:text-xs font-medium text-stone-400 py-0.5 sm:py-1">{d}</div>
+              <div key={d} className="text-center text-xs sm:text-sm lg:text-sm font-medium text-stone-400 py-0.5 sm:py-1">{d}</div>
             ))}
           </div>
 
@@ -360,7 +360,7 @@ export default function TrainerDashboard() {
                       key={di}
                       disabled={isPast}
                       onClick={() => handleDateClick(dateStr)}
-                      className={`aspect-square rounded-lg text-[11px] sm:text-xs lg:text-sm font-medium transition-all flex flex-col items-center justify-center relative ${
+                      className={`aspect-square rounded-lg text-xs sm:text-sm lg:text-base font-medium transition-all flex flex-col items-center justify-center relative ${
                         isPast ? 'text-stone-300 cursor-not-allowed' : 'cursor-pointer hover:bg-sand-light'
                       } ${
                         isThisSelected ? 'bg-teal-brand text-white shadow-md' : ''
@@ -453,7 +453,7 @@ export default function TrainerDashboard() {
                       ) : (
                         <>
                           <span className="text-xs sm:text-sm font-semibold text-stone-800 truncate">{slot.label}</span>
-                          <span className="text-[10px] sm:text-xs text-stone-400">{slot.time} - {String(parseInt(slot.time) + 1).padStart(2, '0')}:00</span>
+                          <span className="text-xs sm:text-sm text-stone-400">{slot.time} - {String(parseInt(slot.time) + 1).padStart(2, '0')}:00</span>
                         </>
                       )}
                     </div>
@@ -469,7 +469,7 @@ export default function TrainerDashboard() {
                         const next = allSlots.filter((_, i) => i !== si)
                         setCustomSlots(next)
                       }}
-                      className="ml-auto text-red-400 hover:text-red-600 text-[10px] shrink-0"
+                      className="ml-auto text-red-400 hover:text-red-600 text-xs shrink-0"
                     >
                       <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -495,7 +495,7 @@ export default function TrainerDashboard() {
 
         {/* Info */}
         <div className="bg-white/50 rounded-2xl p-3 sm:p-4 border border-sand/10">
-          <p className="text-[10px] sm:text-xs text-stone-400 text-center">
+          <p className="text-xs sm:text-sm text-stone-400 text-center">
             Daty z zajetiami sa podswietlone na birazowo. Kliknij date, aby edytowac sloty. Mozesz dodawac dowolne godziny zajec.
           </p>
         </div>
