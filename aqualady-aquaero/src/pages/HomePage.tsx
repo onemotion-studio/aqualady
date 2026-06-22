@@ -91,7 +91,7 @@ export default function HomePage() {
           {/* Content */}
           <div className="relative z-10 flex flex-col justify-center px-5 sm:px-8 lg:px-12 py-10 sm:py-16 lg:py-20 min-h-[320px] sm:min-h-[50vh] lg:min-h-[520px]">
                                                                                                                                                                                                 <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#2B878A] leading-tight mb-3 max-w-xl drop-shadow-[0_2px_2px_rgba(255,255,255,1)]">
-              Studio aqua aerobiku „Aqua Lady”<br />zaprasza na zajęcia prozdrowotne
+              Studio aqua aerobiku<br />„Aqua Lady” zaprasza<br />na zajęcia prozdrowotne
             </h1>
                                                 <p className="text-base sm:text-lg lg:text-xl text-stone-800 leading-relaxed max-w-[360px] sm:max-w-lg drop-shadow-[0_1px_1px_rgba(255,255,255,1)]">
               Popraw kondycje, wzmocnij stawy<br className="sm:hidden" />

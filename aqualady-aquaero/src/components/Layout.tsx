@@ -171,10 +171,10 @@ export default function Layout() {
           </a>
         </div>
         <p className="text-xs sm:text-sm text-stone-400 mb-0.5">
-          &copy; 2025 Aqualady Aquaero
+          &copy; 2026 Aqualady Aquaero
         </p>
         <p className="text-[11px] sm:text-xs text-stone-400">
-          Akwaaerobika dla kobiet 60+ &middot; Warszawa
+          Akwaaerobika dla seniorów &middot; Warszawa
         </p>
       </footer>
     </div>
