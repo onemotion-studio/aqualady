@@ -62,6 +62,7 @@ export async function deleteScheduleFromServer(poolId: string, date: string) {
 // --- Bookings ---
 
 export interface BookingRow {
+  id: number
   pool_id: string
   date: string
   time: string
@@ -74,8 +75,8 @@ export async function loadBookingsFromServer(): Promise<BookingRow[]> {
   if (!supabase) return []
   try {
     const { data, error } = await supabase
-      .from('bookings')
-      .select('pool_id, date, time, quantity, email, name')
+            .from('bookings')
+      .select('id, pool_id, date, time, quantity, email, name')
     if (error) throw error
     return data || []
   } catch (e) {
