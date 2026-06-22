@@ -4,12 +4,9 @@ import Layout from './components/Layout'
 import HomePage from './pages/HomePage'
 import BookingPage from './pages/BookingPage'
 import CartPage from './pages/CartPage'
-import AuthPage from './pages/AuthPage'
-import ProfilePage from './pages/ProfilePage'
 import AdminLogin from './pages/AdminLogin'
 import TrainerDashboard from './pages/TrainerDashboard'
 import { ScheduleProvider } from './context/ScheduleContext'
-import { AuthProvider } from './context/AuthContext'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -30,20 +27,16 @@ function ScrollToTop() {
 export default function App() {
   return (
     <ScheduleProvider>
-      <AuthProvider>
-        <ScrollToTop />
-        <Routes>
-          <Route path="/admin" element={<AdminLogin />} />
-          <Route path="/admin/dashboard" element={<TrainerDashboard />} />
-          <Route element={<Layout />}>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/booking" element={<BookingPage />} />
-            <Route path="/cart" element={<CartPage />} />
-            <Route path="/auth" element={<AuthPage />} />
-            <Route path="/profile" element={<ProfilePage />} />
-          </Route>
-        </Routes>
-      </AuthProvider>
+      <ScrollToTop />
+      <Routes>
+        <Route path="/admin" element={<AdminLogin />} />
+        <Route path="/admin/dashboard" element={<TrainerDashboard />} />
+        <Route element={<Layout />}>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/booking" element={<BookingPage />} />
+          <Route path="/cart" element={<CartPage />} />
+        </Route>
+      </Routes>
     </ScheduleProvider>
   )
 }

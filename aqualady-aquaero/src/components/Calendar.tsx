@@ -20,10 +20,9 @@ interface CalendarProps {
   availableDates?: AvailableDate[]
   scheduledDates?: string[]
   bookedDates?: string[]
-  myBookedDates?: string[]
 }
 
-export default function Calendar({ selectedDate, onDateSelect, resetKey, availableDates, scheduledDates, bookedDates, myBookedDates }: CalendarProps) {
+export default function Calendar({ selectedDate, onDateSelect, resetKey, availableDates, scheduledDates, bookedDates }: CalendarProps) {
   const now = new Date()
   const [currentMonth, setCurrentMonth] = useState(now.getMonth())
   const [currentYear, setCurrentYear] = useState(now.getFullYear())
@@ -41,9 +40,8 @@ export default function Calendar({ selectedDate, onDateSelect, resetKey, availab
 
   const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
 
-        const scheduledSet = scheduledDates ? new Set(scheduledDates) : null
+    const scheduledSet = scheduledDates ? new Set(scheduledDates) : null
   const bookedSet = bookedDates ? new Set(bookedDates) : null
-  const myBookedSet = myBookedDates ? new Set(myBookedDates) : null
 
   const prevMonth = () => {
     if (currentMonth === 0) { setCurrentMonth(11); setCurrentYear(y => y - 1) }
@@ -103,34 +101,31 @@ export default function Calendar({ selectedDate, onDateSelect, resetKey, availab
               const avail = getAvailableDate(day)
               const hasSlots = avail && avail.slots.length > 0
                             const isScheduled = scheduledSet ? scheduledSet.has(dateStr) : false
-                                          const isBooked = bookedSet ? bookedSet.has(dateStr) : false
-                                          const isMyBooked = myBookedSet ? myBookedSet.has(dateStr) : false
-                                          const isClickable = !isPast && (isScheduled || hasSlots)
+                            const isBooked = bookedSet ? bookedSet.has(dateStr) : false
+                            const isClickable = !isPast && (isScheduled || hasSlots)
 
-                                          return (
-                                            <button
-                                              key={di}
-                                              disabled={!isClickable}
-                                              onClick={() => isClickable && onDateSelect(dateStr)}
-                                              className={`aspect-square rounded-lg text-xs sm:text-sm lg:text-base font-medium transition-all flex flex-col items-center justify-center relative ${
-                                                !isClickable ? 'text-stone-300 cursor-not-allowed' : 'cursor-pointer hover:brightness-95'
-                                              } ${
-                                                isSelected ? 'bg-teal-brand text-white shadow-md hover:bg-teal-light' : ''
-                                              } ${
-                                                isMyBooked && !isSelected ? 'bg-teal-100 text-teal-800 font-bold ring-2 ring-teal-brand/30' : ''
-                                              } ${
-                                                hasSlots && !isPast && !isSelected && !isBooked && !isMyBooked ? 'bg-green-100 text-green-800 font-bold' : ''
-                                              } ${
-                                                isBooked && !isSelected && !isMyBooked ? 'bg-amber-100 text-amber-800 font-bold' : ''
-                                              } ${
-                                                isScheduled && !isPast && !isSelected && !isBooked && !hasSlots && !isMyBooked ? 'bg-green-100 text-green-800 font-bold' : ''
-                                              } ${
-                                                avail?.allSlotsFull && !isSelected ? 'bg-stone-200 text-stone-400 font-medium' : ''
-                                              } ${
-                                                isToday && !isSelected && !hasSlots && !isScheduled && !isBooked && !isMyBooked ? 'border border-teal-brand/40 text-teal-brand font-bold' : ''
-                                              } ${
-                                                !isSelected && !isPast && !hasSlots && !isScheduled && !isToday && !isBooked && !isMyBooked ? 'text-stone-300' : ''
-                                              }`}
+                            return (
+                              <button
+                                key={di}
+                                disabled={!isClickable}
+                                onClick={() => isClickable && onDateSelect(dateStr)}
+                                className={`aspect-square rounded-lg text-xs sm:text-sm lg:text-base font-medium transition-all flex flex-col items-center justify-center relative ${
+                                  !isClickable ? 'text-stone-300 cursor-not-allowed' : 'cursor-pointer hover:brightness-95'
+                                } ${
+                                  isSelected ? 'bg-teal-brand text-white shadow-md hover:bg-teal-light' : ''
+                                } ${
+                                  hasSlots && !isPast && !isSelected && !isBooked ? 'bg-green-100 text-green-800 font-bold' : ''
+                                } ${
+                                  isBooked && !isSelected ? 'bg-amber-100 text-amber-800 font-bold' : ''
+                                } ${
+                                  isScheduled && !isPast && !isSelected && !isBooked && !hasSlots ? 'bg-green-100 text-green-800 font-bold' : ''
+                                } ${
+                                  avail?.allSlotsFull && !isSelected ? 'bg-stone-200 text-stone-400 font-medium' : ''
+                                } ${
+                                  isToday && !isSelected && !hasSlots && !isScheduled && !isBooked ? 'border border-teal-brand/40 text-teal-brand font-bold' : ''
+                                } ${
+                                  !isSelected && !isPast && !hasSlots && !isScheduled && !isToday && !isBooked ? 'text-stone-300' : ''
+                                }`}
                                                             >
                                 <span>{day}</span>
                               </button>

@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
-import { useAuth } from '../context/AuthContext'
 import { loadPools, type PoolConfig } from '../config'
 import { loadBookingsFromServer, addBookingToServer } from '../lib/supabase'
 
@@ -12,19 +11,17 @@ const whatToBring = [
 ]
 
 export default function CartPage() {
-    const navigate = useNavigate()
+  const navigate = useNavigate()
   const { state, dispatch } = useCart()
-  const { user } = useAuth()
   const { items } = state
   const [allPools] = useState<Record<string, PoolConfig>>(loadPools)
     const [promoCode, setPromoCode] = useState('')
-  const [name, setName] = useState(user?.user_metadata?.full_name || '')
-  const [email, setEmail] = useState(user?.email || '')
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
   const [accepted, setAccepted] = useState(false)
   const [serverBookings, setServerBookings] = useState<Record<string, number>>({})
 
-    const [loading, setLoading] = useState(false)
-
+  // Load server bookings for capacity check
   useEffect(() => {
     loadBookingsFromServer().then(data => {
       const map: Record<string, number> = {}
@@ -90,39 +87,16 @@ export default function CartPage() {
     return parts.join(' \u00b7 ')
   }
 
-        const handleReserve = async () => {
+    const handleReserve = async () => {
     if (!email || !name || !accepted || items.length === 0) return
-    setLoading(true)
     // Save all single-session items to server bookings
-    const singleItems = items.filter(item => item.type === 'single' && item.poolId && item.date && item.time)
-    for (const item of singleItems) {
-      await addBookingToServer(item.poolId, item.date, item.time, item.quantity, email, name)
+    for (const item of items) {
+      if (item.type === 'single' && item.poolId && item.date && item.time) {
+        await addBookingToServer(item.poolId, item.date, item.time, item.quantity, email, name)
+      }
     }
-
-    // Send confirmation email via Edge Function
-    try {
-      const emailItems = singleItems.map(item => ({
-        poolName: item.poolId,
-        date: item.date,
-        time: item.time,
-        quantity: item.quantity,
-        price: item.price * item.quantity,
-      }))
-      await fetch('https://yrkocsmphipndklgpopd.supabase.co/functions/v1/send-confirmation', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlya29jc21waGlwbmRrbGdwb3BkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4MzU0NzAsImV4cCI6MjA5NjQxMTQ3MH0.xbmnA0hSIrOm9N-pmvkBlyArFrdaBwj_-74Z4eIuR_0',
-        },
-        body: JSON.stringify({ email, name, items: emailItems, total }),
-      })
-    } catch (e) {
-      console.error('Failed to send confirmation email:', e)
-    }
-
     // Clear cart
     dispatch({ type: 'CLEAR_CART' })
-    setLoading(false)
     // Show confirmation
     alert('Rezerwacja zostala zlozona! Szczegoly zostaly wyslane na ' + email)
     navigate('/')
@@ -263,7 +237,7 @@ export default function CartPage() {
               placeholder="twoj@email.pl"
               className="w-full px-4 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-sm focus:border-teal-brand focus:outline-none"
             />
-            <p className="text-xs sm:text-sm text-stone-400">Na ten adres wyslemy potwierdzenie rezerwacji. {!user && 'Rejestracja nie jest wymagana.'}</p>
+            <p className="text-xs sm:text-sm text-stone-400">Na ten adres wyslemy paragon z kodem dostepu. Rejestracja nie jest wymagana.</p>
           </div>
 
           {/* Checkbox */}
@@ -283,12 +257,12 @@ export default function CartPage() {
           </label>
 
           {/* Reserve button */}
-                    <button
+          <button
             onClick={handleReserve}
-                        disabled={!email || !name || !accepted || items.length === 0 || loading}
-            className={'w-full py-4 sm:py-5 rounded-2xl sm:rounded-3xl font-bold text-sm sm:text-base transition-all flex items-center justify-center gap-2 ' + (email && name && accepted && items.length > 0 && !loading ? 'bg-teal-brand text-white shadow-lg hover:bg-teal-light active:scale-[0.98]' : 'bg-stone-200 text-stone-400 cursor-not-allowed')}
+                        disabled={!email || !name || !accepted || items.length === 0}
+            className={'w-full py-4 sm:py-5 rounded-2xl sm:rounded-3xl font-bold text-sm sm:text-base transition-all flex items-center justify-center gap-2 ' + (email && name && accepted && items.length > 0 ? 'bg-teal-brand text-white shadow-lg hover:bg-teal-light active:scale-[0.98]' : 'bg-stone-200 text-stone-400 cursor-not-allowed')}
           >
-            {loading ? 'Proszę czekać...' : <>Zarezerwuj <span className="text-base sm:text-lg">{total} zl</span></>}
+            Zarezerwuj <span className="text-base sm:text-lg">{total} zl</span>
           </button>
 
           {/* Payment methods */}

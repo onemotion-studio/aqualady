@@ -1,16 +1,13 @@
 import { Outlet, Link, useLocation } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
-import { useAuth } from '../context/AuthContext'
 import logoSrc from '../assets/logo_full.png'
 import { useState } from 'react'
 
 export default function Layout() {
   const location = useLocation()
   const { state } = useCart()
-  const { user } = useAuth()
   const cartCount = state.items.length
   const isHome = location.pathname === '/'
-  const isAuthPage = location.pathname === '/auth'
   const [showContactPopup, setShowContactPopup] = useState(false)
 
   return (
@@ -76,32 +73,7 @@ export default function Layout() {
                 {cartCount}
               </span>
             )}
-                    </Link>
-
-          {/* Login / Profile */}
-          {user ? (
-            <Link
-              to="/profile"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-brand/10 hover:bg-teal-brand/20 text-teal-brand text-xs sm:text-sm font-medium transition-colors"
-            >
-              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
-              <span className="hidden sm:inline truncate max-w-[100px]">
-                {user.user_metadata?.full_name || user.email?.split('@')[0]}
-              </span>
-            </Link>
-          ) : !isAuthPage ? (
-            <Link
-              to="/auth"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-brand/10 hover:bg-teal-brand/20 text-teal-brand text-xs sm:text-sm font-medium transition-colors"
-            >
-              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-              </svg>
-              <span className="hidden sm:inline">Zaloguj się</span>
-            </Link>
-          ) : null}
+          </Link>
               </nav>
               </header>
 
