@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
 import { useAuth } from '../context/AuthContext'
 import { loadPools, type PoolConfig } from '../config'
-import { loadBookingsFromServer, addBookingToServer } from '../lib/supabase'
+import { loadBookingsFromServer, addBookingToServer, linkBookingsToUser } from '../lib/supabase'
 
 const whatToBring = [
   { icon: '\u{1F3CA}', text: 'Czepek kapielowy' },
@@ -21,8 +21,10 @@ export default function CartPage() {
   const [name, setName] = useState(user?.user_metadata?.full_name || '')
   const [email, setEmail] = useState(user?.email || '')
   const [accepted, setAccepted] = useState(false)
-  const [serverBookings, setServerBookings] = useState<Record<string, number>>({})
+    const [serverBookings, setServerBookings] = useState<Record<string, number>>({})
   const [loading, setLoading] = useState(false)
+  const [createAccount, setCreateAccount] = useState(false)
+  const [password, setPassword] = useState('')
 
   // Load server bookings for capacity check
   useEffect(() => {
@@ -99,7 +101,7 @@ export default function CartPage() {
           await addBookingToServer(item.poolId, item.date as string, item.time as string, item.quantity, email, name)
         }
 
-    // Send confirmation email via Edge Function
+        // Send confirmation email via Edge Function
     try {
       const emailItems = singleItems.map(item => ({
         poolName: item.poolId,
@@ -118,6 +120,25 @@ export default function CartPage() {
       })
     } catch (e) {
       console.error('Failed to send confirmation email:', e)
+    }
+
+        // If user checked "create account" — sign them up after booking
+    if (createAccount && password) {
+      try {
+        const { supabase: sb } = await import('../lib/supabase')
+        if (sb) {
+          const { data, error } = await sb.auth.signUp({
+            email,
+            password,
+            options: { data: { full_name: name } },
+          })
+          if (!error && data.user) {
+            await linkBookingsToUser(email, data.user.id)
+          }
+        }
+      } catch (e) {
+        console.error('Failed to create account:', e)
+      }
     }
 
     // Clear cart
@@ -263,8 +284,40 @@ export default function CartPage() {
               placeholder="twoj@email.pl"
               className="w-full px-4 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-sm focus:border-teal-brand focus:outline-none"
             />
-            <p className="text-xs sm:text-sm text-stone-400">Na ten adres wyslemy potwierdzenie rezerwacji. {!user && 'Rejestracja nie jest wymagana.'}</p>
+                        <p className="text-xs sm:text-sm text-stone-400">Na ten adres wyslemy potwierdzenie rezerwacji. {!user && 'Rejestracja nie jest wymagana.'}</p>
           </div>
+
+          {/* Create account — only for non-logged-in users */}
+          {!user && (
+            <div className="space-y-3 bg-teal-50 rounded-2xl p-4 sm:p-5 border border-teal-200">
+              <label className="flex items-start gap-2 text-xs sm:text-sm text-stone-600 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={createAccount}
+                  onChange={e => setCreateAccount(e.target.checked)}
+                  className="mt-0.5 accent-teal-brand"
+                />
+                <span>
+                  <span className="font-medium text-teal-700">Utworz konto</span>
+                  {' '}— bedziesz widziec swoje rezerwacje i zarzadzac nimi
+                </span>
+              </label>
+              {createAccount && (
+                <div className="space-y-1 pl-6">
+                  <label className="text-xs sm:text-sm font-medium text-stone-600">Haslo (min. 6 znakow)</label>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    placeholder="Twoje haslo"
+                    required={createAccount}
+                    minLength={6}
+                    className="w-full px-4 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-sm focus:border-teal-brand focus:outline-none"
+                  />
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Checkbox */}
           <label className="flex items-start gap-2 text-xs sm:text-sm text-stone-500">

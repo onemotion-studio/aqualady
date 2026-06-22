@@ -20,6 +20,7 @@ export default function BookingPage() {
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
   const [serverBookings, setServerBookings] = useState<Record<string, number>>({})
   const [myBookings, setMyBookings] = useState<Set<string>>(new Set())
+  const [myBookingsCount, setMyBookingsCount] = useState<Record<string, number>>({})
   const [showConfirm, setShowConfirm] = useState(false)
   const [confirmItem, setConfirmItem] = useState('')
   const [resetKey, setResetKey] = useState(0)
@@ -40,6 +41,7 @@ export default function BookingPage() {
     loadBookingsFromServer().then(data => {
       const map: Record<string, number> = {}
       const mySet = new Set<string>()
+      const myCount: Record<string, number> = {}
       data.forEach(b => {
         const key = b.pool_id + '|' + b.date + '|' + b.time
         map[key] = (map[key] || 0) + b.quantity
@@ -48,10 +50,12 @@ export default function BookingPage() {
           : false
         if (isMine) {
           mySet.add(key)
+          myCount[key] = (myCount[key] || 0) + b.quantity
         }
       })
       setServerBookings(map)
       setMyBookings(mySet)
+      setMyBookingsCount(myCount)
     }).catch(() => {})
   }, [user])
 
@@ -323,7 +327,7 @@ export default function BookingPage() {
                         )}
                       </div>
                       {isBookedByMe && (
-                        <span className="text-xs sm:text-sm text-teal-600 font-medium whitespace-nowrap">Twoja rezerwacja: {(slot as any).booked}</span>
+                        <span className="text-xs sm:text-sm text-teal-600 font-medium whitespace-nowrap">Twoja rezerwacja: {myBookingsCount[selectedPool + '|' + selectedDate + '|' + slot.value] || (slot as any).booked}</span>
                       )}
                       {hasCapacity && remaining > 0 && !isBookedByMe && (
                         <span className="text-xs sm:text-sm text-green-600 font-medium whitespace-nowrap">Zostało {remaining}</span>
