@@ -63,6 +63,7 @@ export async function deleteScheduleFromServer(poolId: string, date: string) {
 
 export interface BookingRow {
   id: number
+  user_id?: string | null
   pool_id: string
   date: string
   time: string
@@ -76,7 +77,7 @@ export async function loadBookingsFromServer(): Promise<BookingRow[]> {
   try {
     const { data, error } = await supabase
       .from('bookings')
-      .select('id, pool_id, date, time, quantity, email, name')
+      .select('id, user_id, pool_id, date, time, quantity, email, name')
     if (error) throw error
     return data || []
   } catch (e) {
@@ -96,6 +97,19 @@ export async function addBookingToServer(poolId: string, date: string, time: str
   } catch (e) {
     console.error('Failed to add booking:', e)
     return false
+  }
+}
+
+export async function linkBookingsToUser(email: string, userId: string) {
+  if (!supabase) return
+  try {
+    await supabase
+      .from('bookings')
+      .update({ user_id: userId })
+      .eq('email', email)
+      .is('user_id', null)
+  } catch (e) {
+    console.error('Failed to link bookings:', e)
   }
 }
 

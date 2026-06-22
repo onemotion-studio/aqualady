@@ -43,14 +43,17 @@ export default function BookingPage() {
       data.forEach(b => {
         const key = b.pool_id + '|' + b.date + '|' + b.time
         map[key] = (map[key] || 0) + b.quantity
-        if (user?.email && b.email === user.email) {
+        const isMine = user
+          ? (b.user_id === user.id || (user.email && b.email === user.email))
+          : false
+        if (isMine) {
           mySet.add(key)
         }
       })
       setServerBookings(map)
       setMyBookings(mySet)
     }).catch(() => {})
-  }, [user?.email])
+  }, [user])
 
   useEffect(() => { loadBookings() }, [loadBookings])
 

@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
-import { supabase } from '../lib/supabase'
+import { supabase, linkBookingsToUser } from '../lib/supabase'
 import type { User } from '@supabase/supabase-js'
 
 interface AuthContextType {
@@ -39,11 +39,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signUp = async (email: string, password: string, name: string): Promise<string | null> => {
     if (!supabase) return 'Auth service not available'
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: { data: { full_name: name } },
     })
+    if (!error && data.user) {
+      // Link existing bookings with this email to the new user
+      await linkBookingsToUser(email, data.user.id)
+    }
     return error?.message ?? null
   }
 

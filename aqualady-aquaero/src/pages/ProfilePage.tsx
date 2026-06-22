@@ -36,7 +36,7 @@ export default function ProfilePage() {
     loadBookingsFromServer().then(data => {
       const allPools = loadPools()
       const myBookings = data
-        .filter(b => b.email === user.email)
+        .filter(b => b.user_id === user.id || (user.email && b.email === user.email))
         .map(b => ({
           id: b.id,
           pool_id: b.pool_id,
