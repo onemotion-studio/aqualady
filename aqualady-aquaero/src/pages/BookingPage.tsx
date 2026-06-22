@@ -1,28 +1,31 @@
-﻿import { useState, useMemo, useRef, useEffect, useCallback } from 'react'
+import { useState, useMemo, useRef, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Calendar from '../components/Calendar'
 import { useCart } from '../context/CartContext'
 import { useSchedule } from '../context/ScheduleContext'
+import { useAuth } from '../context/AuthContext'
 import { loadPoolsAsync, loadPools, PRICES, type PoolId, type PoolConfig } from '../config'
 import { loadBookingsFromServer } from '../lib/supabase'
 
 export default function BookingPage() {
   const navigate = useNavigate()
   const { dispatch, state: cartState } = useCart()
+  const { user } = useAuth()
   const { schedule } = useSchedule()
 
   const [allPools, setAllPools] = useState<Record<string, PoolConfig>>(loadPools())
   const [poolsLoaded, setPoolsLoaded] = useState(false)
   const [selectedPool, setSelectedPool] = useState<PoolId | null>(null)
   const [expandedMap, setExpandedMap] = useState<PoolId | null>(null)
-    const [selectedDate, setSelectedDate] = useState<string | null>(null)
-    const [serverBookings, setServerBookings] = useState<Record<string, number>>({})
+  const [selectedDate, setSelectedDate] = useState<string | null>(null)
+  const [serverBookings, setServerBookings] = useState<Record<string, number>>({})
+  const [myBookings, setMyBookings] = useState<Set<string>>(new Set())
   const [showConfirm, setShowConfirm] = useState(false)
   const [confirmItem, setConfirmItem] = useState('')
   const [resetKey, setResetKey] = useState(0)
   const slotsRef = useRef<HTMLDivElement>(null)
 
-    const poolList = useMemo(() => Object.values(allPools), [allPools])
+  const poolList = useMemo(() => Object.values(allPools), [allPools])
 
   // Асинхронная загрузка бассейнов с сервера
   useEffect(() => {
@@ -36,13 +39,18 @@ export default function BookingPage() {
   const loadBookings = useCallback(() => {
     loadBookingsFromServer().then(data => {
       const map: Record<string, number> = {}
+      const mySet = new Set<string>()
       data.forEach(b => {
         const key = b.pool_id + '|' + b.date + '|' + b.time
         map[key] = (map[key] || 0) + b.quantity
+        if (user?.email && b.email === user.email) {
+          mySet.add(key)
+        }
       })
       setServerBookings(map)
+      setMyBookings(mySet)
     }).catch(() => {})
-  }, [])
+  }, [user?.email])
 
   useEffect(() => { loadBookings() }, [loadBookings])
 
@@ -55,9 +63,9 @@ export default function BookingPage() {
   const handlePoolClick = (poolId: PoolId) => {
     if (selectedPool === poolId) {
       setExpandedMap(null)
-            setSelectedPool(null)
+      setSelectedPool(null)
       setSelectedDate(null)
-        } else {
+    } else {
       setSelectedPool(poolId)
       setExpandedMap(poolId)
       setSelectedDate(null)
@@ -93,32 +101,47 @@ export default function BookingPage() {
     return entry ? entry.slots : []
   }, [selectedPool, selectedDate, schedule])
 
-    // Scheduled date strings for the calendar highlight
-    const scheduledDateStrings = useMemo(() => {
-      if (!selectedPool) return []
-      const today = new Date()
-      const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
-      return schedule
-        .filter(e => e.poolId === selectedPool && e.slots.length > 0 && e.date >= todayStr)
-        .map(e => e.date)
-    }, [selectedPool, schedule])
+  // Scheduled date strings for the calendar highlight
+  const scheduledDateStrings = useMemo(() => {
+    if (!selectedPool) return []
+    const today = new Date()
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+    return schedule
+      .filter(e => e.poolId === selectedPool && e.slots.length > 0 && e.date >= todayStr)
+      .map(e => e.date)
+  }, [selectedPool, schedule])
 
-      // Даты, в которых есть забронированные слоты (только подтверждённые с сервера)
-    const bookedDateStrings = useMemo(() => {
-      if (!selectedPool) return []
-      const today = new Date()
-      const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
-      const bookedDates = new Set<string>()
-      Object.keys(serverBookings).forEach(key => {
-        const [poolId, date] = key.split('|')
-        if (poolId === selectedPool && date && date >= todayStr) {
-          bookedDates.add(date)
-        }
-      })
-      return Array.from(bookedDates)
-    }, [selectedPool, serverBookings])
+  // Даты, в которых есть забронированные слоты (только подтверждённые с сервера)
+  const bookedDateStrings = useMemo(() => {
+    if (!selectedPool) return []
+    const today = new Date()
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+    const bookedDates = new Set<string>()
+    Object.keys(serverBookings).forEach(key => {
+      const [poolId, date] = key.split('|')
+      if (poolId === selectedPool && date && date >= todayStr) {
+        bookedDates.add(date)
+      }
+    })
+    return Array.from(bookedDates)
+  }, [selectedPool, serverBookings])
 
-    const currentPool = selectedPool ? Object.values(allPools).find(p => p.id === selectedPool) : null
+  // Даты, где у текущего пользователя есть брони
+  const myBookedDateStrings = useMemo(() => {
+    if (!selectedPool) return []
+    const today = new Date()
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+    const myDates = new Set<string>()
+    myBookings.forEach(key => {
+      const [poolId, date] = key.split('|')
+      if (poolId === selectedPool && date && date >= todayStr) {
+        myDates.add(date)
+      }
+    })
+    return Array.from(myDates)
+  }, [selectedPool, myBookings])
+
+  const currentPool = selectedPool ? Object.values(allPools).find(p => p.id === selectedPool) : null
 
   // Count bookings from cart (current session)
   const bookedCount = useMemo(() => {
@@ -132,7 +155,7 @@ export default function BookingPage() {
     return map
   }, [cartState.items])
 
-        // Enhanced slots with capacity info (persisted bookings only)
+  // Enhanced slots with capacity info (persisted bookings only)
   const enrichedSlots = useMemo(() => {
     if (!selectedPool || !selectedDate) return []
     const today = new Date()
@@ -149,18 +172,17 @@ export default function BookingPage() {
       const capacity = slot.capacity || 0
       const remaining = capacity > 0 ? capacity - totalBooked : -1
       const isFull = capacity > 0 && remaining <= 0
-      const isBookedByMe = serverBooked > 0
+      const isBookedByMe = myBookings.has(key)
       return { ...slot, remaining, isFull, booked: totalBooked, isBookedByMe }
     })
-  }, [selectedPool, selectedDate, schedule, bookedCount])
+  }, [selectedPool, selectedDate, schedule, bookedCount, myBookings])
 
   // Check if ALL slots for selected date are full
   const allSlotsFull = useMemo(() => {
     return enrichedSlots.length > 0 && enrichedSlots.every(s => (s as any).isFull)
   }, [enrichedSlots])
 
-
-        // Build availableDates for Calendar
+  // Build availableDates for Calendar
   const availableDates = useMemo(() => {
     if (!selectedPool) return []
     const today = new Date()
@@ -183,7 +205,7 @@ export default function BookingPage() {
     })
   }, [selectedPool, schedule, bookedCount])
 
-    return (
+  return (
     <div className="space-y-5 sm:space-y-6 pb-8 sm:pb-10 pt-4 max-w-3xl mx-auto">
       <h1 className="pt-4 text-xl sm:text-2xl lg:text-3xl font-bold text-stone-800">Wybierz zajecia</h1>
 
@@ -200,7 +222,7 @@ export default function BookingPage() {
                 onClick={() => handlePoolClick(p.id)}
                 className={'w-full bg-white rounded-2xl p-4 sm:p-5 shadow-sm border text-left transition-all active:scale-[0.99] ' + (isSelected ? 'border-teal-brand shadow-md' : 'border-sand/15 hover:shadow-md hover:border-teal-brand/30')}
               >
-                                <div className="flex items-start justify-between mb-1">
+                <div className="flex items-start justify-between mb-1">
                   <h3 className="text-sm sm:text-base lg:text-lg font-bold text-stone-800">{p.name}</h3>
                 </div>
                 <div className="flex items-center justify-between">
@@ -223,7 +245,7 @@ export default function BookingPage() {
                   <div className="bg-white rounded-2xl p-3 shadow-sm border border-teal-brand/20 mt-2 mx-1">
                     <div className="flex items-center gap-2 mb-2">
                       <div className="w-2 h-2 rounded-full bg-green-accent" />
-                                            <span className="text-xs font-medium text-stone-700">{p.name}</span>
+                      <span className="text-xs font-medium text-stone-700">{p.name}</span>
                       <span className="text-xs text-stone-400 ml-auto">{p.distance}</span>
                     </div>
                     <p className="text-[11px] text-stone-500 mb-2">{p.address}</p>
@@ -246,8 +268,7 @@ export default function BookingPage() {
       </div>
 
       {/* Date & Time - only when pool selected */}
-
-            {selectedPool && (
+      {selectedPool && (
         <div className="space-y-4 sm:space-y-5 mt-5 pt-5 border-t border-sand/20">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-teal-brand" />
@@ -261,22 +282,23 @@ export default function BookingPage() {
 
           <h2 className="text-base sm:text-lg lg:text-xl font-bold text-stone-800">Wybierz date i godzine</h2>
 
-                    <Calendar
+          <Calendar
             selectedDate={selectedDate}
             onDateSelect={handleDateSelect}
             availableDates={availableDates}
             scheduledDates={scheduledDateStrings}
             bookedDates={bookedDateStrings}
+            myBookedDates={myBookedDateStrings}
             resetKey={resetKey}
           />
 
-                    {/* Slots appear below calendar on date select — full width, stacked vertically */}
+          {/* Slots appear below calendar on date select */}
           {selectedDate && enrichedSlots.length > 0 && !allSlotsFull && (
             <div ref={slotsRef} className="space-y-2 sm:space-y-3 mt-2">
               <p className="text-xs sm:text-sm font-medium text-stone-500 mb-1">
-                {allSlotsFull ? 'Brak wolnych terminow na' : 'Dostepne terminy na'} {selectedDate.slice(8, 10)}.{selectedDate.slice(5, 7)}:
+                Dostepne terminy na {selectedDate.slice(8, 10)}.{selectedDate.slice(5, 7)}:
               </p>
-                                                        {enrichedSlots.map((slot, idx) => {
+              {enrichedSlots.map((slot, idx) => {
                 const isFull = (slot as any).isFull
                 const remaining = (slot as any).remaining
                 const hasCapacity = (slot as any).capacity > 0
@@ -284,29 +306,26 @@ export default function BookingPage() {
                 return (
                   <div
                     key={idx}
-                    className={'w-full rounded-xl border transition-all ' + (isFull ? 'bg-stone-100 border-stone-200' : isBookedByMe ? 'bg-amber-50 border-amber-300' : 'bg-white border-sand/30')}
+                    className={'w-full rounded-xl border transition-all ' + (isFull ? 'bg-stone-100 border-stone-200' : isBookedByMe ? 'bg-teal-50 border-teal-300' : 'bg-white border-sand/30')}
                   >
                     <div className="flex items-center gap-3 px-4 sm:px-5 py-3 sm:py-3.5">
-                      {/* Time info */}
                       <div className="flex flex-col flex-1 min-w-0 justify-center">
                         {slot.label.includes(' - ') ? (
-                          <span className={'text-sm sm:text-base font-medium truncate ' + (isFull ? 'line-through text-stone-400' : isBookedByMe ? 'text-amber-800' : 'text-stone-700')}>{slot.label}</span>
+                          <span className={'text-sm sm:text-base font-medium truncate ' + (isFull ? 'line-through text-stone-400' : isBookedByMe ? 'text-teal-800' : 'text-stone-700')}>{slot.label}</span>
                         ) : (
                           <>
-                            <span className={'text-xs sm:text-sm font-semibold truncate ' + (isFull ? 'line-through text-stone-400' : isBookedByMe ? 'text-amber-800' : 'text-stone-800')}>{slot.label}</span>
-                            <span className={'text-xs sm:text-sm text-stone-400 ' + (isFull ? 'line-through text-stone-400' : isBookedByMe ? 'text-amber-600' : 'text-stone-400')}>{slot.time} - {String(parseInt(slot.time) + 1).padStart(2, '0')}:00</span>
+                            <span className={'text-xs sm:text-sm font-semibold truncate ' + (isFull ? 'line-through text-stone-400' : isBookedByMe ? 'text-teal-800' : 'text-stone-800')}>{slot.label}</span>
+                            <span className={'text-xs sm:text-sm text-stone-400 ' + (isFull ? 'line-through text-stone-400' : isBookedByMe ? 'text-teal-600' : 'text-stone-400')}>{slot.time} - {String(parseInt(slot.time) + 1).padStart(2, '0')}:00</span>
                           </>
                         )}
                       </div>
-                      {/* Availability badge */}
+                      {isBookedByMe && (
+                        <span className="text-xs sm:text-sm text-teal-600 font-medium whitespace-nowrap">Zarezerwowano {(slot as any).booked}</span>
+                      )}
                       {hasCapacity && remaining > 0 && !isBookedByMe && (
                         <span className="text-xs sm:text-sm text-green-600 font-medium whitespace-nowrap">Zostało {remaining}</span>
                       )}
-                      {isBookedByMe && (
-                        <span className="text-xs sm:text-sm text-amber-600 font-medium whitespace-nowrap">Zarezerwowano</span>
-                      )}
-                      {/* Add to cart button — on each available slot */}
-                      {!isFull && !isBookedByMe && (
+                      {!isFull && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation()
@@ -339,7 +358,7 @@ export default function BookingPage() {
             </div>
           )}
 
-                    {selectedDate && allSlotsFull && (
+          {selectedDate && allSlotsFull && (
             <div className="text-center py-6 sm:py-8 bg-stone-50 rounded-2xl border border-stone-200">
               <div className="text-2xl sm:text-3xl mb-2">😔</div>
               <p className="text-sm sm:text-base font-medium text-stone-500">Wszystkie terminy na ten dzien sa zajete</p>
@@ -393,7 +412,7 @@ export default function BookingPage() {
             </button>
           </div>
 
-                    <div className="text-center pt-2">
+          <div className="text-center pt-2">
             <button onClick={() => navigate('/cart')} className="w-full py-3.5 sm:py-4 rounded-xl sm:rounded-2xl bg-teal-brand text-white font-bold text-sm sm:text-base shadow-lg hover:bg-teal-light active:scale-[0.98] transition-all flex items-center justify-center gap-2">
               Przejdz do koszyka
               <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
