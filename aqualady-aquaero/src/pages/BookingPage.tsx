@@ -320,7 +320,7 @@ export default function BookingPage() {
                         )}
                       </div>
                       {isBookedByMe && (
-                        <span className="text-xs sm:text-sm text-teal-600 font-medium whitespace-nowrap">Zarezerwowano {(slot as any).booked}</span>
+                        <span className="text-xs sm:text-sm text-teal-600 font-medium whitespace-nowrap">Twoja rezerwacja: {(slot as any).booked}</span>
                       )}
                       {hasCapacity && remaining > 0 && !isBookedByMe && (
                         <span className="text-xs sm:text-sm text-green-600 font-medium whitespace-nowrap">Zostało {remaining}</span>
