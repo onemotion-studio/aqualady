@@ -90,19 +90,19 @@ export default function HomePage() {
           />
           {/* Content */}
           <div className="relative z-10 flex flex-col justify-center px-5 sm:px-8 lg:px-12 py-10 sm:py-16 lg:py-20 min-h-[320px] sm:min-h-[50vh] lg:min-h-[520px]">
-                                                                                                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#2B878A] leading-tight mb-3 max-w-lg drop-shadow-[0_2px_2px_rgba(255,255,255,1)]">
-              Akwaaerobika<br />dla kobiet 60+
+                                                                                                                                                                                                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#2B878A] leading-tight mb-3 max-w-xl drop-shadow-[0_2px_2px_rgba(255,255,255,1)]">
+              Studio aqua aerobiku „Aqua Lady”<br />zaprasza na zajęcia prozdrowotne
             </h1>
                                                 <p className="text-base sm:text-lg lg:text-xl text-stone-800 leading-relaxed max-w-[360px] sm:max-w-lg drop-shadow-[0_1px_1px_rgba(255,255,255,1)]">
               Popraw kondycje, wzmocnij stawy<br className="sm:hidden" />
-              i znajdz nowe przyjaciolki w przyjaznej,<br className="sm:hidden" />
-              kobiecej atmosferze.
+              i znajdz nowe przyjaciolki w przyjaznej, <br className="sm:hidden" />
+              kobiecej atmosferze
             </p>
             <Link
               to="/booking"
               className="inline-flex items-center gap-2 mt-4 sm:mt-5 px-6 sm:px-8 py-3 sm:py-3.5 rounded-xl bg-teal-brand text-white font-bold text-sm sm:text-base shadow-md hover:bg-teal-light active:scale-[0.97] transition-all self-start"
             >
-              Zobacz zajęcia
+              Grafik i Cennik
               <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
               </svg>
@@ -111,8 +111,39 @@ export default function HomePage() {
         </section>
       </div>
 
+            {/* Блок-описание сразу под hero */}
+      <div className="px-4 sm:px-6 lg:px-8 mt-6 sm:mt-8">
+        <section className="bg-white rounded-2xl p-5 sm:p-6 lg:p-8 border border-sand/10 shadow-sm">
+          <p className="text-sm sm:text-base lg:text-lg text-stone-600 leading-relaxed mb-4">
+            Opracowaliśmy program z uwzględnieniem zmian organizmu związanych z wiekiem. Program jest skierowany do osób starszych i ma na celu bezpieczną poprawę zdrowia, utrzymanie aktywności fizycznej oraz dobrego samopoczucia.
+          </p>
+          <p className="text-sm sm:text-base lg:text-lg font-semibold text-stone-700 mb-3">
+            Główne efekty terapeutyczne:
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
+            {[
+              'Wzmocnienie układu ruchu',
+              'Kształtowanie prawidłowej postawy ciała',
+              'Redukcja masy ciała',
+              'Zwiększenie elastyczności skóry i mięśni',
+              'Hartowanie organizmu',
+              'Poprawa krążenia krwi w całym ciele',
+              'Likwidacja zastojów w nogach',
+              'Redukcja stresu, poprawa snu i humoru',
+            ].map((item, i) => (
+              <div key={i} className="flex items-center gap-2 text-sm sm:text-base text-stone-600">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 shrink-0 text-teal-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                </svg>
+                <span>{item}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
+
       {/* Rest of content with padding */}
-      <div className="px-4 sm:px-6 lg:px-8 space-y-7 sm:space-y-8 lg:space-y-10 mt-6 sm:mt-8 lg:mt-10">
+      <div className="px-4 sm:px-6 lg:px-8 space-y-7 sm:space-y-8 lg:space-y-10 mt-7 sm:mt-8 lg:mt-10">
 
         {/* WHY EXERCISE - адаптивная сетка */}
         <section>
@@ -154,8 +185,11 @@ export default function HomePage() {
             <p>
               <span className="font-semibold text-stone-800">Poziom trudności:</span> Dostosowany do możliwości seniorów – ćwiczymy we własnym tempie.
             </p>
-            <p>
+                        <p>
               <span className="font-semibold text-stone-800">Głębokość wody:</span> Ćwiczenia odbywają się na bezpiecznej głębokości (woda do klatki piersiowej), umiejętność pływania nie jest wymagana!
+            </p>
+            <p>
+              <span className="font-semibold text-stone-800">Komfort:</span> Zajęcia odbywają się w komfortowym tempie, bez przeciążeń. Umiejętność pływania nie jest wymagana.
             </p>
           </div>
         </section>
