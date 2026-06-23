@@ -138,7 +138,7 @@ export default function Layout() {
                 </svg>
                 <div className="flex flex-col">
                   <span className="text-sm sm:text-base font-semibold">Grupa informacyjna</span>
-                  <span className="text-xs text-green-600">Napisz do nas!</span>
+                  <span className="text-xs text-green-600">Sprawdz szczegoly</span>
                 </div>
               </a>
               <a
@@ -152,7 +152,7 @@ export default function Layout() {
                 </svg>
                 <div className="flex flex-col">
                   <span className="text-sm sm:text-base font-semibold">Masz pytania? Chętnie odpowiemy!</span>
-                  <span className="text-xs text-green-600">Zadzwoń lub napisz</span>
+                  <span className="text-xs text-green-600">Napisz do nas</span>
                 </div>
               </a>
             </div>
