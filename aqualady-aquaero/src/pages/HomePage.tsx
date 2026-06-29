@@ -152,7 +152,7 @@ export default function HomePage() {
       <div className="px-4 sm:px-6 lg:px-8 mt-6 sm:mt-8">
         <section>
           <div className="mb-5 sm:mb-6">
-            <h2 className="text-base sm:text-lg lg:text-xl font-semibold text-[#65AFB3] uppercase text-left">Korzyści zdrowotne dla seniorów</h2>
+            <h2 className="text-base sm:text-lg lg:text-xl font-extralight text-[#65AFB3] uppercase text-left">Korzyści zdrowotne dla seniorów</h2>
           </div>
           <div className="space-y-3 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:gap-4 sm:space-y-0">
             {benefits.map((b, i) => (
@@ -176,7 +176,7 @@ export default function HomePage() {
       {/* Galeria */}
       <section className="mt-6 sm:mt-8 lg:mt-10">
         <div className="px-4 sm:px-6 lg:px-8 mb-4 sm:mb-5">
-          <h2 className="text-base sm:text-lg lg:text-xl font-semibold text-[#65AFB3] uppercase text-left">Zobaczcie, jak to działa</h2>
+          <h2 className="text-base sm:text-lg lg:text-xl font-extralight text-[#65AFB3] uppercase text-left">Zobaczcie, jak to działa</h2>
         </div>
         <div className="px-4 sm:px-6 lg:px-8">
           <GallerySlider slides={gallerySlides} className="w-full" />
