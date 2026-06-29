@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 
 interface GallerySlide {
   type: 'image' | 'video'
@@ -15,81 +15,117 @@ interface GallerySliderProps {
 export default function GallerySlider({ slides, className = '' }: GallerySliderProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [current, setCurrent] = useState(0)
-  const [isDragging, setIsDragging] = useState(false)
   const dragRef = useRef({ active: false, startX: 0, moved: false })
+  const videoEls = useRef<Map<number, HTMLVideoElement>>(new Map())
 
-  // Filter slides on mobile
+  const getVisibleCount = () => {
+    if (typeof window === 'undefined') return 1
+    return window.innerWidth >= 1024 ? 3 : 1
+  }
+
+  const [visibleCount, setVisibleCount] = useState(getVisibleCount())
+
+  useEffect(() => {
+    const handleResize = () => {
+      const newCount = getVisibleCount()
+      setVisibleCount(newCount)
+      if (containerRef.current) {
+        const slidesEl = containerRef.current.querySelector('.gallery-slides') as HTMLElement
+        if (slidesEl) {
+          slidesEl.style.transform = `translateX(0)`
+        }
+      }
+      setCurrent(0)
+    }
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
   const filteredSlides = slides.filter(s => {
-    if (window.innerWidth <= 768 && s.hideMobile) return false
+    if (typeof window !== 'undefined' && window.innerWidth <= 768 && s.hideMobile) return false
     return true
   })
 
   const total = filteredSlides.length
-
-  // Remove hideMobile slides from DOM on mobile so they don't affect translateX
-  useEffect(() => {
-    const container = containerRef.current
-    if (!container) return
-    if (window.innerWidth <= 768) {
-      container.querySelectorAll('.slide.hide-mobile').forEach(el => el.remove())
-    }
-  }, [])
-
-
-  // Create dots + play first video on mount
-  useEffect(() => {
-    const container = containerRef.current
-    if (!container || total <= 1) return
-    const dotsContainer = container.querySelector('.slide-dots')
-    if (!dotsContainer) return
-    dotsContainer.innerHTML = ''
-    for (let i = 0; i < total; i++) {
-      const dot = document.createElement('div')
-      dot.className = 'dot' + (i === 0 ? ' active' : '')
-      dotsContainer.appendChild(dot)
-    }
-    // Play initial slide video if any
-    const video = container.querySelector('video')
-    if (video) {
-      video.currentTime = 0
-      video.play().catch(() => {})
-    }
-  }, [total])
+  const gapPercent = 1.5
+  const slideWidth = visibleCount > 1 ? (100 - gapPercent * (visibleCount - 1)) / visibleCount : 100
 
   const goTo = (index: number) => {
     const container = containerRef.current
     if (!container) return
-    const idx = ((index % total) + total) % total
+
+    const maxIndex = Math.max(0, total - visibleCount)
+    const idx = Math.max(0, Math.min(index, maxIndex))
     setCurrent(idx)
+
     const slidesEl = container.querySelector('.gallery-slides') as HTMLElement
     if (slidesEl) {
-      slidesEl.style.transform = `translateX(-${idx * 100}%)`
+      const offset = idx * (slideWidth + gapPercent)
+      slidesEl.style.transform = `translateX(-${offset}%)`
     }
+
     container.querySelectorAll('.dot').forEach((d, i) => {
       d.classList.toggle('active', i === idx)
     })
-    // Play video on current slide, pause all others
-    const allSlides = container.querySelectorAll('.slide')
-    allSlides.forEach((slide, i) => {
-      const video = slide.querySelector('video')
-      if (!video) return
-      if (i === idx) {
-        video.currentTime = 0
-        video.play().catch(() => {})
-      } else {
-        video.pause()
-      }
-    })
   }
 
-  // Click to advance
+  useEffect(() => {
+    const container = containerRef.current
+    if (!container || total <= visibleCount) return
+    const dotsContainer = container.querySelector('.slide-dots')
+    if (!dotsContainer) return
+    dotsContainer.innerHTML = ''
+    const dotCount = Math.max(1, total - visibleCount + 1)
+    for (let i = 0; i < dotCount; i++) {
+      const dot = document.createElement('div')
+      dot.className = 'dot' + (i === 0 ? ' active' : '')
+      dotsContainer.appendChild(dot)
+    }
+  }, [total, visibleCount])
+
+  // Dual loop prevention: RAF + onTimeUpdate
+  useEffect(() => {
+    let rafId: number
+    const tick = () => {
+      videoEls.current.forEach((video) => {
+        if (video.duration && video.currentTime >= video.duration - 1.8) {
+          video.pause()
+          video.currentTime = 0
+          video.play().catch(() => {})
+        }
+      })
+      rafId = requestAnimationFrame(tick)
+    }
+    rafId = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(rafId)
+  }, [])
+
+  const onVideoTimeUpdate = useCallback((e: React.SyntheticEvent<HTMLVideoElement>) => {
+    const video = e.currentTarget
+    if (video.duration && video.currentTime >= video.duration - 1.8) {
+      video.pause()
+      video.currentTime = 0
+      video.play().catch(() => {})
+    }
+  }, [])
+
+  const setVideoRef = (el: HTMLVideoElement | null, index: number) => {
+    if (el) {
+      videoEls.current.set(index, el)
+      el.removeAttribute('loop')
+    } else {
+      videoEls.current.delete(index)
+    }
+  }
+
   const handleClick = (e: React.MouseEvent) => {
     if (dragRef.current.moved) return
     if ((e.target as HTMLElement).closest('.behance-btn')) return
-    goTo((current + 1) % total)
+    const maxIndex = Math.max(0, total - visibleCount)
+    if (current < maxIndex) goTo(current + 1)
+    else goTo(0)
   }
 
-  // Touch swipe
   let touchStartX = 0
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartX = e.touches[0].clientX
@@ -97,10 +133,11 @@ export default function GallerySlider({ slides, className = '' }: GallerySliderP
   const handleTouchEnd = (e: React.TouchEvent) => {
     const diff = touchStartX - e.changedTouches[0].clientX
     if (Math.abs(diff) < 30) return
-    goTo(diff > 0 ? current + 1 : current - 1)
+    const maxIndex = Math.max(0, total - visibleCount)
+    if (diff > 0) goTo(Math.min(current + 1, maxIndex))
+    else goTo(Math.max(0, current - 1))
   }
 
-  // Mouse drag
   const handleMouseDown = (e: React.MouseEvent) => {
     dragRef.current = { active: true, startX: e.clientX, moved: false }
     e.preventDefault()
@@ -119,11 +156,12 @@ export default function GallerySlider({ slides, className = '' }: GallerySliderP
 
     const handleMouseUp = (e: MouseEvent) => {
       if (!dragRef.current.active) return
-      const wasActive = dragRef.current.active
       dragRef.current.active = false
       const diff = dragRef.current.startX - e.clientX
       if (dragRef.current.moved && Math.abs(diff) >= 30) {
-        goTo(diff > 0 ? current + 1 : current - 1)
+        const maxIndex = Math.max(0, total - visibleCount)
+        if (diff > 0) goTo(Math.min(current + 1, maxIndex))
+        else goTo(Math.max(0, current - 1))
       }
       setTimeout(() => { dragRef.current.moved = false }, 0)
     }
@@ -134,16 +172,15 @@ export default function GallerySlider({ slides, className = '' }: GallerySliderP
       document.removeEventListener('mousemove', handleMouseMove)
       document.removeEventListener('mouseup', handleMouseUp)
     }
-  }, [current])
+  }, [current, total, visibleCount])
 
   if (total === 0) return null
 
   return (
     <div ref={containerRef} className={`gallery-slider relative overflow-hidden rounded-2xl select-none ${className}`}>
-      {/* Slides container */}
       <div
         className="gallery-slides flex transition-transform duration-300 ease-out"
-        style={{ transform: `translateX(-${current * 100}%)` }}
+        style={{ transform: `translateX(-${current * (slideWidth + gapPercent)}%)`, gap: `${gapPercent}%` }}
         onClick={handleClick}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
@@ -152,32 +189,35 @@ export default function GallerySlider({ slides, className = '' }: GallerySliderP
         {filteredSlides.map((slide, i) => (
           <div
             key={i}
-            className={`slide min-w-full ${slide.hideMobile ? 'hide-mobile' : ''}`}
+            className={`slide shrink-0 ${slide.hideMobile ? 'hide-mobile' : ''}`}
+            style={{ width: `${slideWidth}%` }}
           >
             {slide.type === 'image' ? (
               <img
                 src={slide.src}
                 alt={`Galeria ${i + 1}`}
-                className="w-full aspect-square sm:aspect-video lg:aspect-[4/3] object-cover"
+                className="w-full object-cover rounded-xl"
+                style={{ aspectRatio: '16/9', display: 'block' }}
                 draggable={false}
               />
             ) : (
               <video
+                ref={(el) => setVideoRef(el, i)}
                 src={slide.src}
-                poster={slide.poster}
-                className="w-full aspect-square sm:aspect-video lg:aspect-[4/3] object-cover"
+                className="w-full object-cover rounded-xl"
+                style={{ aspectRatio: '16/9', display: 'block' }}
                 muted
-                loop
                 autoPlay
                 playsInline
+                preload="auto"
+                onTimeUpdate={onVideoTimeUpdate}
               />
             )}
           </div>
         ))}
       </div>
 
-      {/* Стрелки навигации — только на десктопе */}
-      {total > 1 && (
+      {total > visibleCount && (
         <>
           <button
             onClick={(e) => { e.stopPropagation(); goTo(current - 1); }}
@@ -200,10 +240,8 @@ export default function GallerySlider({ slides, className = '' }: GallerySliderP
         </>
       )}
 
-      {/* Dots */}
-      {total > 1 && (
+      {total > visibleCount && (
         <div className="slide-dots absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
-          {/* Dots added by JS */}
         </div>
       )}
 
@@ -261,11 +299,18 @@ export default function GallerySlider({ slides, className = '' }: GallerySliderP
         .gallery-arrow-right {
           right: 12px;
         }
-        /* Скрываем стрелки на мобильных */
+        /* Стрелки всегда видны, на мобилке чуть меньше */
         @media (max-width: 1023px) {
           .gallery-arrow {
-            display: none;
+            width: 32px;
+            height: 32px;
           }
+        }
+        .gallery-slider video {
+          background-color: transparent;
+        }
+        .gallery-slider video::-webkit-media-controls-start-playback-button {
+          display: none !important;
         }
       `}</style>
     </div>
