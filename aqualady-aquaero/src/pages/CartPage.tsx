@@ -172,8 +172,31 @@ export default function CartPage() {
         },
         body: JSON.stringify({ email, name, items: emailItems, total }),
       })
-    } catch (e) {
+        } catch (e) {
       console.error('Failed to send confirmation email:', e)
+    }
+
+        // Increment promocode usage count
+    if (promoApplied) {
+      try {
+        const res = await fetch('https://yrkocsmphipndklgpopd.supabase.co/rest/v1/promocodes?code=eq.' + promoApplied + '&select=*', {
+          headers: { apikey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlya29jc21waGlwbmRrbGdwb3BkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4MzU0NzAsImV4cCI6MjA5NjQxMTQ3MH0.xbmnA0hSIrOm9N-pmvkBlyArFrdaBwj_-74Z4eIuR_0' }
+        })
+        const data = await res.json()
+        if (data && data.length > 0) {
+          const p = data[0]
+          await fetch('https://yrkocsmphipndklgpopd.supabase.co/rest/v1/promocodes?id=eq.' + p.id, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlya29jc21waGlwbmRrbGdwb3BkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4MzU0NzAsImV4cCI6MjA5NjQxMTQ3MH0.xbmnA0hSIrOm9N-pmvkBlyArFrdaBwj_-74Z4eIuR_0',
+            },
+            body: JSON.stringify({ used_count: (p.used_count || 0) + 1 }),
+          })
+        }
+      } catch (e) {
+        console.error('Failed to increment promocode:', e)
+      }
     }
 
         // If user checked "create account" — sign them up after booking
