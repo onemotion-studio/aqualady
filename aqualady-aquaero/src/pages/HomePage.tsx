@@ -134,7 +134,7 @@ export default function HomePage() {
                   className="block text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-light leading-[1.2] tracking-tight text-[#094348] drop-shadow-[0_2px_4px_rgba(255,255,255,0.9)]"
                   style={{ fontFamily: "'Merriweather', serif" }}
                 >
-                  Studio aqua aerobiku<br className="sm:hidden" /> "Aqua Lady"
+                  <span className="block sm:inline">Studio aqua aerobiku </span><span className="block sm:inline">"Aqua Lady"</span>
                 </span>
                 <span
                   className="block text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-light italic leading-[1.2] tracking-tight text-[#8B6F45] drop-shadow-[0_2px_4px_rgba(255,255,255,0.9)]"
