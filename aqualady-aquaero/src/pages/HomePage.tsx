@@ -151,10 +151,10 @@ export default function HomePage() {
       {/* Opis */}
       <div className="px-4 sm:px-6 lg:px-8 mt-6 sm:mt-8">
         <section className="rounded-2xl p-5 sm:p-6 lg:p-8">
-          <p className="text-sm sm:text-base lg:text-lg text-stone-600 leading-relaxed mb-4">
+          <p className="text-lg sm:text-xl lg:text-2xl text-stone-600 leading-relaxed mb-4">
             Program jest skierowany do osób starszych i ma na celu bezpieczną poprawę zdrowia, utrzymanie aktywności fizycznej oraz dobrego samopoczucia.
           </p>
-          <p className="text-sm sm:text-base lg:text-lg font-semibold text-stone-700 mb-3">
+          <p className="text-lg sm:text-xl lg:text-2xl font-semibold text-stone-700 mb-3">
             Główne efekty terapeutyczne:
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
@@ -168,15 +168,15 @@ export default function HomePage() {
               'Likwidacja zastojów w nogach',
               'Redukcja stresu, poprawa snu i humoru',
             ].map((item, i) => (
-              <div key={i} className="flex items-center gap-2 text-sm sm:text-base text-stone-600">
-                <svg className="w-4 h-4 sm:w-5 sm:h-5 shrink-0 text-teal-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div key={i} className="flex items-center gap-2 text-lg sm:text-xl text-stone-600">
+                <svg className="w-6 h-6 sm:w-7 sm:h-5 shrink-0 text-teal-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                 </svg>
                 <span>{item}</span>
               </div>
             ))}
           </div>
-          <p className="text-sm sm:text-base lg:text-lg text-stone-600 leading-relaxed mt-4">
+          <p className="text-lg sm:text-xl lg:text-2xl text-stone-600 leading-relaxed mt-4">
             Zajęcia odbywają się w komfortowym tempie, bez przeciążeń. Umiejętność pływania nie jest wymagana.
           </p>
         </section>
