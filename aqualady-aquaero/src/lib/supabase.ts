@@ -190,7 +190,7 @@ export interface PromocodeRow {
   pool_id?: string | null
   date?: string | null
   time_slot?: string | null
-  min_quantity?: number
+  min_quantity?: number | null
 }
 
 export async function loadPromocodesFromServer(): Promise<PromocodeRow[]> {

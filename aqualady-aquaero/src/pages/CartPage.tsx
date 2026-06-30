@@ -133,7 +133,7 @@ export default function CartPage() {
         if (p.time_slot) {
           const allowedSlots = p.time_slot.split(',').filter(Boolean)
           const hasMatchingSlot = items.some(item =>
-            allowedSlots.some(slot => item.time === slot || item.time === 'slot_' + slot.replace(':', ''))
+            allowedSlots.some((slot: string) => item.time === slot || item.time === 'slot_' + slot.replace(':', ''))
           )
           if (!hasMatchingSlot) {
             setPromoError('Kod działa tylko na wybrane godziny')
