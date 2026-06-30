@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
+﻿import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
@@ -28,7 +28,7 @@ export async function loadScheduleFromServer() {
 export async function saveScheduleToServer(poolId: string, date: string, slots: any[]) {
   if (!supabase) return false
   try {
-    // Upsert: если запись существует — обновляем, иначе вставляем
+    // Upsert: РµСЃР»Рё Р·Р°РїРёСЃСЊ СЃСѓС‰РµСЃС‚РІСѓРµС‚ вЂ” РѕР±РЅРѕРІР»СЏРµРј, РёРЅР°С‡Рµ РІСЃС‚Р°РІР»СЏРµРј
     const { error } = await supabase
       .from('schedule')
       .upsert(
@@ -174,3 +174,64 @@ export async function deletePoolFromServer(poolId: string) {
   }
 }
 
+
+// --- Promocodes ---
+
+export interface PromocodeRow {
+  id: string
+  code: string
+  discount_type: 'percent' | 'fixed'
+  discount_value: number
+  max_uses: number
+  used_count: number
+  expires_at: string | null
+  is_active: boolean
+  created_at: string
+}
+
+export async function loadPromocodesFromServer(): Promise<PromocodeRow[]> {
+  if (!supabase) return []
+  try {
+    const { data, error } = await supabase
+      .from('promocodes')
+      .select('*')
+      .order('created_at', { ascending: false })
+    if (error) throw error
+    return data || []
+  } catch (e) {
+    console.error('Failed to load promocodes:', e)
+    return []
+  }
+}
+
+export async function savePromocodeToServer(promocode: Omit<PromocodeRow, 'created_at'>) {
+  if (!supabase) return false
+  try {
+    const { error } = await supabase
+      .from('promocodes')
+      .upsert(
+        { ...promocode, updated_at: new Date().toISOString() },
+        { onConflict: 'id' }
+      )
+    if (error) throw error
+    return true
+  } catch (e) {
+    console.error('Failed to save promocode:', e)
+    return false
+  }
+}
+
+export async function deletePromocodeFromServer(id: string) {
+  if (!supabase) return false
+  try {
+    const { error } = await supabase
+      .from('promocodes')
+      .delete()
+      .match({ id })
+    if (error) throw error
+    return true
+  } catch (e) {
+    console.error('Failed to delete promocode:', e)
+    return false
+  }
+}

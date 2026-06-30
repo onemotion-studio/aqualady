@@ -2,7 +2,7 @@
 import { useNavigate } from 'react-router-dom'
 import { MONTHS_PL, DAYS_PL, loadPoolsAsync, loadPools, saveCustomPool, removeCustomPool, DEFAULT_SLOTS, type PoolConfig } from '../config'
 import { useSchedule, type TimeSlotDef } from '../context/ScheduleContext'
-import { loadBookingsFromServer, type BookingRow } from '../lib/supabase'
+import { loadBookingsFromServer, loadPromocodesFromServer, savePromocodeToServer, deletePromocodeFromServer, type BookingRow, type PromocodeRow } from '../lib/supabase'
 
 const CUSTOM_SLOTS_KEY = 'aqualady_custom_slots'
 
@@ -73,6 +73,25 @@ export default function TrainerDashboard() {
   const [editSlotEnd, setEditSlotEnd] = useState('')
   const [editSlotLabel, setEditSlotLabel] = useState('')
   const [editSlotCapacity, setEditSlotCapacity] = useState('')
+
+  // Promocodes state
+  const [tab, setTab] = useState<'schedule' | 'promocodes'>('schedule')
+  const [promocodes, setPromocodes] = useState<PromocodeRow[]>([])
+  const [showPromoForm, setShowPromoForm] = useState(false)
+  const [editPromoId, setEditPromoId] = useState<string | null>(null)
+  const [promoForm, setPromoForm] = useState({
+    code: '',
+    discount_type: 'percent' as 'percent' | 'fixed',
+    discount_value: '',
+    max_uses: '',
+    expires_at: '',
+    is_active: true,
+  })
+
+  // Load promocodes
+  useEffect(() => {
+    loadPromocodesFromServer().then(data => setPromocodes(data)).catch(() => {})
+  }, [])
 
   // Load bookings from server
   useEffect(() => {
@@ -233,6 +252,61 @@ export default function TrainerDashboard() {
     cancelEditSlot()
   }
 
+  // Promocodes handlers
+  const resetPromoForm = () => {
+    setPromoForm({ code: '', discount_type: 'percent', discount_value: '', max_uses: '', expires_at: '', is_active: true })
+    setEditPromoId(null)
+  }
+
+  const openAddPromo = () => {
+    resetPromoForm()
+    setShowPromoForm(true)
+  }
+
+  const openEditPromo = (p: PromocodeRow) => {
+    setEditPromoId(p.id)
+    setPromoForm({
+      code: p.code,
+      discount_type: p.discount_type,
+      discount_value: String(p.discount_value),
+      max_uses: String(p.max_uses),
+      expires_at: p.expires_at ? p.expires_at.slice(0, 10) : '',
+      is_active: p.is_active,
+    })
+    setShowPromoForm(true)
+  }
+
+  const handleSavePromo = async () => {
+    const id = editPromoId || 'promo_' + Date.now()
+    const value = parseInt(promoForm.discount_value) || 0
+    const maxUses = parseInt(promoForm.max_uses) || 0
+    if (!promoForm.code || value <= 0) return
+    const promocode = {
+      id,
+      code: promoForm.code.toUpperCase().trim(),
+      discount_type: promoForm.discount_type,
+      discount_value: value,
+      max_uses: maxUses,
+      used_count: promocodes.find(p => p.id === id)?.used_count || 0,
+      expires_at: promoForm.expires_at ? promoForm.expires_at + 'T23:59:59' : null,
+      is_active: promoForm.is_active,
+    }
+    const ok = await savePromocodeToServer(promocode)
+    if (ok) {
+      const reloaded = await loadPromocodesFromServer()
+      setPromocodes(reloaded)
+    }
+    setShowPromoForm(false)
+    resetPromoForm()
+  }
+
+  const handleDeletePromo = async (id: string) => {
+    const ok = await deletePromocodeFromServer(id)
+    if (ok) {
+      setPromocodes(prev => prev.filter(p => p.id !== id))
+    }
+  }
+
   // Calendar helpers
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate()
   const firstDayOfWeek = new Date(currentYear, currentMonth, 1).getDay()
@@ -257,25 +331,48 @@ export default function TrainerDashboard() {
   }
   if (week.length > 0) { while (week.length < 7) week.push(null); weeks.push(week) }
 
-    return (
+        return (
     <div className="min-h-screen bg-stone-50">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-5">
           <div>
             <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-stone-800">Panel Trenera</h1>
-            <p className="text-xs sm:text-sm text-stone-400">Zarzadzanie zajetosciami</p>
+            <p className="text-xs sm:text-sm text-stone-400">Zarządzanie zajęciami</p>
           </div>
           <button
             onClick={() => navigate('/')}
             className="text-xs sm:text-sm text-stone-400 underline hover:text-stone-600"
           >
-            Strona glowna
+            Strona główna
           </button>
         </div>
 
-        {/* Pool selector with actions */}
-        <div className="mb-5">
+        {/* Tabs */}
+        <div className="flex gap-1 mb-5 bg-white rounded-2xl p-1 border border-sand/20 shadow-sm">
+          <button
+            onClick={() => setTab('schedule')}
+            className={`flex-1 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-medium transition-all ${
+              tab === 'schedule' ? 'bg-teal-brand text-white shadow-md' : 'text-stone-500 hover:text-stone-700'
+            }`}
+          >
+            Grafik zajęć
+          </button>
+          <button
+            onClick={() => setTab('promocodes')}
+            className={`flex-1 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-medium transition-all ${
+              tab === 'promocodes' ? 'bg-teal-brand text-white shadow-md' : 'text-stone-500 hover:text-stone-700'
+            }`}
+          >
+            Promokody ({promocodes.length})
+          </button>
+        </div>
+
+        {/* Schedule Tab */}
+        {tab === 'schedule' && (
+        <>
+          {/* Pool selector with actions */}
+          <div className="mb-5">
           <label className="text-xs sm:text-sm font-medium text-stone-500 mb-1.5 block">Wybierz basen:</label>
           <div className="flex gap-2">
             <div className="relative flex-1">
@@ -589,12 +686,159 @@ export default function TrainerDashboard() {
           </div>
         )}
 
-        {/* Info */}
+                {/* Info */}
         <div className="bg-white/50 rounded-2xl p-3 sm:p-4 border border-sand/10">
           <p className="text-xs sm:text-sm text-stone-400 text-center">
-            Daty z zajetiami sa podswietlone na birazowo. Kliknij date, aby edytowac sloty. Mozesz dodawac dowolne godziny zajec.
+            Daty z zajęciami są podświetlone na birazowo. Kliknij datę, aby edytować sloty. Możesz dodawać dowolne godziny zajęć.
           </p>
+                </div>
+      </>)}
+
+      {/* Promocodes Tab */}
+      {tab === 'promocodes' && (
+        <div className="space-y-4">
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium text-stone-600">Lista promokodów</p>
+            <button
+              onClick={openAddPromo}
+              className="px-4 py-2 rounded-xl bg-teal-brand text-white text-sm font-bold hover:bg-teal-light active:scale-[0.98] transition-all"
+            >
+              + Nowy kod
+            </button>
+          </div>
+
+          {/* Form */}
+          {showPromoForm && (
+            <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-sand/20 space-y-3">
+              <p className="text-xs sm:text-sm font-semibold text-stone-700">
+                {editPromoId ? 'Edytuj promokod' : 'Nowy promokod'}
+              </p>
+              <input
+                placeholder="Kod (np. ZNIŻKA10)"
+                value={promoForm.code}
+                onChange={e => setPromoForm(prev => ({ ...prev, code: e.target.value }))}
+                className="w-full px-4 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-sm focus:border-teal-brand focus:outline-none uppercase"
+              />
+              <div className="flex gap-2">
+                <select
+                  value={promoForm.discount_type}
+                  onChange={e => setPromoForm(prev => ({ ...prev, discount_type: e.target.value as 'percent' | 'fixed' }))}
+                  className="px-4 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-sm focus:border-teal-brand focus:outline-none"
+                >
+                  <option value="percent">%</option>
+                  <option value="fixed">zł</option>
+                </select>
+                <input
+                  type="number"
+                  min="1"
+                  placeholder={promoForm.discount_type === 'percent' ? 'Rabat %' : 'Kwota zł'}
+                  value={promoForm.discount_value}
+                  onChange={e => setPromoForm(prev => ({ ...prev, discount_value: e.target.value }))}
+                  className="flex-1 px-4 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-sm focus:border-teal-brand focus:outline-none"
+                />
+              </div>
+              <div className="flex gap-2">
+                <input
+                  type="number"
+                  min="0"
+                  placeholder="Max użyć (0 = bez limitu)"
+                  value={promoForm.max_uses}
+                  onChange={e => setPromoForm(prev => ({ ...prev, max_uses: e.target.value }))}
+                  className="flex-1 px-4 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-sm focus:border-teal-brand focus:outline-none"
+                />
+                <input
+                  type="date"
+                  value={promoForm.expires_at}
+                  onChange={e => setPromoForm(prev => ({ ...prev, expires_at: e.target.value }))}
+                  className="flex-1 px-4 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-sm focus:border-teal-brand focus:outline-none"
+                />
+              </div>
+              <label className="flex items-center gap-2 text-sm text-stone-600">
+                <input
+                  type="checkbox"
+                  checked={promoForm.is_active}
+                  onChange={e => setPromoForm(prev => ({ ...prev, is_active: e.target.checked }))}
+                  className="w-4 h-4 accent-teal-brand rounded"
+                />
+                Aktywny
+              </label>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleSavePromo}
+                  disabled={!promoForm.code || !promoForm.discount_value}
+                  className="flex-1 py-2.5 sm:py-3 rounded-xl bg-teal-brand text-white text-sm font-bold disabled:bg-stone-200 disabled:text-stone-400 hover:bg-teal-light active:scale-[0.98] transition-all"
+                >
+                  {editPromoId ? 'Zapisz zmiany' : 'Dodaj kod'}
+                </button>
+                <button
+                  onClick={() => { setShowPromoForm(false); resetPromoForm() }}
+                  className="px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-sm text-stone-500 hover:bg-stone-50 transition-all"
+                >
+                  Anuluj
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* List */}
+          {promocodes.length === 0 ? (
+            <div className="bg-white rounded-2xl p-6 text-center border border-sand/20">
+              <p className="text-sm text-stone-400">Brak promokodów. Dodaj pierwszy!</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {promocodes.map(p => {
+                const isExpired = p.expires_at && new Date(p.expires_at) < new Date()
+                const isMaxed = p.max_uses > 0 && p.used_count >= p.max_uses
+                const isActive = p.is_active && !isExpired && !isMaxed
+                return (
+                  <div key={p.id} className="bg-white rounded-2xl p-4 border border-sand/20 shadow-sm">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-2.5 h-2.5 rounded-full ${isActive ? 'bg-green-500' : 'bg-red-400'}`} />
+                        <div>
+                          <span className="text-sm sm:text-base font-bold text-stone-800">{p.code}</span>
+                          <span className="text-xs text-stone-400 ml-2">
+                            {p.discount_type === 'percent' ? `${p.discount_value}%` : `${p.discount_value} zł`}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-stone-400">
+                          {p.max_uses > 0 ? `${p.used_count}/${p.max_uses}` : `${p.used_count} użyć`}
+                        </span>
+                        <button
+                          onClick={() => openEditPromo(p)}
+                          className="text-stone-400 hover:text-teal-brand transition-colors"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
+                        </button>
+                        <button
+                          onClick={() => handleDeletePromo(p.id)}
+                          className="text-red-400 hover:text-red-600 transition-colors"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                    {p.expires_at && (
+                      <p className="text-xs text-stone-400 mt-1 ml-5">
+                        {isExpired ? 'Wygasł: ' : 'Ważny do: '}{new Date(p.expires_at).toLocaleDateString('pl-PL')}
+                      </p>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          )}
         </div>
+      )}
+
       </div>
     </div>
   )

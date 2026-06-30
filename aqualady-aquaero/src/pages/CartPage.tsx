@@ -18,6 +18,10 @@ export default function CartPage() {
   const { items } = state
   const [allPools] = useState<Record<string, PoolConfig>>(loadPools)
     const [promoCode, setPromoCode] = useState('')
+  const [promoDiscount, setPromoDiscount] = useState(0)
+  const [promoError, setPromoError] = useState('')
+  const [promoApplied, setPromoApplied] = useState('')
+  const [promoLoading, setPromoLoading] = useState(false)
   const [name, setName] = useState(user?.user_metadata?.full_name || '')
   const [email, setEmail] = useState(user?.email || '')
   const [accepted, setAccepted] = useState(false)
@@ -66,10 +70,60 @@ export default function CartPage() {
     doScroll()
     requestAnimationFrame(doScroll)
     setTimeout(doScroll, 50)
-    setTimeout(doScroll, 150)
-  }, [])
+        setTimeout(doScroll, 150)
+    }, [])
 
   const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
+
+  const applyPromoCode = async () => {
+    const code = promoCode.trim().toUpperCase()
+    if (!code) return
+    setPromoLoading(true)
+    setPromoError('')
+    try {
+      const res = await fetch('https://yrkocsmphipndklgpopd.supabase.co/rest/v1/promocodes?code=eq.' + code + '&select=*', {
+        headers: { apikey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlya29jc21waGlwbmRrbGdwb3BkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4MzU0NzAsImV4cCI6MjA5NjQxMTQ3MH0.xbmnA0hSIrOm9N-pmvkBlyArFrdaBwj_-74Z4eIuR_0' }
+      })
+      const data = await res.json()
+      if (!data || data.length === 0) {
+        setPromoError('Kod nie istnieje')
+        setPromoDiscount(0)
+        setPromoApplied('')
+      } else {
+        const p = data[0]
+        if (!p.is_active) {
+          setPromoError('Kod jest nieaktywny')
+          setPromoDiscount(0)
+          setPromoApplied('')
+          return
+        }
+        if (p.expires_at && new Date(p.expires_at) < new Date()) {
+          setPromoError('Kod wygasł')
+          setPromoDiscount(0)
+          setPromoApplied('')
+          return
+        }
+        if (p.max_uses > 0 && p.used_count >= p.max_uses) {
+          setPromoError('Kod został już wykorzystany')
+          setPromoDiscount(0)
+          setPromoApplied('')
+          return
+        }
+        if (p.discount_type === 'percent') {
+          setPromoDiscount(Math.round(total * p.discount_value / 100))
+        } else {
+          setPromoDiscount(Math.min(p.discount_value, total))
+        }
+        setPromoApplied(code)
+        setPromoError('')
+      }
+    } catch {
+      setPromoError('Błąd sprawdzania kodu')
+    }
+    setPromoLoading(false)
+  }
+
+  const totalAfterDiscount = Math.max(0, total - promoDiscount)
 
   const getPoolName = (poolId: string) => {
     return allPools[poolId]?.name || poolId
@@ -216,31 +270,62 @@ export default function CartPage() {
             ))}
           </div>
 
-          {/* Promo code */}
+                    {/* Promo code */}
           <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-sand/10">
             <p className="text-xs sm:text-sm font-medium text-stone-600 mb-2">Kod promocyjny</p>
-            <div className="flex gap-2">
-              <input
-                value={promoCode}
-                onChange={e => setPromoCode(e.target.value)}
-                placeholder="Wpisz kod"
-                className="flex-1 px-4 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-sm focus:border-teal-brand focus:outline-none"
-              />
-              <button className="px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl bg-teal-brand text-white text-sm font-medium hover:bg-teal-light active:scale-[0.98] transition-all">
-                Zastosuj
-              </button>
-            </div>
+            {promoApplied ? (
+              <div className="flex items-center justify-between bg-teal-50 rounded-xl px-4 py-3 border border-teal-200">
+                <div className="flex items-center gap-2">
+                  <svg className="w-4 h-4 text-teal-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="text-sm font-semibold text-teal-700">{promoApplied}</span>
+                  <span className="text-sm text-teal-600">-{promoDiscount} zł</span>
+                </div>
+                <button
+                  onClick={() => { setPromoApplied(''); setPromoDiscount(0); setPromoCode('') }}
+                  className="text-stone-400 hover:text-red-500 transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                <input
+                  value={promoCode}
+                  onChange={e => { setPromoCode(e.target.value); setPromoError('') }}
+                  placeholder="Wpisz kod"
+                  className="flex-1 px-4 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-sm focus:border-teal-brand focus:outline-none uppercase"
+                />
+                <button
+                  onClick={applyPromoCode}
+                  disabled={!promoCode.trim() || promoLoading}
+                  className="px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl bg-teal-brand text-white text-sm font-medium hover:bg-teal-light active:scale-[0.98] transition-all disabled:bg-stone-200 disabled:text-stone-400"
+                >
+                  {promoLoading ? '...' : 'Zastosuj'}
+                </button>
+              </div>
+            )}
+            {promoError && <p className="text-xs text-red-500 mt-1.5">{promoError}</p>}
           </div>
 
-          {/* Suma / Do zaplaty */}
+                    {/* Suma / Do zaplaty */}
           <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-sand/10 space-y-1.5">
             <div className="flex items-center justify-between text-sm sm:text-base text-stone-600">
               <span>Suma:</span>
-              <span>{total} zl</span>
+              <span>{total} zł</span>
             </div>
+            {promoDiscount > 0 && (
+              <div className="flex items-center justify-between text-sm sm:text-base text-teal-600">
+                <span>Zniżka ({promoApplied}):</span>
+                <span>-{promoDiscount} zł</span>
+              </div>
+            )}
             <div className="flex items-center justify-between text-base sm:text-lg font-extrabold text-stone-800 border-t border-sand/20 pt-2">
-              <span>Do zaplaty:</span>
-              <span className="text-teal-brand">{total} zl</span>
+              <span>Do zapłaty:</span>
+              <span className="text-teal-brand">{totalAfterDiscount} zł</span>
             </div>
           </div>
 
@@ -341,7 +426,7 @@ export default function CartPage() {
                         disabled={!email || !name || !accepted || items.length === 0 || loading}
             className={'w-full py-4 sm:py-5 rounded-2xl sm:rounded-3xl font-bold text-sm sm:text-base transition-all flex items-center justify-center gap-2 ' + (email && name && accepted && items.length > 0 && !loading ? 'bg-teal-brand text-white shadow-lg hover:bg-teal-light active:scale-[0.98]' : 'bg-stone-200 text-stone-400 cursor-not-allowed')}
           >
-            {loading ? 'Proszę czekać...' : <>Zarezerwuj <span className="text-base sm:text-lg">{total} zl</span></>}
+            {loading ? 'Proszę czekać...' : <>Zarezerwuj <span className="text-base sm:text-lg">{totalAfterDiscount} zł</span></>}
           </button>
 
           {/* Payment methods */}
