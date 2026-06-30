@@ -187,6 +187,10 @@ export interface PromocodeRow {
   expires_at: string | null
   is_active: boolean
   created_at: string
+  pool_id?: string | null
+  date?: string | null
+  time_slot?: string | null
+  min_quantity?: number
 }
 
 export async function loadPromocodesFromServer(): Promise<PromocodeRow[]> {

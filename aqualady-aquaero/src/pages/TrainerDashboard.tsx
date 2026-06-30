@@ -74,19 +74,24 @@ export default function TrainerDashboard() {
   const [editSlotLabel, setEditSlotLabel] = useState('')
   const [editSlotCapacity, setEditSlotCapacity] = useState('')
 
-  // Promocodes state
+    // Promocodes state
   const [tab, setTab] = useState<'schedule' | 'promocodes'>('schedule')
   const [promocodes, setPromocodes] = useState<PromocodeRow[]>([])
   const [showPromoForm, setShowPromoForm] = useState(false)
   const [editPromoId, setEditPromoId] = useState<string | null>(null)
-  const [promoForm, setPromoForm] = useState({
-    code: '',
-    discount_type: 'percent' as 'percent' | 'fixed',
-    discount_value: '',
-    max_uses: '',
-    expires_at: '',
-    is_active: true,
-  })
+  const [promoCalendarMonth, setPromoCalendarMonth] = useState<Date | null>(null)
+    const [promoForm, setPromoForm] = useState({
+      code: '',
+      discount_type: 'percent' as 'percent' | 'fixed',
+      discount_value: '',
+      max_uses: '',
+      expires_at: '',
+      is_active: true,
+      pool_id: '',
+      date: '',
+      time_slots: [] as string[],
+      min_quantity: '',
+    })
 
   // Load promocodes
   useEffect(() => {
@@ -253,44 +258,54 @@ export default function TrainerDashboard() {
   }
 
   // Promocodes handlers
-  const resetPromoForm = () => {
-    setPromoForm({ code: '', discount_type: 'percent', discount_value: '', max_uses: '', expires_at: '', is_active: true })
-    setEditPromoId(null)
-  }
+    const resetPromoForm = () => {
+      setPromoForm({ code: '', discount_type: 'percent', discount_value: '', max_uses: '', expires_at: '', is_active: true, pool_id: '', date: '', time_slots: [], min_quantity: '' })
+      setEditPromoId(null)
+      setPromoCalendarMonth(null)
+    }
 
   const openAddPromo = () => {
     resetPromoForm()
     setShowPromoForm(true)
   }
 
-  const openEditPromo = (p: PromocodeRow) => {
-    setEditPromoId(p.id)
-    setPromoForm({
-      code: p.code,
-      discount_type: p.discount_type,
-      discount_value: String(p.discount_value),
-      max_uses: String(p.max_uses),
-      expires_at: p.expires_at ? p.expires_at.slice(0, 10) : '',
-      is_active: p.is_active,
-    })
-    setShowPromoForm(true)
-  }
+    const openEditPromo = (p: PromocodeRow) => {
+      setEditPromoId(p.id)
+      setPromoForm({
+        code: p.code,
+        discount_type: p.discount_type,
+        discount_value: String(p.discount_value),
+        max_uses: String(p.max_uses),
+        expires_at: p.expires_at ? p.expires_at.slice(0, 10) : '',
+        is_active: p.is_active,
+        pool_id: p.pool_id || '',
+        date: p.date || '',
+        time_slots: p.time_slot ? p.time_slot.split(',') : [],
+        min_quantity: String(p.min_quantity || 0),
+      })
+      setPromoCalendarMonth(p.date ? new Date(p.date) : null)
+      setShowPromoForm(true)
+    }
 
   const handleSavePromo = async () => {
     const id = editPromoId || 'promo_' + Date.now()
     const value = parseInt(promoForm.discount_value) || 0
     const maxUses = parseInt(promoForm.max_uses) || 0
     if (!promoForm.code || value <= 0) return
-    const promocode = {
-      id,
-      code: promoForm.code.toUpperCase().trim(),
-      discount_type: promoForm.discount_type,
-      discount_value: value,
-      max_uses: maxUses,
-      used_count: promocodes.find(p => p.id === id)?.used_count || 0,
-      expires_at: promoForm.expires_at ? promoForm.expires_at + 'T23:59:59' : null,
-      is_active: promoForm.is_active,
-    }
+        const promocode = {
+          id,
+          code: promoForm.code.toUpperCase().trim(),
+          discount_type: promoForm.discount_type,
+          discount_value: value,
+          max_uses: maxUses,
+          used_count: promocodes.find(p => p.id === id)?.used_count || 0,
+          expires_at: promoForm.expires_at ? promoForm.expires_at + 'T23:59:59' : null,
+          is_active: promoForm.is_active,
+          pool_id: promoForm.pool_id || null,
+          date: promoForm.date || null,
+          time_slot: promoForm.time_slots.length > 0 ? promoForm.time_slots.join(',') : null,
+          min_quantity: promoForm.min_quantity ? parseInt(promoForm.min_quantity) : null,
+        }
     const ok = await savePromocodeToServer(promocode)
     if (ok) {
       const reloaded = await loadPromocodesFromServer()
@@ -708,7 +723,7 @@ export default function TrainerDashboard() {
             </button>
           </div>
 
-          {/* Form */}
+                    {/* Form */}
           {showPromoForm && (
             <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-sand/20 space-y-3">
               <p className="text-xs sm:text-sm font-semibold text-stone-700">
@@ -763,6 +778,174 @@ export default function TrainerDashboard() {
                 />
                 Aktywny
               </label>
+
+              {/* Ograniczenia — wybor basenu, daty i slotow */}
+              <div className="border-t border-sand/20 pt-3 space-y-3">
+                <p className="text-xs font-medium text-stone-500 mb-2">Ograniczenia (opcjonalne)</p>
+
+                {/* Wybor basenu */}
+                <select
+                  value={promoForm.pool_id}
+                  onChange={e => {
+                    setPromoForm(prev => ({ ...prev, pool_id: e.target.value, date: '', time_slots: [] }))
+                    setPromoCalendarMonth(null)
+                  }}
+                  className="w-full px-4 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-sm focus:border-teal-brand focus:outline-none"
+                >
+                  <option value="">Dowolny basen</option>
+                  {poolList.map(p => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
+                  ))}
+                </select>
+
+                {/* Kalendarz — tylko gdy wybrany basen */}
+                {promoForm.pool_id && (
+                  <>
+                    <div className="bg-stone-50 rounded-xl p-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <button
+                          onClick={() => setPromoCalendarMonth(prev => {
+                            const d = prev ? new Date(prev) : new Date()
+                            d.setMonth(d.getMonth() - 1)
+                            return d
+                          })}
+                          className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-sand-light transition-colors text-stone-600"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                        </button>
+                        <span className="text-xs sm:text-sm font-semibold text-stone-700">
+                          {MONTHS_PL[(promoCalendarMonth || new Date()).getMonth()]} {(promoCalendarMonth || new Date()).getFullYear()}
+                        </span>
+                        <button
+                          onClick={() => setPromoCalendarMonth(prev => {
+                            const d = prev ? new Date(prev) : new Date()
+                            d.setMonth(d.getMonth() + 1)
+                            return d
+                          })}
+                          className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-sand-light transition-colors text-stone-600"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-7 gap-0.5 mb-0.5">
+                        {DAYS_PL.map(d => (
+                          <div key={d} className="text-center text-[10px] font-medium text-stone-400 py-0.5">{d}</div>
+                        ))}
+                      </div>
+
+                      {(() => {
+                        const calDate = promoCalendarMonth || new Date()
+                        const year = calDate.getFullYear()
+                        const month = calDate.getMonth()
+                        const daysInM = new Date(year, month + 1, 0).getDate()
+                        const firstDow = new Date(year, month, 1).getDay()
+                        const offset = firstDow === 0 ? 6 : firstDow - 1
+                        const todayStr = new Date().toISOString().slice(0, 10)
+                        const promoPoolSchedule = getScheduleForPool(promoForm.pool_id)
+                        const datesWithSlots = new Set(promoPoolSchedule.map(s => s.date))
+
+                        const calWeeks: (number | null)[][] = []
+                        let calWeek: (number | null)[] = []
+                        for (let i = 0; i < offset; i++) calWeek.push(null)
+                        for (let day = 1; day <= daysInM; day++) {
+                          calWeek.push(day)
+                          if (calWeek.length === 7) { calWeeks.push(calWeek); calWeek = [] }
+                        }
+                        if (calWeek.length > 0) { while (calWeek.length < 7) calWeek.push(null); calWeeks.push(calWeek) }
+
+                        return calWeeks.map((week, wi) => (
+                          <div key={wi} className="grid grid-cols-7 gap-0.5">
+                            {week.map((day, di) => {
+                              if (day === null) return <div key={di} className="aspect-square" />
+                              const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+                              const isPast = dateStr < todayStr
+                              const isSelected = promoForm.date === dateStr
+                              const hasSlots = datesWithSlots.has(dateStr)
+                              return (
+                                <button
+                                  key={di}
+                                  disabled={isPast}
+                                  onClick={() => {
+                                    setPromoForm(prev => ({ ...prev, date: prev.date === dateStr ? '' : dateStr, time_slots: prev.date === dateStr ? [] : prev.time_slots }))
+                                  }}
+                                  className={`aspect-square rounded-md text-[10px] font-medium transition-all ${
+                                    isPast ? 'text-stone-300 cursor-not-allowed' : 'cursor-pointer'
+                                  } ${
+                                    isSelected ? 'bg-teal-brand text-white shadow-sm' : ''
+                                  } ${
+                                    hasSlots && !isSelected ? 'bg-teal-brand/10 text-teal-brand font-bold' : ''
+                                  } ${
+                                    !isSelected && !hasSlots && !isPast ? 'text-stone-600 hover:bg-sand-light' : ''
+                                  }`}
+                                >
+                                  {day}
+                                </button>
+                              )
+                            })}
+                          </div>
+                        ))
+                      })()}
+                    </div>
+
+                    {/* Lista slotow dla wybranej daty */}
+                    {promoForm.date && (() => {
+                      const entry = poolSchedule.find(s => s.poolId === promoForm.pool_id && s.date === promoForm.date)
+                      const slots = entry?.slots || []
+                      if (slots.length === 0) return <p className="text-xs text-stone-400 text-center py-2">Brak slotów w tym dniu</p>
+                      return (
+                        <div className="space-y-1.5">
+                          <p className="text-xs font-medium text-stone-500">
+                            {slots.length === 1 ? 'Wybierz slot (opcjonalnie)' : 'Wybierz sloty (opcjonalnie)'}
+                          </p>
+                          {slots.map(slot => {
+                            const isChecked = promoForm.time_slots.includes(slot.value)
+                            return (
+                              <label key={slot.value} className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-xs cursor-pointer transition-all ${
+                                isChecked ? 'bg-teal-brand/10 border-teal-brand text-teal-brand' : 'bg-white border-sand/30 text-stone-600 hover:border-teal-brand/40'
+                              }`}>
+                                <input
+                                  type="checkbox"
+                                  checked={isChecked}
+                                  onChange={() => {
+                                    setPromoForm(prev => ({
+                                      ...prev,
+                                      time_slots: isChecked
+                                        ? prev.time_slots.filter(v => v !== slot.value)
+                                        : [...prev.time_slots, slot.value],
+                                    }))
+                                  }}
+                                  className="w-3.5 h-3.5 accent-teal-brand rounded"
+                                />
+                                <span className="font-medium">{slot.label}</span>
+                                {slot.capacity ? <span className="text-stone-400 ml-auto">max {slot.capacity} os.</span> : null}
+                              </label>
+                            )
+                          })}
+                        </div>
+                      )
+                    })()}
+                  </>
+                )}
+
+                                {/* Min. liczba zajec */}
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-stone-500">Min. liczba zajęć</label>
+                  <p className="text-[11px] text-stone-400 leading-relaxed">
+                    Promokod zadziała tylko wtedy, gdy w koszyku znajduje się co najmniej podana liczba zajęć. 
+                    Jeśli pole pozostawisz puste lub wpiszesz 0 — wymaganie nie będzie sprawdzane.
+                  </p>
+                  <input
+                    type="number"
+                    min="0"
+                    placeholder="np. 3"
+                    value={promoForm.min_quantity}
+                    onChange={e => setPromoForm(prev => ({ ...prev, min_quantity: e.target.value }))}
+                    className="w-full px-4 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-sm focus:border-teal-brand focus:outline-none"
+                  />
+                </div>
+              </div>
+
               <div className="flex gap-2">
                 <button
                   onClick={handleSavePromo}
@@ -826,10 +1009,22 @@ export default function TrainerDashboard() {
                         </button>
                       </div>
                     </div>
-                    {p.expires_at && (
+                                        {p.expires_at && (
                       <p className="text-xs text-stone-400 mt-1 ml-5">
                         {isExpired ? 'Wygasł: ' : 'Ważny do: '}{new Date(p.expires_at).toLocaleDateString('pl-PL')}
                       </p>
+                    )}
+                    {p.pool_id && (
+                      <p className="text-xs text-stone-400 mt-1 ml-5">Basen: {allPools[p.pool_id]?.name || p.pool_id}</p>
+                    )}
+                    {p.date && (
+                      <p className="text-xs text-stone-400 mt-1 ml-5">Data: {p.date.slice(8, 10)}.{p.date.slice(5, 7)}.{p.date.slice(0, 4)}</p>
+                    )}
+                                        {p.time_slot && (
+                      <p className="text-xs text-stone-400 mt-1 ml-5">Godziny: {p.time_slot.split(',').map(t => t.replace('slot_', '').replace(/(\d{2})(\d{2})/, '$1:$2')).join(', ')}</p>
+                    )}
+                    {typeof p.min_quantity === 'number' && p.min_quantity > 0 && (
+                      <p className="text-xs text-stone-400 mt-1 ml-5">Min. liczba zajęć: {p.min_quantity}</p>
                     )}
                   </div>
                 )

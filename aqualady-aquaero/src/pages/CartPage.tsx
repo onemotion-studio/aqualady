@@ -103,11 +103,54 @@ export default function CartPage() {
           setPromoApplied('')
           return
         }
-        if (p.max_uses > 0 && p.used_count >= p.max_uses) {
+                if (p.max_uses > 0 && p.used_count >= p.max_uses) {
           setPromoError('Kod został już wykorzystany')
           setPromoDiscount(0)
           setPromoApplied('')
           return
+        }
+        // Check pool_id restriction
+        if (p.pool_id) {
+          const hasMatchingPool = items.some(item => item.poolId === p.pool_id)
+          if (!hasMatchingPool) {
+            setPromoError('Kod działa tylko na wybrany basen')
+            setPromoDiscount(0)
+            setPromoApplied('')
+            return
+          }
+        }
+        // Check date restriction
+        if (p.date) {
+          const hasMatchingDate = items.some(item => item.date === p.date)
+          if (!hasMatchingDate) {
+            setPromoError('Kod działa tylko na wybraną datę')
+            setPromoDiscount(0)
+            setPromoApplied('')
+            return
+          }
+        }
+                // Check time_slot restriction (может быть несколько через запятую)
+        if (p.time_slot) {
+          const allowedSlots = p.time_slot.split(',').filter(Boolean)
+          const hasMatchingSlot = items.some(item =>
+            allowedSlots.some(slot => item.time === slot || item.time === 'slot_' + slot.replace(':', ''))
+          )
+          if (!hasMatchingSlot) {
+            setPromoError('Kod działa tylko na wybrane godziny')
+            setPromoDiscount(0)
+            setPromoApplied('')
+            return
+          }
+        }
+        // Check min_quantity restriction
+        if (p.min_quantity && p.min_quantity > 0) {
+          const totalQty = items.reduce((s, item) => s + item.quantity, 0)
+          if (totalQty < p.min_quantity) {
+            setPromoError(`Minimalna liczba zajęć: ${p.min_quantity}`)
+            setPromoDiscount(0)
+            setPromoApplied('')
+            return
+          }
         }
         if (p.discount_type === 'percent') {
           setPromoDiscount(Math.round(total * p.discount_value / 100))
