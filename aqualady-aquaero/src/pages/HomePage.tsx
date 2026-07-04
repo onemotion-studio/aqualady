@@ -234,7 +234,12 @@ export default function HomePage() {
                 const totalSlots = (subs as any[]).reduce((s: number, sub: any) => s + (sub.dates?.length || 0), 0)
 
                 return (
-                  <div key={templateId} className="bg-white rounded-2xl p-5 shadow-sm border border-sand/20 hover:shadow-md transition-all flex flex-col">
+                  <div key={templateId} className="bg-white rounded-2xl p-5 shadow-sm border border-sand/20 hover:shadow-md transition-all flex flex-col relative">
+                    {tmpl.tag && (
+                      <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-sm text-[9px] font-semibold px-2 py-0.5 rounded-full shadow-sm border border-sand/20 whitespace-nowrap text-stone-500 z-10">
+                        {tmpl.tag}
+                      </div>
+                    )}
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-2">
                         <h3 className="text-base font-bold text-stone-800">{tmpl.name}</h3>

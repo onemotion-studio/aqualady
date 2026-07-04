@@ -469,12 +469,19 @@ export default function BookingPage() {
                         })
                         showCartAnimation(`${tmpl.name} dodany do koszyka!`)
                       }}
-                      className="bg-white border border-sand/30 rounded-xl py-3 sm:py-4 px-3 text-center hover:border-teal-brand/40 hover:shadow transition-all active:scale-[0.98] block w-full"
+                      className="bg-white border border-sand/30 rounded-xl py-3 sm:py-4 px-3 text-center hover:border-teal-brand/40 hover:shadow transition-all active:scale-[0.98] block w-full relative"
                     >
-                      <div className="text-xs sm:text-sm font-bold text-teal-brand">{tmpl.name}</div>
-                      <div className="text-sm sm:text-base font-bold text-stone-800">{tmpl.price} zł</div>
-                      <div className="text-[9px] sm:text-[11px] text-stone-400">{poolNames[tmpl.pool_id] || ''}</div>
-                      <div className="text-[9px] sm:text-[11px] text-stone-400 mt-0.5">{tmpl.total_classes} zajęć · {(subs as any[]).length} mies.</div>
+                      {tmpl.tag && (
+                        <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-sm text-[9px] font-semibold px-2 py-0.5 rounded-full shadow-sm border border-sand/20 whitespace-nowrap text-stone-500">
+                          {tmpl.tag}
+                        </div>
+                      )}
+                      <div className={tmpl.tag ? 'mt-0.5' : ''}>
+                        <div className="text-xs sm:text-sm font-bold text-teal-brand">{tmpl.name}</div>
+                        <div className="text-sm sm:text-base font-bold text-stone-800">{tmpl.price} zł</div>
+                        <div className="text-[9px] sm:text-[11px] text-stone-400">{poolNames[tmpl.pool_id] || ''}</div>
+                        <div className="text-[9px] sm:text-[11px] text-stone-400 mt-0.5">{tmpl.total_classes} zajęć · {(subs as any[]).length} mies.</div>
+                      </div>
                     </button>
                   )
                 })}

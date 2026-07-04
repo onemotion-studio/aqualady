@@ -114,6 +114,7 @@ export default function SubscriptionsPage() {
               <div className="flex items-start justify-between mb-3">
                 <div>
                   <h2 className="text-base font-bold text-stone-800">{tmpl.name}</h2>
+                  {tmpl.tag && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-teal-brand/10 text-teal-brand font-medium ml-2">{tmpl.tag}</span>}
                   <p className="text-xs text-stone-400 mt-0.5">{tmpl.total_classes} zajęć · {allPools[tmpl.pool_id]?.name || tmpl.pool_id}</p>
                   {tmpl.days_of_week.length > 0 && (
                     <p className="text-[10px] text-stone-400 mt-0.5">Dni: {tmpl.days_of_week.map(d => DAY_SHORT[d]).join(', ')}</p>

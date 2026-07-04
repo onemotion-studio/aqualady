@@ -103,11 +103,12 @@ export default function TrainerDashboard() {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([])
   const [showTemplateForm, setShowTemplateForm] = useState(false)
   const [editTemplateId, setEditTemplateId] = useState<string | null>(null)
-  const [templateForm, setTemplateForm] = useState({
+    const [templateForm, setTemplateForm] = useState({
     name: '',
     pool_id: '',
     total_classes: '8',
     price: '',
+    tag: '',
     days_of_week: [] as number[],
     time_slots: [] as string[],
   })
@@ -1072,11 +1073,12 @@ export default function TrainerDashboard() {
           <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-sand/20">
             <div className="flex items-center justify-between mb-3">
               <p className="text-sm font-semibold text-stone-700">Szablony abonamentów</p>
-              <button onClick={() => { setEditTemplateId(null); setTemplateForm({ name: '', pool_id: '', total_classes: '8', price: '', days_of_week: [], time_slots: [] }); setShowTemplateForm(true); window.scrollTo({ top: 0, behavior: 'smooth' }) }} className="px-3 py-1.5 rounded-xl bg-teal-brand text-white text-xs font-bold hover:bg-teal-light transition-all">+ Nowy szablon</button>
+              <button onClick={() => { setEditTemplateId(null); setTemplateForm({ name: '', pool_id: '', total_classes: '8', price: '', tag: '', days_of_week: [], time_slots: [] }); setShowTemplateForm(true); window.scrollTo({ top: 0, behavior: 'smooth' }) }} className="px-3 py-1.5 rounded-xl bg-teal-brand text-white text-xs font-bold hover:bg-teal-light transition-all">+ Nowy szablon</button>
             </div>
             {showTemplateForm && (
               <div className="bg-stone-50 rounded-xl p-3 sm:p-4 space-y-2.5 mb-3">
                 <input placeholder="Nazwa (np. 8 zajęć — poranki)" value={templateForm.name} onChange={e => setTemplateForm(p => ({ ...p, name: e.target.value }))} className="w-full px-3 py-2 rounded-lg border border-sand/30 text-xs focus:border-teal-brand focus:outline-none" />
+      <input placeholder="Etykieta (np. podstawowy, popularny, bezlimit)" value={templateForm.tag} onChange={e => setTemplateForm(p => ({ ...p, tag: e.target.value }))} className="w-full px-3 py-2 rounded-lg border border-sand/30 text-xs focus:border-teal-brand focus:outline-none" />
                 <div className="flex gap-2">
                   <select value={templateForm.pool_id} onChange={e => setTemplateForm(p => ({ ...p, pool_id: e.target.value }))} className="flex-1 px-3 py-2 rounded-lg border border-sand/30 text-xs focus:border-teal-brand focus:outline-none">
                     <option value="">Wybierz basen</option>
@@ -1115,7 +1117,7 @@ export default function TrainerDashboard() {
                   </div>
                 })()}
                 <div className="flex gap-2 pt-1">
-                  <button onClick={async () => { if (!templateForm.name || !templateForm.pool_id || !templateForm.price) return; const id = editTemplateId || 'tmpl_' + Date.now(); const ok = await saveTemplateToServer({ id, name: templateForm.name, pool_id: templateForm.pool_id, total_classes: parseInt(templateForm.total_classes) || 8, price: parseInt(templateForm.price) || 0, days_of_week: templateForm.days_of_week, time_slots: templateForm.time_slots, is_active: true }); if (ok) setTemplates(await loadTemplatesFromServer()); setShowTemplateForm(false) }} disabled={!templateForm.name || !templateForm.pool_id || !templateForm.price} className="flex-1 py-2 rounded-lg bg-teal-brand text-white text-xs font-bold disabled:bg-stone-300 hover:bg-teal-light transition-all">{editTemplateId ? 'Zapisz' : 'Dodaj szablon'}</button>
+                  <button onClick={async () => { if (!templateForm.name || !templateForm.pool_id || !templateForm.price) return; const id = editTemplateId || 'tmpl_' + Date.now(); const ok = await saveTemplateToServer({ id, name: templateForm.name, pool_id: templateForm.pool_id, total_classes: parseInt(templateForm.total_classes) || 8, price: parseInt(templateForm.price) || 0, tag: templateForm.tag, days_of_week: templateForm.days_of_week, time_slots: templateForm.time_slots, is_active: true }); if (ok) setTemplates(await loadTemplatesFromServer()); setShowTemplateForm(false) }} disabled={!templateForm.name || !templateForm.pool_id || !templateForm.price} className="flex-1 py-2 rounded-lg bg-teal-brand text-white text-xs font-bold disabled:bg-stone-300 hover:bg-teal-light transition-all">{editTemplateId ? 'Zapisz' : 'Dodaj szablon'}</button>
                   <button onClick={() => setShowTemplateForm(false)} className="px-4 py-2 rounded-lg border border-stone-300 text-xs text-stone-500 hover:bg-stone-50 transition-all">Anuluj</button>
                 </div>
               </div>
@@ -1125,13 +1127,14 @@ export default function TrainerDashboard() {
             ) : (
               <div className="space-y-1">
                 {templates.map(t => (
-                  <div key={t.id} className="flex items-center justify-between bg-stone-50 rounded-xl px-3 py-2">
+                                    <div key={t.id} className="flex items-center justify-between bg-stone-50 rounded-xl px-3 py-2">
                     <div className="flex items-center gap-2 min-w-0">
                       <span className="text-xs font-bold text-stone-700">{t.name}</span>
                       <span className="text-[10px] text-stone-400">{t.total_classes} · {t.price} zł · {poolList.find(p => p.id === t.pool_id)?.name || t.pool_id}</span>
+                      {t.tag && <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-teal-brand/10 text-teal-brand font-medium">{t.tag}</span>}
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
-                      <button onClick={() => { setEditTemplateId(t.id); setTemplateForm({ name: t.name, pool_id: t.pool_id, total_classes: String(t.total_classes), price: String(t.price), days_of_week: t.days_of_week, time_slots: t.time_slots }); setShowTemplateForm(true); window.scrollTo({ top: 0, behavior: 'smooth' }) }} className="text-stone-400 hover:text-teal-brand transition-colors"><svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg></button>
+                      <button onClick={() => { setEditTemplateId(t.id); setTemplateForm({ name: t.name, pool_id: t.pool_id, total_classes: String(t.total_classes), price: String(t.price), tag: t.tag || '', days_of_week: t.days_of_week, time_slots: t.time_slots }); setShowTemplateForm(true); window.scrollTo({ top: 0, behavior: 'smooth' }) }} className="text-stone-400 hover:text-teal-brand transition-colors"><svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg></button>
                       <button onClick={async () => { await deleteTemplateFromServer(t.id); setTemplates(prev => prev.filter(x => x.id !== t.id)) }} className="text-red-400 hover:text-red-600 transition-colors"><svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
                       <button onClick={() => { setSubForm({ template_id: t.id, month: String(new Date().getMonth() + 2 > 12 ? new Date().getMonth() + 2 - 12 : new Date().getMonth() + 2), year: String(new Date().getFullYear() + (new Date().getMonth() + 2 > 12 ? 1 : 0)) }); setShowSubForm(true) }} className="px-2 py-1 rounded-lg bg-teal-brand/10 text-teal-brand text-[10px] font-bold hover:bg-teal-brand/20 transition-all">Utwórz</button>
                     </div>

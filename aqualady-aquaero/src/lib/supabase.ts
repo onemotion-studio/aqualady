@@ -251,6 +251,7 @@ export interface SubscriptionTemplate {
   price: number
   days_of_week: number[] // 0=mon, 1=tue, ... 6=sun (ISO)
   time_slots: string[]
+  tag: string // e.g. "podstawowy", "popularny", "bezlimit"
   is_active: boolean
   created_at: string
 }
