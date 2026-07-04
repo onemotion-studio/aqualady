@@ -172,7 +172,10 @@ export default function CartPage() {
     return allPools[poolId]?.name || poolId
   }
 
-  const getItemSubtitle = (item: typeof items[0]) => {
+    const getItemSubtitle = (item: typeof items[0]) => {
+    if (item.type === 'subscription') {
+      return 'Abonament miesięczny'
+    }
     const parts: string[] = []
     parts.push('Zajecie')
     if (item.date) {

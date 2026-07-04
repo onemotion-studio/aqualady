@@ -448,16 +448,34 @@ export default function BookingPage() {
                   const tmpl = templates.find((t: any) => t.id === templateId)
                   if (!tmpl) return null
                   return (
-                    <Link
+                    <button
                       key={templateId}
-                      to="/subscriptions"
-                      className="bg-white border border-sand/30 rounded-xl py-3 sm:py-4 px-3 text-center hover:border-teal-brand/40 hover:shadow transition-all active:scale-[0.98] block"
+                      onClick={() => {
+                        const id = 'sub_' + templateId + '_' + Date.now() + '_' + Math.random()
+                        dispatch({
+                          type: 'ADD_ITEM',
+                          payload: {
+                            id,
+                            poolId: selectedPool || '',
+                            type: 'subscription',
+                            label: `${tmpl.name} · ${(subs as any[]).length} mies.`,
+                            price: tmpl.price,
+                            quantity: 1,
+                            templateId: tmpl.id,
+                            month: (subs as any[])[0]?.month,
+                            year: (subs as any[])[0]?.year,
+                            dates: (subs as any[]).flatMap((s: any) => s.dates || []),
+                          },
+                        })
+                        showCartAnimation(`${tmpl.name} dodany do koszyka!`)
+                      }}
+                      className="bg-white border border-sand/30 rounded-xl py-3 sm:py-4 px-3 text-center hover:border-teal-brand/40 hover:shadow transition-all active:scale-[0.98] block w-full"
                     >
                       <div className="text-xs sm:text-sm font-bold text-teal-brand">{tmpl.name}</div>
                       <div className="text-sm sm:text-base font-bold text-stone-800">{tmpl.price} zł</div>
                       <div className="text-[9px] sm:text-[11px] text-stone-400">{poolNames[tmpl.pool_id] || ''}</div>
                       <div className="text-[9px] sm:text-[11px] text-stone-400 mt-0.5">{tmpl.total_classes} zajęć · {(subs as any[]).length} mies.</div>
-                    </Link>
+                    </button>
                   )
                 })}
               </div>

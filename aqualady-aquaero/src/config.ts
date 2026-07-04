@@ -15,12 +15,18 @@ export interface PoolConfig {
 export interface CartItem {
   id: string
   poolId: PoolId
-  type: 'single' | 'pass8' | 'pass12' | 'pass16'
+  type: 'single' | 'pass8' | 'pass12' | 'pass16' | 'subscription'
   label: string
   date?: string
   time?: string
   price: number
   quantity: number
+  // Dla abonamentu
+  subscriptionId?: string
+  templateId?: string
+  month?: number
+  year?: number
+  dates?: string[]
 }
 
 export const PRICES = {
