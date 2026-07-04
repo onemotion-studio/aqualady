@@ -6,6 +6,7 @@ import BookingPage from './pages/BookingPage'
 import CartPage from './pages/CartPage'
 import AuthPage from './pages/AuthPage'
 import ProfilePage from './pages/ProfilePage'
+import SubscriptionsPage from './pages/SubscriptionsPage'
 import AdminLogin from './pages/AdminLogin'
 import TrainerDashboard from './pages/TrainerDashboard'
 import { ScheduleProvider } from './context/ScheduleContext'
@@ -41,6 +42,7 @@ export default function App() {
             <Route path="/cart" element={<CartPage />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/subscriptions" element={<SubscriptionsPage />} />
           </Route>
         </Routes>
       </AuthProvider>

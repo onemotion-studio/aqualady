@@ -2,7 +2,7 @@
 import { useNavigate } from 'react-router-dom'
 import { MONTHS_PL, DAYS_PL, loadPoolsAsync, loadPools, saveCustomPool, removeCustomPool, DEFAULT_SLOTS, type PoolConfig } from '../config'
 import { useSchedule, type TimeSlotDef } from '../context/ScheduleContext'
-import { loadBookingsFromServer, loadPromocodesFromServer, savePromocodeToServer, deletePromocodeFromServer, type BookingRow, type PromocodeRow } from '../lib/supabase'
+import { loadBookingsFromServer, loadPromocodesFromServer, savePromocodeToServer, deletePromocodeFromServer, loadTemplatesFromServer, saveTemplateToServer, deleteTemplateFromServer, loadSubscriptionsFromServer, saveSubscriptionToServer, deleteSubscriptionFromServer, type BookingRow, type PromocodeRow, type SubscriptionTemplate, type Subscription } from '../lib/supabase'
 
 const CUSTOM_SLOTS_KEY = 'aqualady_custom_slots'
 
@@ -75,7 +75,7 @@ export default function TrainerDashboard() {
   const [editSlotCapacity, setEditSlotCapacity] = useState('')
 
     // Promocodes state
-  const [tab, setTab] = useState<'schedule' | 'promocodes'>('schedule')
+  const [tab, setTab] = useState<'schedule' | 'promocodes' | 'subscriptions'>('schedule')
   const [promocodes, setPromocodes] = useState<PromocodeRow[]>([])
   const [showPromoForm, setShowPromoForm] = useState(false)
   const [editPromoId, setEditPromoId] = useState<string | null>(null)
@@ -93,10 +93,38 @@ export default function TrainerDashboard() {
       min_quantity: '',
     })
 
-  // Load promocodes
+    // Load promocodes
   useEffect(() => {
     loadPromocodesFromServer().then(data => setPromocodes(data)).catch(() => {})
   }, [])
+
+  // Subscription templates state
+  const [templates, setTemplates] = useState<SubscriptionTemplate[]>([])
+  const [subscriptions, setSubscriptions] = useState<Subscription[]>([])
+  const [showTemplateForm, setShowTemplateForm] = useState(false)
+  const [editTemplateId, setEditTemplateId] = useState<string | null>(null)
+  const [templateForm, setTemplateForm] = useState({
+    name: '',
+    pool_id: '',
+    total_classes: '8',
+    price: '',
+    days_of_week: [] as number[],
+    time_slots: [] as string[],
+  })
+  const [showSubForm, setShowSubForm] = useState(false)
+  const [subForm, setSubForm] = useState({
+    template_id: '',
+    month: '',
+    year: String(new Date().getFullYear()),
+  })
+
+  // Load templates & subscriptions
+  useEffect(() => {
+    loadTemplatesFromServer().then(data => setTemplates(data)).catch(() => {})
+    loadSubscriptionsFromServer().then(data => setSubscriptions(data)).catch(() => {})
+  }, [])
+
+  const DAY_NAMES = ['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Niedz']
 
   // Load bookings from server
   useEffect(() => {
@@ -373,13 +401,17 @@ export default function TrainerDashboard() {
           >
             Grafik zajęć
           </button>
-          <button
+                    <button
             onClick={() => setTab('promocodes')}
-            className={`flex-1 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-medium transition-all ${
-              tab === 'promocodes' ? 'bg-teal-brand text-white shadow-md' : 'text-stone-500 hover:text-stone-700'
-            }`}
+            className={`flex-1 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-medium transition-all ${tab === 'promocodes' ? 'bg-teal-brand text-white shadow-md' : 'text-stone-500 hover:text-stone-700'}`}
           >
             Promokody ({promocodes.length})
+          </button>
+          <button
+            onClick={() => setTab('subscriptions')}
+            className={`flex-1 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-medium transition-all ${tab === 'subscriptions' ? 'bg-teal-brand text-white shadow-md' : 'text-stone-500 hover:text-stone-700'}`}
+          >
+            Subskrypcje ({subscriptions.length})
           </button>
         </div>
 
@@ -1023,7 +1055,7 @@ export default function TrainerDashboard() {
                                         {p.time_slot && (
                       <p className="text-xs text-stone-400 mt-1 ml-5">Godziny: {p.time_slot.split(',').map(t => t.replace('slot_', '').replace(/(\d{2})(\d{2})/, '$1:$2')).join(', ')}</p>
                     )}
-                    {typeof p.min_quantity === 'number' && p.min_quantity > 0 && (
+                                        {typeof p.min_quantity === 'number' && p.min_quantity > 0 && (
                       <p className="text-xs text-stone-400 mt-1 ml-5">Min. liczba zajęć: {p.min_quantity}</p>
                     )}
                   </div>
@@ -1031,6 +1063,129 @@ export default function TrainerDashboard() {
               })}
             </div>
           )}
+        </div>
+      )}
+
+      {/* Subscriptions Tab */}
+      {tab === 'subscriptions' && (
+        <div className="space-y-4">
+          <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-sand/20">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-sm font-semibold text-stone-700">Szablony abonamentów</p>
+              <button onClick={() => { setEditTemplateId(null); setTemplateForm({ name: '', pool_id: '', total_classes: '8', price: '', days_of_week: [], time_slots: [] }); setShowTemplateForm(true); window.scrollTo({ top: 0, behavior: 'smooth' }) }} className="px-3 py-1.5 rounded-xl bg-teal-brand text-white text-xs font-bold hover:bg-teal-light transition-all">+ Nowy szablon</button>
+            </div>
+            {showTemplateForm && (
+              <div className="bg-stone-50 rounded-xl p-3 sm:p-4 space-y-2.5 mb-3">
+                <input placeholder="Nazwa (np. 8 zajęć — poranki)" value={templateForm.name} onChange={e => setTemplateForm(p => ({ ...p, name: e.target.value }))} className="w-full px-3 py-2 rounded-lg border border-sand/30 text-xs focus:border-teal-brand focus:outline-none" />
+                <div className="flex gap-2">
+                  <select value={templateForm.pool_id} onChange={e => setTemplateForm(p => ({ ...p, pool_id: e.target.value }))} className="flex-1 px-3 py-2 rounded-lg border border-sand/30 text-xs focus:border-teal-brand focus:outline-none">
+                    <option value="">Wybierz basen</option>
+                    {poolList.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                  </select>
+                  <input type="number" min="1" placeholder="Liczba" value={templateForm.total_classes} onChange={e => setTemplateForm(p => ({ ...p, total_classes: e.target.value }))} className="w-20 px-3 py-2 rounded-lg border border-sand/30 text-xs focus:border-teal-brand focus:outline-none" />
+                  <div className="relative">
+                    <input type="number" min="1" placeholder="Cena" value={templateForm.price} onChange={e => setTemplateForm(p => ({ ...p, price: e.target.value }))} className="w-24 px-3 py-2 rounded-lg border border-sand/30 text-xs focus:border-teal-brand focus:outline-none pr-5" />
+                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-stone-400">zł</span>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-[10px] font-medium text-stone-500 mb-1">Dni tygodnia:</p>
+                  <div className="flex flex-wrap gap-1">
+                    {DAY_NAMES.map((n, idx) => {
+                      const on = templateForm.days_of_week.includes(idx)
+                      return <button key={idx} onClick={() => setTemplateForm(p => ({ ...p, days_of_week: on ? p.days_of_week.filter(d => d !== idx) : [...p.days_of_week, idx].sort() }))} className={`px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition-all ${on ? 'bg-teal-brand text-white' : 'bg-white border border-sand/30 text-stone-600 hover:border-teal-brand/40'}`}>{n}</button>
+                    })}
+                  </div>
+                </div>
+                {templateForm.pool_id && (() => {
+                  const slotSet = new Set<string>()
+                  schedule.filter(s => s.poolId === templateForm.pool_id).forEach(s => s.slots.forEach(sl => slotSet.add(sl.value)))
+                  const allSlots = Array.from(slotSet)
+                  if (allSlots.length === 0) return null
+                  return <div>
+                    <p className="text-[10px] font-medium text-stone-500 mb-1">Godziny:</p>
+                    <div className="flex flex-wrap gap-1">
+                      {allSlots.map(slotVal => {
+                        const def = customSlots.find(d => d.value === slotVal)
+                        const label = def?.label || slotVal.replace('slot_', '').replace(/(\d{2})(\d{2})/, '$1:$2')
+                        const on = templateForm.time_slots.includes(slotVal)
+                        return <button key={slotVal} onClick={() => setTemplateForm(p => ({ ...p, time_slots: on ? p.time_slots.filter(s => s !== slotVal) : [...p.time_slots, slotVal] }))} className={`px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition-all ${on ? 'bg-teal-brand text-white' : 'bg-white border border-sand/30 text-stone-600 hover:border-teal-brand/40'}`}>{label}</button>
+                      })}
+                    </div>
+                  </div>
+                })()}
+                <div className="flex gap-2 pt-1">
+                  <button onClick={async () => { if (!templateForm.name || !templateForm.pool_id || !templateForm.price) return; const id = editTemplateId || 'tmpl_' + Date.now(); const ok = await saveTemplateToServer({ id, name: templateForm.name, pool_id: templateForm.pool_id, total_classes: parseInt(templateForm.total_classes) || 8, price: parseInt(templateForm.price) || 0, days_of_week: templateForm.days_of_week, time_slots: templateForm.time_slots, is_active: true }); if (ok) setTemplates(await loadTemplatesFromServer()); setShowTemplateForm(false) }} disabled={!templateForm.name || !templateForm.pool_id || !templateForm.price} className="flex-1 py-2 rounded-lg bg-teal-brand text-white text-xs font-bold disabled:bg-stone-300 hover:bg-teal-light transition-all">{editTemplateId ? 'Zapisz' : 'Dodaj szablon'}</button>
+                  <button onClick={() => setShowTemplateForm(false)} className="px-4 py-2 rounded-lg border border-stone-300 text-xs text-stone-500 hover:bg-stone-50 transition-all">Anuluj</button>
+                </div>
+              </div>
+            )}
+            {templates.length === 0 ? (
+              <p className="text-xs text-stone-400 text-center py-4">Brak szablonów</p>
+            ) : (
+              <div className="space-y-1">
+                {templates.map(t => (
+                  <div key={t.id} className="flex items-center justify-between bg-stone-50 rounded-xl px-3 py-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="text-xs font-bold text-stone-700">{t.name}</span>
+                      <span className="text-[10px] text-stone-400">{t.total_classes} · {t.price} zł · {poolList.find(p => p.id === t.pool_id)?.name || t.pool_id}</span>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button onClick={() => { setEditTemplateId(t.id); setTemplateForm({ name: t.name, pool_id: t.pool_id, total_classes: String(t.total_classes), price: String(t.price), days_of_week: t.days_of_week, time_slots: t.time_slots }); setShowTemplateForm(true); window.scrollTo({ top: 0, behavior: 'smooth' }) }} className="text-stone-400 hover:text-teal-brand transition-colors"><svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg></button>
+                      <button onClick={async () => { await deleteTemplateFromServer(t.id); setTemplates(prev => prev.filter(x => x.id !== t.id)) }} className="text-red-400 hover:text-red-600 transition-colors"><svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
+                      <button onClick={() => { setSubForm({ template_id: t.id, month: String(new Date().getMonth() + 2 > 12 ? new Date().getMonth() + 2 - 12 : new Date().getMonth() + 2), year: String(new Date().getFullYear() + (new Date().getMonth() + 2 > 12 ? 1 : 0)) }); setShowSubForm(true) }} className="px-2 py-1 rounded-lg bg-teal-brand/10 text-teal-brand text-[10px] font-bold hover:bg-teal-brand/20 transition-all">Utwórz</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-sand/20">
+            <p className="text-sm font-semibold text-stone-700 mb-3">Abonamenty miesięczne</p>
+            {showSubForm && (
+              <div className="bg-stone-50 rounded-xl p-3 sm:p-4 space-y-2.5 mb-3">
+                <p className="text-xs font-semibold text-stone-600">Nowy abonament z szablonu</p>
+                <div className="flex gap-2">
+                  <select value={subForm.template_id} onChange={e => setSubForm(p => ({ ...p, template_id: e.target.value }))} className="flex-1 px-3 py-2 rounded-lg border border-sand/30 text-xs focus:border-teal-brand focus:outline-none">
+                    <option value="">Szablon</option>
+                    {templates.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                  </select>
+                  <select value={subForm.month} onChange={e => setSubForm(p => ({ ...p, month: e.target.value }))} className="flex-1 px-3 py-2 rounded-lg border border-sand/30 text-xs focus:border-teal-brand focus:outline-none">
+                    <option value="">Miesiąc</option>
+                    {Array.from({ length: 6 }, (_, i) => { const n = new Date(); const m = n.getMonth() + 1 + i; const mo = m > 12 ? m - 12 : m; const yr = m > 12 ? n.getFullYear() + 1 : n.getFullYear(); return <option key={m} value={mo.toString()}>{MONTHS_PL[mo - 1]} {yr}</option> })}
+                  </select>
+                  <button onClick={async () => { const tmpl = templates.find(t => t.id === subForm.template_id); if (!tmpl || !subForm.month) return; const month = parseInt(subForm.month); const year = parseInt(subForm.year); const dates = []; const daysInM = new Date(year, month, 0).getDate(); for (let d = 1; d <= daysInM; d++) { const dt = new Date(year, month - 1, d); if (tmpl.days_of_week.includes((dt.getDay() + 6) % 7)) dates.push(year + '-' + String(month).padStart(2, '0') + '-' + String(d).padStart(2, '0')) }; let expiresAt = null; if (dates.length > 0) { const fd = new Date(dates[0] + 'T00:00:00'); fd.setDate(fd.getDate() - 1); fd.setHours(23, 59, 59); expiresAt = fd.toISOString() }; const ok = await saveSubscriptionToServer({ id: 'sub_' + Date.now(), template_id: tmpl.id, pool_id: tmpl.pool_id, month, year, price: tmpl.price, total_classes: tmpl.total_classes, dates, time_slot: tmpl.time_slots[0] || '', is_published: true, expires_at: expiresAt }); if (ok) setSubscriptions(await loadSubscriptionsFromServer()); setShowSubForm(false) }} disabled={!subForm.template_id || !subForm.month} className="px-4 py-2 rounded-lg bg-teal-brand text-white text-xs font-bold disabled:bg-stone-300 hover:bg-teal-light transition-all">Utwórz</button>
+                  <button onClick={() => setShowSubForm(false)} className="px-4 py-2 rounded-lg border border-stone-300 text-xs text-stone-500 hover:bg-stone-50 transition-all">Anuluj</button>
+                </div>
+              </div>
+            )}
+            {subscriptions.length === 0 ? (
+              <p className="text-xs text-stone-400 text-center py-4">Brak abonamentów</p>
+            ) : (
+              <div className="space-y-1">
+                {subscriptions.map(s => {
+                  const tmpl = templates.find(t => t.id === s.template_id)
+                  const isExpired = s.expires_at && new Date(s.expires_at) < new Date()
+                  return (
+                    <div key={s.id} className="flex items-center justify-between bg-stone-50 rounded-xl px-3 py-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className={`w-2 h-2 rounded-full shrink-0 ${s.is_published && !isExpired ? 'bg-green-500' : 'bg-red-400'}`} />
+                        <span className="text-xs font-bold text-stone-700">{tmpl?.name || '—'}</span>
+                        <span className="text-[10px] text-stone-400">{MONTHS_PL[s.month - 1]} {s.year}</span>
+                        <span className="text-[10px] text-stone-400">{s.total_classes} · {s.price} zł</span>
+                        {isExpired && <span className="text-[10px] text-red-500 font-medium">wygasł</span>}
+                      </div>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <button onClick={async () => { await saveSubscriptionToServer({ ...s, is_published: !s.is_published }); setSubscriptions(await loadSubscriptionsFromServer()) }} className={`px-2 py-1 rounded-lg text-[10px] font-bold transition-all ${s.is_published ? 'bg-green-100 text-green-700' : 'bg-stone-200 text-stone-500'}`}>{s.is_published ? 'Aktywny' : 'Ukryty'}</button>
+                        <button onClick={async () => { await deleteSubscriptionFromServer(s.id); setSubscriptions(prev => prev.filter(x => x.id !== s.id)) }} className="text-red-400 hover:text-red-600 transition-colors"><svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
         </div>
       )}
 

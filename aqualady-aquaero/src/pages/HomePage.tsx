@@ -1,5 +1,5 @@
 ﻿import { Link } from 'react-router-dom'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import heroImage from '../assets/hero_1.png'
 import musclesIcon from '../assets/Muscles.png'
 import heartIcon from '../assets/Heart.png'
@@ -8,6 +8,8 @@ import moodIcon from '../assets/Mood.png'
 import sleepIcon from '../assets/Sleep.png'
 import muscles2Icon from '../assets/muscles-2.png'
 import GallerySlider from '../components/GallerySlider'
+import { loadSubscriptionsFromServer, loadTemplatesFromServer, loadPoolNames } from '../lib/supabase'
+import { MONTHS_PL } from '../config'
 
 // Auto-import all gallery media files
 const galleryImports = import.meta.glob('/src/assets/gallery/*.{png,jpg,jpeg,gif,webp,mp4,webm}', { eager: true, query: '?url' })
@@ -45,12 +47,6 @@ const benefits = [
   },
 ]
 
-const plans = [
-  { id: 'pass8', title: '8 zajec', sub: '1 miesiac', price: '299', desc: 'Dla osob, ktore dopiero zaczynaja swoja przygode z akwaaerobika.', popular: false },
-  { id: 'pass12', title: '12 zajec', sub: '1,5 miesiaca', price: '399', desc: 'Najpopularniejszy wybor - optymalna liczba zajec dla regularnych cwiczen.', popular: true },
-  { id: 'passUnlimited', title: 'Bezlimit', sub: '1 miesiac', price: '549', desc: 'Nieograniczony dostep do wszystkich zajec. Dla prawdziwych entuzjastek!', popular: false },
-]
-
 const galleryImages = [
   { id: 1, alt: 'Zajecia akwaaerobiki w basenie' },
   { id: 2, alt: 'Seniorzy cwicza w wodzie' },
@@ -60,6 +56,11 @@ const galleryImages = [
   { id: 6, alt: 'Usmiechnieci uczestnicy' },
   { id: 7, alt: 'Zajecia w Basenie Fala' },
 ]
+
+function slotLabel(value: string): string {
+  const m = value.match(/slot_(\d{2})(\d{2})/)
+  return m ? `${m[1]}:${m[2]}` : value
+}
 
 // Build gallery slides from auto-imported files
 const gallerySlides = Object.entries(galleryImports)
@@ -77,6 +78,32 @@ const gallerySlides = Object.entries(galleryImports)
   })
 
 export default function HomePage() {
+  const [subscriptions, setSubscriptions] = useState<any[]>([])
+  const [templates, setTemplates] = useState<any[]>([])
+  const [poolNames, setPoolNames] = useState<Record<string, string>>({})
+
+  useEffect(() => {
+    Promise.all([
+      loadSubscriptionsFromServer(),
+      loadTemplatesFromServer(),
+      loadPoolNames(),
+    ]).then(([subs, tmpls, pools]) => {
+      const now = new Date()
+      const active = subs.filter((s: any) => s.is_published && (!s.expires_at || new Date(s.expires_at) > now))
+      setSubscriptions(active)
+      setTemplates(tmpls)
+      setPoolNames(pools)
+    }).catch(() => {})
+  }, [])
+
+  const grouped = subscriptions.reduce((acc: Record<string, any[]>, sub: any) => {
+    const key = sub.template_id
+    if (!acc[key]) acc[key] = []
+    acc[key].push(sub)
+    return acc
+  }, {})
+
+  const DAY_SHORT = ['pon', 'wt', 'śr', 'czw', 'pt', 'sob', 'niedz']
   return (
     <div className="space-y-0 pb-8">
       {/* HERO SECTION */}
@@ -192,7 +219,53 @@ export default function HomePage() {
         </div>
       </section>
 
-        {/* Social media — pod galeria */}
+      {/* Cennik — abonamenty miesięczne */}
+      {Object.keys(grouped).length > 0 && (
+        <section className="mt-6 sm:mt-8 lg:mt-10">
+          <div className="px-4 sm:px-6 lg:px-8 mb-4 sm:mb-5">
+            <h2 className="text-base sm:text-lg lg:text-xl font-extralight text-[#65AFB3] uppercase text-left">Abonamenty miesięczne</h2>
+          </div>
+          <div className="px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {Object.entries(grouped).map(([templateId, subs]) => {
+                const tmpl = templates.find((t: any) => t.id === templateId)
+                if (!tmpl) return null
+
+                const totalSlots = (subs as any[]).reduce((s: number, sub: any) => s + (sub.dates?.length || 0), 0)
+
+                return (
+                  <div key={templateId} className="bg-white rounded-2xl p-5 shadow-sm border border-sand/20 hover:shadow-md transition-all flex flex-col">
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="text-base font-bold text-stone-800">{tmpl.name}</h3>
+                        <span className="text-lg font-bold text-teal-brand">{tmpl.price} zł</span>
+                      </div>
+                      <p className="text-xs text-stone-400 mb-1">
+                        {tmpl.total_classes} zajęć · {poolNames[tmpl.pool_id] || tmpl.pool_id}
+                      </p>
+                      {tmpl.days_of_week.length > 0 && (
+                        <p className="text-[10px] text-stone-400 mb-1">Dni: {tmpl.days_of_week.map((d: number) => DAY_SHORT[d]).join(', ')}</p>
+                      )}
+                      {tmpl.time_slots.length > 0 && (
+                        <p className="text-[10px] text-stone-400 mb-1">Godziny: {tmpl.time_slots.map(slotLabel).join(', ')}</p>
+                      )}
+                      <p className="text-[10px] text-stone-400">Dostępne miesiące: {(subs as any[]).map((s: any) => `${MONTHS_PL[s.month - 1]} ${s.year}`).join(', ')}</p>
+                    </div>
+                    <Link
+                      to="/subscriptions"
+                      className="mt-4 w-full py-2.5 rounded-xl bg-teal-brand text-white text-xs font-bold text-center hover:bg-teal-light active:scale-[0.98] transition-all block"
+                    >
+                      Wybierz termin
+                    </Link>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Social media — pod galeria */}
         <section className="mt-6 sm:mt-8 lg:mt-10">
         <div className="px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col items-center gap-4 py-6 sm:py-8">

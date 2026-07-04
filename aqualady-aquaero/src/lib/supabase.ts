@@ -235,7 +235,185 @@ export async function deletePromocodeFromServer(id: string) {
     if (error) throw error
     return true
   } catch (e) {
-    console.error('Failed to delete promocode:', e)
+        console.error('Failed to delete promocode:', e)
     return false
   }
+}
+
+
+// --- Subscription Templates ---
+
+export interface SubscriptionTemplate {
+  id: string
+  name: string
+  pool_id: string
+  total_classes: number
+  price: number
+  days_of_week: number[] // 0=mon, 1=tue, ... 6=sun (ISO)
+  time_slots: string[]
+  is_active: boolean
+  created_at: string
+}
+
+export async function loadTemplatesFromServer(): Promise<SubscriptionTemplate[]> {
+  if (!supabase) return []
+  try {
+    const { data, error } = await supabase
+      .from('subscription_templates')
+      .select('*')
+      .order('name')
+    if (error) throw error
+    return data || []
+  } catch (e) {
+    console.error('Failed to load templates:', e)
+    return []
+  }
+}
+
+export async function saveTemplateToServer(template: Omit<SubscriptionTemplate, 'created_at'>) {
+  if (!supabase) return false
+  try {
+    const { error } = await supabase
+      .from('subscription_templates')
+      .upsert(template, { onConflict: 'id' })
+    if (error) throw error
+    return true
+  } catch (e) {
+    console.error('Failed to save template:', e)
+    return false
+  }
+}
+
+export async function deleteTemplateFromServer(id: string) {
+  if (!supabase) return false
+  try {
+    const { error } = await supabase
+      .from('subscription_templates')
+      .delete()
+      .match({ id })
+    if (error) throw error
+    return true
+  } catch (e) {
+    console.error('Failed to delete template:', e)
+    return false
+  }
+}
+
+// --- Subscriptions (monthly) ---
+
+export interface Subscription {
+  id: string
+  template_id: string
+  pool_id: string
+  month: number
+  year: number
+  price: number
+  total_classes: number
+  dates: string[]
+  time_slot: string
+  is_published: boolean
+  expires_at: string | null
+  created_at: string
+}
+
+export async function loadSubscriptionsFromServer(): Promise<Subscription[]> {
+  if (!supabase) return []
+  try {
+    const { data, error } = await supabase
+      .from('subscriptions')
+      .select('*')
+      .order('year', { ascending: false })
+      .order('month', { ascending: false })
+    if (error) throw error
+    return data || []
+  } catch (e) {
+    console.error('Failed to load subscriptions:', e)
+    return []
+  }
+}
+
+export async function saveSubscriptionToServer(sub: Omit<Subscription, 'created_at'>) {
+  if (!supabase) return false
+  try {
+    const { error } = await supabase
+      .from('subscriptions')
+      .upsert(sub, { onConflict: 'id' })
+    if (error) throw error
+    return true
+  } catch (e) {
+    console.error('Failed to save subscription:', e)
+    return false
+  }
+}
+
+export async function deleteSubscriptionFromServer(id: string) {
+  if (!supabase) return false
+  try {
+    const { error } = await supabase
+      .from('subscriptions')
+      .delete()
+      .match({ id })
+    if (error) throw error
+    return true
+  } catch (e) {
+    console.error('Failed to delete subscription:', e)
+    return false
+  }
+}
+
+// --- Subscription Purchases ---
+
+export interface SubscriptionPurchase {
+  id: string
+  subscription_id: string
+  user_email: string
+  user_name: string
+  promo_code: string | null
+  promo_discount: number
+  final_price: number
+  purchased_at: string
+}
+
+export async function addSubscriptionPurchase(purchase: Omit<SubscriptionPurchase, 'id' | 'purchased_at'>) {
+  if (!supabase) return null
+  try {
+    const { data, error } = await supabase
+      .from('subscription_purchases')
+      .insert({
+        ...purchase,
+        id: 'sub_purchase_' + Date.now(),
+        purchased_at: new Date().toISOString(),
+      })
+      .select('id')
+      .single()
+    if (error) throw error
+    return data?.id || null
+  } catch (e) {
+    console.error('Failed to add subscription purchase:', e)
+    return null
+  }
+}
+
+export async function loadSubscriptionPurchases(): Promise<SubscriptionPurchase[]> {
+  if (!supabase) return []
+  try {
+    const { data, error } = await supabase
+      .from('subscription_purchases')
+      .select('*')
+      .order('purchased_at', { ascending: false })
+    if (error) throw error
+    return data || []
+  } catch (e) {
+    console.error('Failed to load subscription purchases:', e)
+    return []
+  }
+}
+
+// --- Pool names helper (for HomePage) ---
+export async function loadPoolNames(): Promise<Record<string, string>> {
+  const pools = await loadPoolsFromServer()
+  if (!pools) return {}
+  const map: Record<string, string> = {}
+  pools.forEach(p => { map[p.id] = p.name })
+  return map
 }

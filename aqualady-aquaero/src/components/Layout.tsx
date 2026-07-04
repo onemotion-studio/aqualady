@@ -29,6 +29,15 @@ export default function Layout() {
 
                     {/* WhatsApp buttons hidden — now on homepage hero */}
 
+                              <Link
+            to="/subscriptions"
+            className="hidden sm:inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-600 text-xs sm:text-sm font-medium transition-colors"
+          >
+            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Abonamenty
+          </Link>
                     <Link
             to="/cart"
             className="relative p-2 sm:p-2.5 rounded-full hover:bg-sand-light transition-colors"

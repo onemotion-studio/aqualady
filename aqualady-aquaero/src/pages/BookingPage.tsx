@@ -5,7 +5,8 @@ import { useCart } from '../context/CartContext'
 import { useSchedule } from '../context/ScheduleContext'
 import { useAuth } from '../context/AuthContext'
 import { loadPoolsAsync, loadPools, PRICES, type PoolId, type PoolConfig } from '../config'
-import { loadBookingsFromServer } from '../lib/supabase'
+import { loadBookingsFromServer, loadSubscriptionsFromServer, loadTemplatesFromServer, loadPoolNames } from '../lib/supabase'
+import { MONTHS_PL } from '../config'
 
 export default function BookingPage() {
   const navigate = useNavigate()
@@ -27,6 +28,9 @@ export default function BookingPage() {
   const [cartPopupLabel, setCartPopupLabel] = useState('')
   const [slotQuantities, setSlotQuantities] = useState<Record<string, number>>({})
   const [resetKey, setResetKey] = useState(0)
+  const [subscriptions, setSubscriptions] = useState<any[]>([])
+  const [templates, setTemplates] = useState<any[]>([])
+  const [poolNames, setPoolNames] = useState<Record<string, string>>({})
   const slotsRef = useRef<HTMLDivElement>(null)
 
   const poolList = useMemo(() => Object.values(allPools), [allPools])
@@ -63,6 +67,21 @@ export default function BookingPage() {
   }, [user])
 
   useEffect(() => { loadBookings() }, [loadBookings])
+
+  // Load subscriptions & templates
+  useEffect(() => {
+    Promise.all([
+      loadSubscriptionsFromServer(),
+      loadTemplatesFromServer(),
+      loadPoolNames(),
+    ]).then(([subs, tmpls, pnames]) => {
+      const now = new Date()
+      const active = subs.filter((s: any) => s.is_published && (!s.expires_at || new Date(s.expires_at) > now))
+      setSubscriptions(active)
+      setTemplates(tmpls)
+      setPoolNames(pnames)
+    }).catch(() => {})
+  }, [])
 
   // Re-sync on window focus (e.g. after returning from cart)
   useEffect(() => {
@@ -410,51 +429,40 @@ export default function BookingPage() {
             </div>
           )}
 
-          {/* Passes */}
-          <div className="text-center text-xs sm:text-sm text-stone-400 py-1 sm:py-2">- lub kup karnet -</div>
+          {/* Subscriptions */}
+          {subscriptions.length > 0 && (
+            <>
+              <div className="text-center text-xs sm:text-sm text-stone-400 py-1 sm:py-2">- lub kup abonament -</div>
 
-          <div className="grid grid-cols-3 gap-2 sm:gap-3">
-            <button
-              onClick={() => {
-                if (!selectedPool) return
-                const id = "pass8-" + selectedPool + "-" + Date.now() + "-" + Math.random()
-                dispatch({ type: "ADD_ITEM", payload: { id, poolId: selectedPool, type: "pass8", label: "Karnet na 8 zajec - " + (currentPool?.name || selectedPool), price: 299, quantity: 1 } })
-                showCartAnimation("Karnet na 8 zajec zostal dodany do koszyka!")
-              }}
-              className="bg-white border border-sand/30 rounded-xl py-3 sm:py-4 px-2 text-center hover:border-teal-brand/40 hover:shadow transition-all active:scale-[0.98]"
-            >
-              <div className="text-xs sm:text-sm font-bold text-teal-brand">8 zajec</div>
-              <div className="text-sm sm:text-base font-bold text-stone-800">299 zl</div>
-              <div className="text-[9px] sm:text-[11px] text-stone-400">1 mies.</div>
-            </button>
-            <button
-              onClick={() => {
-                if (!selectedPool) return
-                const id = "pass12-" + selectedPool + "-" + Date.now() + "-" + Math.random()
-                dispatch({ type: "ADD_ITEM", payload: { id, poolId: selectedPool, type: "pass12", label: "Karnet na 12 zajec - " + (currentPool?.name || selectedPool), price: 399, quantity: 1 } })
-                showCartAnimation("Karnet na 12 zajec zostal dodany do koszyka!")
-              }}
-              className="bg-white border-2 border-teal-brand/30 rounded-xl py-3 sm:py-4 px-2 text-center hover:border-teal-brand hover:shadow transition-all active:scale-[0.98] relative"
-            >
-              <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 bg-teal-brand text-white text-[8px] sm:text-[10px] px-1.5 py-0.5 rounded-full font-bold whitespace-nowrap">BEST</div>
-              <div className="text-xs sm:text-sm font-bold text-teal-brand mt-1.5">12 zajec</div>
-              <div className="text-sm sm:text-base font-bold text-stone-800">399 zl</div>
-              <div className="text-[9px] sm:text-[11px] text-stone-400">1,5 mies.</div>
-            </button>
-            <button
-              onClick={() => {
-                if (!selectedPool) return
-                const id = "pass16-" + selectedPool + "-" + Date.now() + "-" + Math.random()
-                dispatch({ type: "ADD_ITEM", payload: { id, poolId: selectedPool, type: "pass16", label: "Karnet Bezlimit - " + (currentPool?.name || selectedPool), price: 549, quantity: 1 } })
-                showCartAnimation("Karnet Bezlimit zostal dodany do koszyka!")
-              }}
-              className="bg-white border border-sand/30 rounded-xl py-3 sm:py-4 px-2 text-center hover:border-teal-brand/40 hover:shadow transition-all active:scale-[0.98]"
-            >
-              <div className="text-xs sm:text-sm font-bold text-teal-brand">Bezlimit</div>
-              <div className="text-sm sm:text-base font-bold text-stone-800">549 zl</div>
-              <div className="text-[9px] sm:text-[11px] text-stone-400">1 mies.</div>
-            </button>
-          </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
+                {Object.entries(
+                  subscriptions
+                    .filter((sub: any) => sub.pool_id === selectedPool)
+                    .reduce((acc: Record<string, any[]>, sub: any) => {
+                    const key = sub.template_id
+                    if (!acc[key]) acc[key] = []
+                    acc[key].push(sub)
+                    return acc
+                  }, {})
+                ).map(([templateId, subs]) => {
+                  const tmpl = templates.find((t: any) => t.id === templateId)
+                  if (!tmpl) return null
+                  return (
+                    <Link
+                      key={templateId}
+                      to="/subscriptions"
+                      className="bg-white border border-sand/30 rounded-xl py-3 sm:py-4 px-3 text-center hover:border-teal-brand/40 hover:shadow transition-all active:scale-[0.98] block"
+                    >
+                      <div className="text-xs sm:text-sm font-bold text-teal-brand">{tmpl.name}</div>
+                      <div className="text-sm sm:text-base font-bold text-stone-800">{tmpl.price} zł</div>
+                      <div className="text-[9px] sm:text-[11px] text-stone-400">{poolNames[tmpl.pool_id] || ''}</div>
+                      <div className="text-[9px] sm:text-[11px] text-stone-400 mt-0.5">{tmpl.total_classes} zajęć · {(subs as any[]).length} mies.</div>
+                    </Link>
+                  )
+                })}
+              </div>
+            </>
+          )}
 
           <div className="text-center pt-2">
             <button onClick={() => navigate('/cart')} className="w-full py-3.5 sm:py-4 rounded-xl sm:rounded-2xl bg-teal-brand text-white font-bold text-sm sm:text-base shadow-lg hover:bg-teal-light active:scale-[0.98] transition-all flex items-center justify-center gap-2">
