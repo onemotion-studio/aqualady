@@ -20,7 +20,7 @@ export default function Layout() {
         <Link to="/" className="flex items-center no-underline shrink-0">
           <img
             src={logoSrc}
-            className="h-9 sm:h-10 lg:h-12 w-auto object-contain"
+            className="h-8 sm:h-10 lg:h-12 w-auto object-contain"
           />
         </Link>
 
