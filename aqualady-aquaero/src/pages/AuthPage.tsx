@@ -93,7 +93,7 @@ export default function AuthPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 sm:py-4 rounded-xl sm:rounded-2xl font-bold text-sm sm:text-base bg-teal-brand text-white shadow-lg hover:bg-teal-light active:scale-[0.98] transition-all disabled:bg-stone-300 disabled:cursor-not-allowed"
+              className="w-full py-3 sm:py-4 rounded-xl sm:rounded-2xl font-bold text-sm sm:text-base bg-gradient-primary text-white shadow-lg hover:brightness-110 active:scale-[0.98] transition-all disabled:bg-stone-300 disabled:cursor-not-allowed"
             >
               {loading
                 ? 'Proszę czekać...'

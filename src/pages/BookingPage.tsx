@@ -202,9 +202,7 @@ export default function BookingPage() {
               <button
                 onClick={() => setSelectedTime('morning')}
                 className={`flex-1 py-3 rounded-xl text-sm font-medium transition-all border ${
-                  selectedTime === 'morning'
-                    ? 'bg-teal-brand text-white border-teal-brand shadow'
-                    : 'bg-white text-stone-600 border-sand/30 hover:border-teal-brand/40'
+                  selectedTime === 'morning' ? 'bg-gradient-primary text-white border-teal-brand shadow' : 'bg-white text-stone-600 border-sand/30 hover:border-teal-brand/40'
                 }`}
               >
                 🌅 Poranna (9:00)
@@ -212,9 +210,7 @@ export default function BookingPage() {
               <button
                 onClick={() => setSelectedTime('evening')}
                 className={`flex-1 py-3 rounded-xl text-sm font-medium transition-all border ${
-                  selectedTime === 'evening'
-                    ? 'bg-teal-brand text-white border-teal-brand shadow'
-                    : 'bg-white text-stone-600 border-sand/30 hover:border-teal-brand/40'
+                  selectedTime === 'evening' ? 'bg-gradient-primary text-white border-teal-brand shadow' : 'bg-white text-stone-600 border-sand/30 hover:border-teal-brand/40'
                 }`}
               >
                 🌇 Wieczorna (17:00)
@@ -241,8 +237,8 @@ export default function BookingPage() {
               disabled={selectedDates.length === 0}
               className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all ${
                 selectedDates.length === 0
-                  ? 'bg-stone-200 text-stone-400 cursor-not-allowed'
-                  : 'bg-teal-brand text-white shadow-lg hover:bg-teal-light active:scale-[0.98]'
+                                  ? 'bg-stone-200 text-stone-400 cursor-not-allowed'
+                                  : 'bg-gradient-primary text-white shadow-lg hover:brightness-110 active:scale-[0.98]'
               }`}
             >
               Dodaj wybrane zajęcia · {selectedDates.length} × {PRICES.single} zł

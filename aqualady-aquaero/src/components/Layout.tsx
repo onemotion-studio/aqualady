@@ -15,12 +15,12 @@ export default function Layout() {
 
   return (
     <div className="flex flex-col min-h-dvh">
-      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-sand/30 px-4 sm:px-6 lg:px-8 py-2.5 flex items-center justify-between shadow-sm">
+
+      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-sand/30 px-4 sm:px-6 lg:px-8 py-5 flex items-center justify-between shadow-sm">
         <Link to="/" className="flex items-center no-underline shrink-0">
           <img
             src={logoSrc}
-            alt="Aqualady Aquaero"
-            className="h-8 sm:h-10 lg:h-12 w-auto object-contain"
+            className="h-10 sm:h-10 lg:h-12 w-auto object-contain"
           />
         </Link>
 
@@ -47,7 +47,7 @@ export default function Layout() {
           {user ? (
             <Link
               to="/profile"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-brand/10 hover:bg-teal-brand/20 text-teal-brand text-xs sm:text-sm font-medium transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#7BE2F7] hover:bg-[#FFD878] text-white text-xs sm:text-sm font-medium transition-colors"
             >
               <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -59,7 +59,7 @@ export default function Layout() {
           ) : !isAuthPage ? (
             <Link
               to="/auth"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-brand/10 hover:bg-teal-brand/20 text-teal-brand text-xs sm:text-sm font-medium transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#7BE2F7] hover:bg-[#FFD878] text-white text-xs sm:text-sm font-medium transition-colors"
             >
               <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
@@ -106,9 +106,9 @@ export default function Layout() {
                   <span className="text-xs text-green-600">Sprawdz szczegoly</span>
                 </div>
               </a>
-              <a
+                            <a
                 href="#"
-                className="flex items-center gap-3 w-full px-4 py-3.5 rounded-xl bg-green-500/10 hover:bg-green-500/20 text-green-700 font-medium transition-colors"
+                className="flex items-center gap-3 w-full px-4 py-3.5 rounded-xl bg-gradient-secondary hover:brightness-110 text-white font-medium transition-colors"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -117,7 +117,7 @@ export default function Layout() {
                 </svg>
                 <div className="flex flex-col">
                   <span className="text-sm sm:text-base font-semibold">Masz pytania? Chętnie odpowiemy!</span>
-                  <span className="text-xs text-green-600">Napisz do nas</span>
+                  <span className="text-xs opacity-70">Napisz do nas</span>
                 </div>
               </a>
             </div>
@@ -135,12 +135,20 @@ export default function Layout() {
                       <div className="max-w-2xl mx-auto pointer-events-auto">
                         <Link
                           to="/booking"
-                          className="flex items-center justify-center gap-2 w-full py-3.5 sm:py-4 rounded-xl sm:rounded-2xl bg-teal-brand text-white font-bold text-base sm:text-lg shadow-lg hover:bg-teal-light active:scale-[0.98] transition-all"
+                                                    className="flex items-center justify-center gap-4 sm:gap-5 w-full py-4 sm:py-5 px-5 sm:px-8 rounded-full bg-gradient-to-r from-[#94DEEE] to-[#29C5E2] text-white shadow-lg hover:brightness-110 active:scale-[0.98] transition-all"
                         >
-                          Grafik i Cennik
-                          <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
-                          </svg>
+                                                    <div className="flex items-center gap-4 sm:gap-5">
+                                                      <svg className="w-9 h-9 sm:w-11 sm:h-11 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+                                                      </svg>
+                                                      <div className="flex flex-col text-left leading-tight">
+                                                        <span className="text-2xl sm:text-3xl font-light tracking-wide">Grafik i Cennik - Kup bilet</span>
+                                                        <span className="text-base sm:text-lg text-white/80 tracking-wide">Zarezerwuj swoje miejsce na zajęcia</span>
+                                                      </div>
+                                                      <svg className="w-7 h-7 sm:w-8 sm:h-8 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                                                      </svg>
+                                                    </div>
                         </Link>
                       </div>
                     </div>

@@ -82,7 +82,7 @@ export default function SubscriptionsPage() {
           <p className="text-sm text-stone-400">Aktualnie brak dostępnych abonamentów. Zapraszamy wkrótce!</p>
           <button
             onClick={() => navigate('/booking')}
-            className="mt-6 px-6 py-3 rounded-xl bg-teal-brand text-white text-sm font-bold hover:bg-teal-light transition-all"
+            className="mt-6 px-6 py-3 rounded-xl bg-gradient-primary text-white text-sm font-bold hover:brightness-110 transition-all"
           >
             Rezerwuj pojedyncze zajęcia
           </button>
@@ -147,7 +147,7 @@ export default function SubscriptionsPage() {
                         <div className="shrink-0 ml-3">
                           <button
                             onClick={() => handleAddToCart(sub)}
-                            className="px-4 py-1.5 rounded-lg bg-teal-brand text-white text-[10px] font-bold hover:bg-teal-light active:scale-[0.97] transition-all"
+                            className="px-4 py-1.5 rounded-lg bg-gradient-primary text-white text-[10px] font-bold hover:brightness-110 active:scale-[0.97] transition-all"
                           >
                             Do koszyka
                           </button>

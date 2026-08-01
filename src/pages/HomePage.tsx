@@ -141,7 +141,7 @@ export default function HomePage() {
                 <p className="text-[11px] text-stone-500 mt-1.5 mb-3">{plan.desc}</p>
                 <Link
                   to="/booking"
-                  className="block w-full py-2.5 rounded-xl bg-teal-brand text-white text-sm font-bold text-center hover:bg-teal-light active:scale-[0.98] transition-all shadow-sm"
+                  className="block w-full py-2.5 rounded-xl bg-gradient-primary text-white text-sm font-bold text-center hover:brightness-110 active:scale-[0.98] transition-all shadow-sm"
                 >
                   Kupić
                 </Link>

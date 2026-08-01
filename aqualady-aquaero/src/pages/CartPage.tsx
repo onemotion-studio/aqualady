@@ -371,7 +371,7 @@ export default function CartPage() {
                 <button
                   onClick={applyPromoCode}
                   disabled={!promoCode.trim() || promoLoading}
-                  className="px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl bg-teal-brand text-white text-sm font-medium hover:bg-teal-light active:scale-[0.98] transition-all disabled:bg-stone-200 disabled:text-stone-400"
+                  className="px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl bg-gradient-primary text-white text-sm font-medium hover:brightness-110 active:scale-[0.98] transition-all disabled:bg-stone-200 disabled:text-stone-400"
                 >
                   {promoLoading ? '...' : 'Zastosuj'}
                 </button>
@@ -493,7 +493,7 @@ export default function CartPage() {
                     <button
             onClick={handleReserve}
                         disabled={!email || !name || !accepted || items.length === 0 || loading}
-            className={'w-full py-4 sm:py-5 rounded-2xl sm:rounded-3xl font-bold text-sm sm:text-base transition-all flex items-center justify-center gap-2 ' + (email && name && accepted && items.length > 0 && !loading ? 'bg-teal-brand text-white shadow-lg hover:bg-teal-light active:scale-[0.98]' : 'bg-stone-200 text-stone-400 cursor-not-allowed')}
+            className={'w-full py-4 sm:py-5 rounded-2xl sm:rounded-3xl font-bold text-sm sm:text-base transition-all flex items-center justify-center gap-2 ' + (email && name && accepted && items.length > 0 && !loading ? 'bg-gradient-primary text-white shadow-lg hover:brightness-110 active:scale-[0.98]' : 'bg-stone-200 text-stone-400 cursor-not-allowed')}
           >
             {loading ? 'Proszę czekać...' : <>Zarezerwuj <span className="text-base sm:text-lg">{totalAfterDiscount} zł</span></>}
           </button>

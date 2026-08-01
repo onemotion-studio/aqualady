@@ -46,7 +46,7 @@ export default function AdminLogin() {
 
         <button
           type="submit"
-          className="w-full mt-5 py-3.5 sm:py-4 rounded-xl sm:rounded-2xl bg-teal-brand text-white font-bold text-sm sm:text-base shadow-lg hover:bg-teal-light active:scale-[0.98] transition-all"
+          className="w-full mt-5 py-3.5 sm:py-4 rounded-xl sm:rounded-2xl bg-gradient-primary text-white font-bold text-sm sm:text-base shadow-lg hover:brightness-110 active:scale-[0.98] transition-all"
         >
           Zaloguj sie
         </button>

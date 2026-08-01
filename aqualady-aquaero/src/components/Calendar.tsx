@@ -115,7 +115,7 @@ export default function Calendar({ selectedDate, onDateSelect, resetKey, availab
                                                                 className={`aspect-square rounded-lg text-xs sm:text-sm lg:text-base font-medium transition-all flex flex-col items-center justify-center relative ${
                                   !isClickable ? 'text-stone-300 cursor-not-allowed' : 'cursor-pointer hover:brightness-95'
                                 } ${
-                                  isSelected ? 'bg-teal-brand text-white shadow-md hover:bg-teal-light' : ''
+                                  isSelected ? 'bg-gradient-primary text-white shadow-md hover:brightness-110' : ''
                                 } ${
                                   isMyBooked && !isSelected ? 'bg-teal-100 text-teal-800 font-bold ring-2 ring-teal-brand/30' : ''
                                 } ${

@@ -397,20 +397,20 @@ export default function TrainerDashboard() {
           <button
             onClick={() => setTab('schedule')}
             className={`flex-1 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-medium transition-all ${
-              tab === 'schedule' ? 'bg-teal-brand text-white shadow-md' : 'text-stone-500 hover:text-stone-700'
+              tab === 'schedule' ? 'bg-gradient-primary text-white shadow-md' : 'text-stone-500 hover:text-stone-700'
             }`}
           >
             Grafik zajęć
           </button>
                     <button
             onClick={() => setTab('promocodes')}
-            className={`flex-1 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-medium transition-all ${tab === 'promocodes' ? 'bg-teal-brand text-white shadow-md' : 'text-stone-500 hover:text-stone-700'}`}
+            className={`flex-1 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-medium transition-all ${tab === 'promocodes' ? 'bg-gradient-primary text-white shadow-md' : 'text-stone-500 hover:text-stone-700'}`}
           >
             Promokody ({promocodes.length})
           </button>
           <button
             onClick={() => setTab('subscriptions')}
-            className={`flex-1 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-medium transition-all ${tab === 'subscriptions' ? 'bg-teal-brand text-white shadow-md' : 'text-stone-500 hover:text-stone-700'}`}
+            className={`flex-1 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-medium transition-all ${tab === 'subscriptions' ? 'bg-gradient-primary text-white shadow-md' : 'text-stone-500 hover:text-stone-700'}`}
           >
             Subskrypcje ({subscriptions.length})
           </button>
@@ -427,7 +427,7 @@ export default function TrainerDashboard() {
               <select
                 value={activePoolId}
                 onChange={e => { setActivePoolId(e.target.value); setSelectedDate(null); setCheckedSlots(new Set()) }}
-                className="w-full px-4 py-3 sm:py-3.5 rounded-xl bg-white border border-sand/30 text-sm text-stone-700 focus:border-teal-brand focus:outline-none appearance-none"
+                className="w-full px-4 py-3 sm:py-3.5 rounded-xl bg-white border border-sand/30 text-sm text-stone-700 focus:border-gradient-primary focus:outline-none appearance-none"
               >
                 {poolList.map(p => (
                   <option key={p.id} value={p.id}>{p.name}</option>
@@ -436,7 +436,7 @@ export default function TrainerDashboard() {
             </div>
             <button
               onClick={openEditPool}
-              className="px-3 sm:px-4 py-3 sm:py-3.5 rounded-xl bg-white border border-sand/30 text-stone-500 hover:border-teal-brand/40 hover:text-teal-brand transition-all"
+              className="px-3 sm:px-4 py-3 sm:py-3.5 rounded-xl bg-white border border-sand/30 text-stone-500 hover:border-gradient-primary/40 hover:text-gradient-primary transition-all"
               title="Edytuj basen"
             >
               <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -445,7 +445,7 @@ export default function TrainerDashboard() {
             </button>
             <button
               onClick={openAddPool}
-              className="px-3 sm:px-4 py-3 sm:py-3.5 rounded-xl bg-teal-brand text-white text-sm font-medium hover:bg-teal-light active:scale-[0.98] transition-all"
+              className="px-3 sm:px-4 py-3 sm:py-3.5 rounded-xl bg-gradient-primary text-white text-sm font-medium hover:brightness-110 active:scale-[0.98] transition-all"
               title="Dodaj nowy basen"
             >
               + Nowy
@@ -471,19 +471,19 @@ export default function TrainerDashboard() {
               placeholder="Nazwa basenu"
               value={poolForm.name}
               onChange={e => setPoolForm(prev => ({ ...prev, name: e.target.value }))}
-              className="w-full px-4 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-sm focus:border-teal-brand focus:outline-none"
+              className="w-full px-4 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-sm focus:border-gradient-primary focus:outline-none"
             />
             <input
               placeholder="Adres"
               value={poolForm.address}
               onChange={e => setPoolForm(prev => ({ ...prev, address: e.target.value }))}
-              className="w-full px-4 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-sm focus:border-teal-brand focus:outline-none"
+              className="w-full px-4 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-sm focus:border-gradient-primary focus:outline-none"
             />
                         <input
                           placeholder="Temperatura (np. 28)"
                           value={poolForm.temp}
                           onChange={e => setPoolForm(prev => ({ ...prev, temp: e.target.value }))}
-                          className="w-full px-4 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-sm focus:border-teal-brand focus:outline-none"
+                          className="w-full px-4 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-sm focus:border-gradient-primary focus:outline-none"
                           type="number"
                         />
             <div className="flex gap-2">
@@ -491,7 +491,7 @@ export default function TrainerDashboard() {
                 placeholder="Szerokosc (lat)"
                 value={poolForm.lat}
                 onChange={e => setPoolForm(prev => ({ ...prev, lat: e.target.value }))}
-                className="flex-1 px-4 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-sm focus:border-teal-brand focus:outline-none"
+                className="flex-1 px-4 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-sm focus:border-gradient-primary focus:outline-none"
                 type="number"
                 step="any"
               />
@@ -499,7 +499,7 @@ export default function TrainerDashboard() {
                 placeholder="Dlugosc (lng)"
                 value={poolForm.lng}
                 onChange={e => setPoolForm(prev => ({ ...prev, lng: e.target.value }))}
-                className="flex-1 px-4 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-sm focus:border-teal-brand focus:outline-none"
+                className="flex-1 px-4 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-sm focus:border-gradient-primary focus:outline-none"
                 type="number"
                 step="any"
               />
@@ -508,7 +508,7 @@ export default function TrainerDashboard() {
               <button
                 onClick={handleSavePool}
                 disabled={!poolForm.name}
-                className="flex-1 py-2.5 sm:py-3 rounded-xl bg-teal-brand text-white text-sm font-bold disabled:bg-stone-200 disabled:text-stone-400 hover:bg-teal-light active:scale-[0.98] transition-all"
+                className="flex-1 py-2.5 sm:py-3 rounded-xl bg-gradient-primary text-white text-sm font-bold disabled:bg-stone-200 disabled:text-stone-400 hover:brightness-110 active:scale-[0.98] transition-all"
               >
                 {editingPoolId ? 'Zapisz zmiany' : 'Dodaj basen'}
               </button>
@@ -566,13 +566,13 @@ export default function TrainerDashboard() {
                       className={`aspect-square rounded-lg text-xs sm:text-sm lg:text-base font-medium transition-all flex flex-col items-center justify-center relative ${
                         isPast ? 'text-stone-300 cursor-not-allowed' : 'cursor-pointer hover:bg-sand-light'
                       } ${
-                        isThisSelected ? 'bg-teal-brand text-white shadow-md' : ''
+                        isThisSelected ? 'bg-gradient-primary text-white shadow-md' : ''
                       } ${
                         hasBookings && !isThisSelected ? 'bg-amber-700/15 text-amber-700 font-bold' : ''
                       } ${
-                        hasSchedule && !isThisSelected && !hasBookings ? 'bg-teal-brand/15 text-teal-brand font-bold' : ''
+                        hasSchedule && !isThisSelected && !hasBookings ? 'bg-gradient-primary/15 text-gradient-primary font-bold' : ''
                       } ${
-                        isToday && !isThisSelected && !hasSchedule && !hasBookings ? 'border border-teal-brand/40 text-teal-brand font-bold' : ''
+                        isToday && !isThisSelected && !hasSchedule && !hasBookings ? 'border border-gradient-primary/40 text-gradient-primary font-bold' : ''
                       } ${
                         !isThisSelected && !isPast && !hasSchedule && !hasBookings && !isToday ? 'text-stone-700' : ''
                       }`}
@@ -599,14 +599,14 @@ export default function TrainerDashboard() {
                 type="time"
                 value={newSlotStart}
                 onChange={e => setNewSlotStart(e.target.value)}
-                className="flex-1 px-3 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-xs sm:text-sm focus:border-teal-brand focus:outline-none"
+                className="flex-1 px-3 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-xs sm:text-sm focus:border-gradient-primary focus:outline-none"
                 placeholder="Poczatek"
               />
               <input
                 type="time"
                 value={newSlotEnd}
                 onChange={e => setNewSlotEnd(e.target.value)}
-                className="flex-1 px-3 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-xs sm:text-sm focus:border-teal-brand focus:outline-none"
+                className="flex-1 px-3 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-xs sm:text-sm focus:border-gradient-primary focus:outline-none"
                 placeholder="Koniec"
               />
                         </div>
@@ -614,7 +614,7 @@ export default function TrainerDashboard() {
               <input
                 value={newSlotLabel}
                 onChange={e => setNewSlotLabel(e.target.value)}
-                className="flex-1 px-3 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-xs sm:text-sm focus:border-teal-brand focus:outline-none"
+                className="flex-1 px-3 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-xs sm:text-sm focus:border-gradient-primary focus:outline-none"
                 placeholder="Opis (opcjonalnie)"
               />
               <input
@@ -623,14 +623,14 @@ export default function TrainerDashboard() {
                 max="99"
                 value={newSlotCapacity}
                 onChange={e => setNewSlotCapacity(e.target.value)}
-                className="w-full sm:w-24 px-3 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-xs sm:text-sm focus:border-teal-brand focus:outline-none"
+                className="w-full sm:w-24 px-3 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-xs sm:text-sm focus:border-gradient-primary focus:outline-none"
                 placeholder="Miejsca"
               />
             </div>
             <button
               onClick={addCustomSlot}
               disabled={!newSlotStart || !newSlotEnd}
-              className="w-full py-2.5 sm:py-3 rounded-xl bg-teal-brand text-white text-xs sm:text-sm font-bold disabled:bg-stone-200 disabled:text-stone-400 hover:bg-teal-light transition-all mb-4"
+              className="w-full py-2.5 sm:py-3 rounded-xl bg-gradient-primary text-white text-xs sm:text-sm font-bold disabled:bg-stone-200 disabled:text-stone-400 hover:brightness-110 transition-all mb-4"
             >
               + Dodaj
             </button>
@@ -648,13 +648,13 @@ export default function TrainerDashboard() {
                     <div key={slot.value} className="bg-amber-50 rounded-xl p-3 sm:p-4 border border-amber-200 space-y-2">
                       <p className="text-xs font-semibold text-amber-800">Edytuj slot</p>
                       <div className="flex flex-col sm:flex-row gap-2">
-                        <input type="time" value={editSlotStart} onChange={e => setEditSlotStart(e.target.value)} className="flex-1 px-3 py-2 rounded-lg border border-amber-200 text-xs focus:border-teal-brand focus:outline-none" />
-                        <input type="time" value={editSlotEnd} onChange={e => setEditSlotEnd(e.target.value)} className="flex-1 px-3 py-2 rounded-lg border border-amber-200 text-xs focus:border-teal-brand focus:outline-none" />
+                        <input type="time" value={editSlotStart} onChange={e => setEditSlotStart(e.target.value)} className="flex-1 px-3 py-2 rounded-lg border border-amber-200 text-xs focus:border-gradient-primary focus:outline-none" />
+                        <input type="time" value={editSlotEnd} onChange={e => setEditSlotEnd(e.target.value)} className="flex-1 px-3 py-2 rounded-lg border border-amber-200 text-xs focus:border-gradient-primary focus:outline-none" />
                       </div>
-                      <input value={editSlotLabel} onChange={e => setEditSlotLabel(e.target.value)} className="w-full px-3 py-2 rounded-lg border border-amber-200 text-xs focus:border-teal-brand focus:outline-none" placeholder="Opis" />
-                      <input type="number" min="1" max="99" value={editSlotCapacity} onChange={e => setEditSlotCapacity(e.target.value)} className="w-full sm:w-24 px-3 py-2 rounded-lg border border-amber-200 text-xs focus:border-teal-brand focus:outline-none" placeholder="Miejsca" />
+                      <input value={editSlotLabel} onChange={e => setEditSlotLabel(e.target.value)} className="w-full px-3 py-2 rounded-lg border border-amber-200 text-xs focus:border-gradient-primary focus:outline-none" placeholder="Opis" />
+                      <input type="number" min="1" max="99" value={editSlotCapacity} onChange={e => setEditSlotCapacity(e.target.value)} className="w-full sm:w-24 px-3 py-2 rounded-lg border border-amber-200 text-xs focus:border-gradient-primary focus:outline-none" placeholder="Miejsca" />
                       <div className="flex gap-2">
-                        <button onClick={() => saveEditSlot(si)} disabled={!editSlotStart || !editSlotEnd} className="flex-1 py-2 rounded-lg bg-teal-brand text-white text-xs font-bold disabled:bg-stone-300 hover:bg-teal-light transition-all">Zapisz</button>
+                        <button onClick={() => saveEditSlot(si)} disabled={!editSlotStart || !editSlotEnd} className="flex-1 py-2 rounded-lg bg-gradient-primary text-white text-xs font-bold disabled:bg-stone-300 hover:brightness-110 transition-all">Zapisz</button>
                         <button onClick={cancelEditSlot} className="px-4 py-2 rounded-lg border border-stone-300 text-xs text-stone-500 hover:bg-stone-50 transition-all">Anuluj</button>
                       </div>
                     </div>
@@ -664,9 +664,9 @@ export default function TrainerDashboard() {
                 return (
                   <div key={slot.value}>
                     <label className={`flex items-center gap-3 px-4 py-3 sm:py-3.5 rounded-xl border text-sm font-medium transition-all cursor-pointer ${
-                      isChecked ? 'bg-teal-brand/10 border-teal-brand text-teal-brand' : 'bg-white border-sand/30 text-stone-600 hover:border-teal-brand/40'
+                      isChecked ? 'bg-gradient-primary/10 border-gradient-primary text-gradient-primary' : 'bg-white border-sand/30 text-stone-600 hover:border-gradient-primary/40'
                     }`}>
-                      <input type="checkbox" checked={isChecked} onChange={() => toggleSlot(slot.value)} className="w-4 h-4 sm:w-5 sm:h-5 accent-teal-brand rounded" />
+                      <input type="checkbox" checked={isChecked} onChange={() => toggleSlot(slot.value)} className="w-4 h-4 sm:w-5 sm:h-5 accent-gradient-primary rounded" />
                       <div className="flex items-center gap-3 flex-1 min-w-0">
                         <div className="flex flex-col flex-1 min-w-0">
                           {slot.label.includes(' - ') ? (
@@ -679,7 +679,7 @@ export default function TrainerDashboard() {
                           )}
                         </div>
                         {slot.capacity ? (
-                          <span className="text-xs font-bold text-teal-brand bg-teal-brand/10 px-3 py-1 rounded-full shrink-0">{slot.capacity}</span>
+                          <span className="text-xs font-bold text-gradient-primary bg-gradient-primary/10 px-3 py-1 rounded-full shrink-0">{slot.capacity}</span>
                         ) : null}
                         {/* Индикатор бронирований */}
                         {totalBooked > 0 && (
@@ -690,7 +690,7 @@ export default function TrainerDashboard() {
                         {totalBooked > 0 && (
                           <span className="text-xs font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">{totalBooked}</span>
                         )}
-                        <button type="button" onClick={(e) => { e.preventDefault(); startEditSlot(slot, si) }} className="text-stone-400 hover:text-teal-brand transition-colors" title="Edytuj">
+                        <button type="button" onClick={(e) => { e.preventDefault(); startEditSlot(slot, si) }} className="text-stone-400 hover:text-gradient-primary transition-colors" title="Edytuj">
                           <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                         </button>
                         <button type="button" onClick={(e) => { e.preventDefault(); const next = allSlots.filter((_, i) => i !== si); setCustomSlots(next) }} className="text-red-400 hover:text-red-600 transition-colors" title="Usun">
@@ -709,7 +709,7 @@ export default function TrainerDashboard() {
                         <p className="text-xs font-medium text-stone-500 mb-1">Zapisani ({totalBooked} os.):</p>
                         {slotBookings.map((r, i) => (
                           <div key={i} className="flex items-center gap-2 text-xs sm:text-sm">
-                            <span className="w-5 h-5 rounded-full bg-teal-brand/10 text-teal-brand font-bold flex items-center justify-center shrink-0 text-[10px]">{r.quantity}</span>
+                            <span className="w-5 h-5 rounded-full bg-gradient-primary/10 text-gradient-primary font-bold flex items-center justify-center shrink-0 text-[10px]">{r.quantity}</span>
                             <span className="font-medium text-stone-700">{r.name || '—'}</span>
                             {r.email && <span className="text-stone-400 text-xs truncate">{r.email}</span>}
                           </div>
@@ -723,7 +723,7 @@ export default function TrainerDashboard() {
 
                         <button
               onClick={handleSave}
-              className="w-full mt-4 py-3.5 sm:py-4 rounded-xl sm:rounded-2xl bg-teal-brand text-white font-bold text-sm sm:text-base shadow-lg hover:bg-teal-light active:scale-[0.98] transition-all"
+              className="w-full mt-4 py-3.5 sm:py-4 rounded-xl sm:rounded-2xl bg-gradient-primary text-white font-bold text-sm sm:text-base shadow-lg hover:brightness-110 active:scale-[0.98] transition-all"
             >
               Opublikuj grafik
             </button>
@@ -750,7 +750,7 @@ export default function TrainerDashboard() {
             <p className="text-sm font-medium text-stone-600">Lista promokodów</p>
             <button
               onClick={openAddPromo}
-              className="px-4 py-2 rounded-xl bg-teal-brand text-white text-sm font-bold hover:bg-teal-light active:scale-[0.98] transition-all"
+              className="px-4 py-2 rounded-xl bg-gradient-primary text-white text-sm font-bold hover:brightness-110 active:scale-[0.98] transition-all"
             >
               + Nowy kod
             </button>
@@ -766,13 +766,13 @@ export default function TrainerDashboard() {
                 placeholder="Kod (np. ZNIŻKA10)"
                 value={promoForm.code}
                 onChange={e => setPromoForm(prev => ({ ...prev, code: e.target.value }))}
-                className="w-full px-4 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-sm focus:border-teal-brand focus:outline-none uppercase"
+                className="w-full px-4 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-sm focus:border-gradient-primary focus:outline-none uppercase"
               />
               <div className="flex gap-2">
                 <select
                   value={promoForm.discount_type}
                   onChange={e => setPromoForm(prev => ({ ...prev, discount_type: e.target.value as 'percent' | 'fixed' }))}
-                  className="px-4 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-sm focus:border-teal-brand focus:outline-none"
+                  className="px-4 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-sm focus:border-gradient-primary focus:outline-none"
                 >
                   <option value="percent">%</option>
                   <option value="fixed">zł</option>
@@ -783,7 +783,7 @@ export default function TrainerDashboard() {
                   placeholder={promoForm.discount_type === 'percent' ? 'Rabat %' : 'Kwota zł'}
                   value={promoForm.discount_value}
                   onChange={e => setPromoForm(prev => ({ ...prev, discount_value: e.target.value }))}
-                  className="flex-1 px-4 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-sm focus:border-teal-brand focus:outline-none"
+                  className="flex-1 px-4 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-sm focus:border-gradient-primary focus:outline-none"
                 />
               </div>
               <div className="flex gap-2">
@@ -793,13 +793,13 @@ export default function TrainerDashboard() {
                   placeholder="Max użyć (0 = bez limitu)"
                   value={promoForm.max_uses}
                   onChange={e => setPromoForm(prev => ({ ...prev, max_uses: e.target.value }))}
-                  className="flex-1 px-4 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-sm focus:border-teal-brand focus:outline-none"
+                  className="flex-1 px-4 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-sm focus:border-gradient-primary focus:outline-none"
                 />
                 <input
                   type="date"
                   value={promoForm.expires_at}
                   onChange={e => setPromoForm(prev => ({ ...prev, expires_at: e.target.value }))}
-                  className="flex-1 px-4 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-sm focus:border-teal-brand focus:outline-none"
+                  className="flex-1 px-4 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-sm focus:border-gradient-primary focus:outline-none"
                 />
               </div>
               <label className="flex items-center gap-2 text-sm text-stone-600">
@@ -807,7 +807,7 @@ export default function TrainerDashboard() {
                   type="checkbox"
                   checked={promoForm.is_active}
                   onChange={e => setPromoForm(prev => ({ ...prev, is_active: e.target.checked }))}
-                  className="w-4 h-4 accent-teal-brand rounded"
+                  className="w-4 h-4 accent-gradient-primary rounded"
                 />
                 Aktywny
               </label>
@@ -823,7 +823,7 @@ export default function TrainerDashboard() {
                     setPromoForm(prev => ({ ...prev, pool_id: e.target.value, date: '', time_slots: [] }))
                     setPromoCalendarMonth(null)
                   }}
-                  className="w-full px-4 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-sm focus:border-teal-brand focus:outline-none"
+                  className="w-full px-4 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-sm focus:border-gradient-primary focus:outline-none"
                 >
                   <option value="">Dowolny basen</option>
                   {poolList.map(p => (
@@ -905,9 +905,9 @@ export default function TrainerDashboard() {
                                   className={`aspect-square rounded-md text-[10px] font-medium transition-all ${
                                     isPast ? 'text-stone-300 cursor-not-allowed' : 'cursor-pointer'
                                   } ${
-                                    isSelected ? 'bg-teal-brand text-white shadow-sm' : ''
+                                    isSelected ? 'bg-gradient-primary text-white shadow-sm' : ''
                                   } ${
-                                    hasSlots && !isSelected ? 'bg-teal-brand/10 text-teal-brand font-bold' : ''
+                                    hasSlots && !isSelected ? 'bg-gradient-primary/10 text-gradient-primary font-bold' : ''
                                   } ${
                                     !isSelected && !hasSlots && !isPast ? 'text-stone-600 hover:bg-sand-light' : ''
                                   }`}
@@ -935,7 +935,7 @@ export default function TrainerDashboard() {
                             const isChecked = promoForm.time_slots.includes(slot.value)
                             return (
                               <label key={slot.value} className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-xs cursor-pointer transition-all ${
-                                isChecked ? 'bg-teal-brand/10 border-teal-brand text-teal-brand' : 'bg-white border-sand/30 text-stone-600 hover:border-teal-brand/40'
+                                isChecked ? 'bg-gradient-primary/10 border-gradient-primary text-gradient-primary' : 'bg-white border-sand/30 text-stone-600 hover:border-gradient-primary/40'
                               }`}>
                                 <input
                                   type="checkbox"
@@ -948,7 +948,7 @@ export default function TrainerDashboard() {
                                         : [...prev.time_slots, slot.value],
                                     }))
                                   }}
-                                  className="w-3.5 h-3.5 accent-teal-brand rounded"
+                                  className="w-3.5 h-3.5 accent-gradient-primary rounded"
                                 />
                                 <span className="font-medium">{slot.label}</span>
                                 {slot.capacity ? <span className="text-stone-400 ml-auto">max {slot.capacity} os.</span> : null}
@@ -974,7 +974,7 @@ export default function TrainerDashboard() {
                     placeholder="np. 3"
                     value={promoForm.min_quantity}
                     onChange={e => setPromoForm(prev => ({ ...prev, min_quantity: e.target.value }))}
-                    className="w-full px-4 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-sm focus:border-teal-brand focus:outline-none"
+                    className="w-full px-4 py-2.5 sm:py-3 rounded-xl border border-sand/30 text-sm focus:border-gradient-primary focus:outline-none"
                   />
                 </div>
               </div>
@@ -983,7 +983,7 @@ export default function TrainerDashboard() {
                 <button
                   onClick={handleSavePromo}
                   disabled={!promoForm.code || !promoForm.discount_value}
-                  className="flex-1 py-2.5 sm:py-3 rounded-xl bg-teal-brand text-white text-sm font-bold disabled:bg-stone-200 disabled:text-stone-400 hover:bg-teal-light active:scale-[0.98] transition-all"
+                  className="flex-1 py-2.5 sm:py-3 rounded-xl bg-gradient-primary text-white text-sm font-bold disabled:bg-stone-200 disabled:text-stone-400 hover:brightness-110 active:scale-[0.98] transition-all"
                 >
                   {editPromoId ? 'Zapisz zmiany' : 'Dodaj kod'}
                 </button>
@@ -1026,7 +1026,7 @@ export default function TrainerDashboard() {
                         </span>
                         <button
                           onClick={() => openEditPromo(p)}
-                          className="text-stone-400 hover:text-teal-brand transition-colors"
+                          className="text-stone-400 hover:text-gradient-primary transition-colors"
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -1073,20 +1073,20 @@ export default function TrainerDashboard() {
           <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-sand/20">
             <div className="flex items-center justify-between mb-3">
               <p className="text-sm font-semibold text-stone-700">Szablony abonamentów</p>
-              <button onClick={() => { setEditTemplateId(null); setTemplateForm({ name: '', pool_id: '', total_classes: '8', price: '', tag: '', days_of_week: [], time_slots: [] }); setShowTemplateForm(true); window.scrollTo({ top: 0, behavior: 'smooth' }) }} className="px-3 py-1.5 rounded-xl bg-teal-brand text-white text-xs font-bold hover:bg-teal-light transition-all">+ Nowy szablon</button>
+              <button onClick={() => { setEditTemplateId(null); setTemplateForm({ name: '', pool_id: '', total_classes: '8', price: '', tag: '', days_of_week: [], time_slots: [] }); setShowTemplateForm(true); window.scrollTo({ top: 0, behavior: 'smooth' }) }} className="px-3 py-1.5 rounded-xl bg-gradient-primary text-white text-xs font-bold hover:brightness-110 transition-all">+ Nowy szablon</button>
             </div>
             {showTemplateForm && (
               <div className="bg-stone-50 rounded-xl p-3 sm:p-4 space-y-2.5 mb-3">
-                <input placeholder="Nazwa (np. 8 zajęć — poranki)" value={templateForm.name} onChange={e => setTemplateForm(p => ({ ...p, name: e.target.value }))} className="w-full px-3 py-2 rounded-lg border border-sand/30 text-xs focus:border-teal-brand focus:outline-none" />
-      <input placeholder="Etykieta (np. podstawowy, popularny, bezlimit)" value={templateForm.tag} onChange={e => setTemplateForm(p => ({ ...p, tag: e.target.value }))} className="w-full px-3 py-2 rounded-lg border border-sand/30 text-xs focus:border-teal-brand focus:outline-none" />
+                <input placeholder="Nazwa (np. 8 zajęć — poranki)" value={templateForm.name} onChange={e => setTemplateForm(p => ({ ...p, name: e.target.value }))} className="w-full px-3 py-2 rounded-lg border border-sand/30 text-xs focus:border-gradient-primary focus:outline-none" />
+      <input placeholder="Etykieta (np. podstawowy, popularny, bezlimit)" value={templateForm.tag} onChange={e => setTemplateForm(p => ({ ...p, tag: e.target.value }))} className="w-full px-3 py-2 rounded-lg border border-sand/30 text-xs focus:border-gradient-primary focus:outline-none" />
                 <div className="flex gap-2">
-                  <select value={templateForm.pool_id} onChange={e => setTemplateForm(p => ({ ...p, pool_id: e.target.value }))} className="flex-1 px-3 py-2 rounded-lg border border-sand/30 text-xs focus:border-teal-brand focus:outline-none">
+                  <select value={templateForm.pool_id} onChange={e => setTemplateForm(p => ({ ...p, pool_id: e.target.value }))} className="flex-1 px-3 py-2 rounded-lg border border-sand/30 text-xs focus:border-gradient-primary focus:outline-none">
                     <option value="">Wybierz basen</option>
                     {poolList.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                   </select>
-                  <input type="number" min="1" placeholder="Liczba" value={templateForm.total_classes} onChange={e => setTemplateForm(p => ({ ...p, total_classes: e.target.value }))} className="w-20 px-3 py-2 rounded-lg border border-sand/30 text-xs focus:border-teal-brand focus:outline-none" />
+                  <input type="number" min="1" placeholder="Liczba" value={templateForm.total_classes} onChange={e => setTemplateForm(p => ({ ...p, total_classes: e.target.value }))} className="w-20 px-3 py-2 rounded-lg border border-sand/30 text-xs focus:border-gradient-primary focus:outline-none" />
                   <div className="relative">
-                    <input type="number" min="1" placeholder="Cena" value={templateForm.price} onChange={e => setTemplateForm(p => ({ ...p, price: e.target.value }))} className="w-24 px-3 py-2 rounded-lg border border-sand/30 text-xs focus:border-teal-brand focus:outline-none pr-5" />
+                    <input type="number" min="1" placeholder="Cena" value={templateForm.price} onChange={e => setTemplateForm(p => ({ ...p, price: e.target.value }))} className="w-24 px-3 py-2 rounded-lg border border-sand/30 text-xs focus:border-gradient-primary focus:outline-none pr-5" />
                     <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-stone-400">zł</span>
                   </div>
                 </div>
@@ -1095,7 +1095,7 @@ export default function TrainerDashboard() {
                   <div className="flex flex-wrap gap-1">
                     {DAY_NAMES.map((n, idx) => {
                       const on = templateForm.days_of_week.includes(idx)
-                      return <button key={idx} onClick={() => setTemplateForm(p => ({ ...p, days_of_week: on ? p.days_of_week.filter(d => d !== idx) : [...p.days_of_week, idx].sort() }))} className={`px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition-all ${on ? 'bg-teal-brand text-white' : 'bg-white border border-sand/30 text-stone-600 hover:border-teal-brand/40'}`}>{n}</button>
+                      return <button key={idx} onClick={() => setTemplateForm(p => ({ ...p, days_of_week: on ? p.days_of_week.filter(d => d !== idx) : [...p.days_of_week, idx].sort() }))} className={`px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition-all ${on ? 'bg-gradient-primary text-white' : 'bg-white border border-sand/30 text-stone-600 hover:border-gradient-primary/40'}`}>{n}</button>
                     })}
                   </div>
                 </div>
@@ -1111,13 +1111,13 @@ export default function TrainerDashboard() {
                         const def = customSlots.find(d => d.value === slotVal)
                         const label = def?.label || slotVal.replace('slot_', '').replace(/(\d{2})(\d{2})/, '$1:$2')
                         const on = templateForm.time_slots.includes(slotVal)
-                        return <button key={slotVal} onClick={() => setTemplateForm(p => ({ ...p, time_slots: on ? p.time_slots.filter(s => s !== slotVal) : [...p.time_slots, slotVal] }))} className={`px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition-all ${on ? 'bg-teal-brand text-white' : 'bg-white border border-sand/30 text-stone-600 hover:border-teal-brand/40'}`}>{label}</button>
+                        return <button key={slotVal} onClick={() => setTemplateForm(p => ({ ...p, time_slots: on ? p.time_slots.filter(s => s !== slotVal) : [...p.time_slots, slotVal] }))} className={`px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition-all ${on ? 'bg-gradient-primary text-white' : 'bg-white border border-sand/30 text-stone-600 hover:border-gradient-primary/40'}`}>{label}</button>
                       })}
                     </div>
                   </div>
                 })()}
                 <div className="flex gap-2 pt-1">
-                  <button onClick={async () => { if (!templateForm.name || !templateForm.pool_id || !templateForm.price) return; const id = editTemplateId || 'tmpl_' + Date.now(); const ok = await saveTemplateToServer({ id, name: templateForm.name, pool_id: templateForm.pool_id, total_classes: parseInt(templateForm.total_classes) || 8, price: parseInt(templateForm.price) || 0, tag: templateForm.tag, days_of_week: templateForm.days_of_week, time_slots: templateForm.time_slots, is_active: true }); if (ok) setTemplates(await loadTemplatesFromServer()); setShowTemplateForm(false) }} disabled={!templateForm.name || !templateForm.pool_id || !templateForm.price} className="flex-1 py-2 rounded-lg bg-teal-brand text-white text-xs font-bold disabled:bg-stone-300 hover:bg-teal-light transition-all">{editTemplateId ? 'Zapisz' : 'Dodaj szablon'}</button>
+                  <button onClick={async () => { if (!templateForm.name || !templateForm.pool_id || !templateForm.price) return; const id = editTemplateId || 'tmpl_' + Date.now(); const ok = await saveTemplateToServer({ id, name: templateForm.name, pool_id: templateForm.pool_id, total_classes: parseInt(templateForm.total_classes) || 8, price: parseInt(templateForm.price) || 0, tag: templateForm.tag, days_of_week: templateForm.days_of_week, time_slots: templateForm.time_slots, is_active: true }); if (ok) setTemplates(await loadTemplatesFromServer()); setShowTemplateForm(false) }} disabled={!templateForm.name || !templateForm.pool_id || !templateForm.price} className="flex-1 py-2 rounded-lg bg-gradient-primary text-white text-xs font-bold disabled:bg-stone-300 hover:brightness-110 transition-all">{editTemplateId ? 'Zapisz' : 'Dodaj szablon'}</button>
                   <button onClick={() => setShowTemplateForm(false)} className="px-4 py-2 rounded-lg border border-stone-300 text-xs text-stone-500 hover:bg-stone-50 transition-all">Anuluj</button>
                 </div>
               </div>
@@ -1131,12 +1131,12 @@ export default function TrainerDashboard() {
                     <div className="flex items-center gap-2 min-w-0">
                       <span className="text-xs font-bold text-stone-700">{t.name}</span>
                       <span className="text-[10px] text-stone-400">{t.total_classes} · {t.price} zł · {poolList.find(p => p.id === t.pool_id)?.name || t.pool_id}</span>
-                      {t.tag && <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-teal-brand/10 text-teal-brand font-medium">{t.tag}</span>}
+                      {t.tag && <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-gradient-primary/10 text-gradient-primary font-medium">{t.tag}</span>}
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
-                      <button onClick={() => { setEditTemplateId(t.id); setTemplateForm({ name: t.name, pool_id: t.pool_id, total_classes: String(t.total_classes), price: String(t.price), tag: t.tag || '', days_of_week: t.days_of_week, time_slots: t.time_slots }); setShowTemplateForm(true); window.scrollTo({ top: 0, behavior: 'smooth' }) }} className="text-stone-400 hover:text-teal-brand transition-colors"><svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg></button>
+                      <button onClick={() => { setEditTemplateId(t.id); setTemplateForm({ name: t.name, pool_id: t.pool_id, total_classes: String(t.total_classes), price: String(t.price), tag: t.tag || '', days_of_week: t.days_of_week, time_slots: t.time_slots }); setShowTemplateForm(true); window.scrollTo({ top: 0, behavior: 'smooth' }) }} className="text-stone-400 hover:text-gradient-primary transition-colors"><svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg></button>
                       <button onClick={async () => { await deleteTemplateFromServer(t.id); setTemplates(prev => prev.filter(x => x.id !== t.id)) }} className="text-red-400 hover:text-red-600 transition-colors"><svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
-                      <button onClick={() => { setSubForm({ template_id: t.id, month: String(new Date().getMonth() + 2 > 12 ? new Date().getMonth() + 2 - 12 : new Date().getMonth() + 2), year: String(new Date().getFullYear() + (new Date().getMonth() + 2 > 12 ? 1 : 0)) }); setShowSubForm(true) }} className="px-2 py-1 rounded-lg bg-teal-brand/10 text-teal-brand text-[10px] font-bold hover:bg-teal-brand/20 transition-all">Utwórz</button>
+                      <button onClick={() => { setSubForm({ template_id: t.id, month: String(new Date().getMonth() + 2 > 12 ? new Date().getMonth() + 2 - 12 : new Date().getMonth() + 2), year: String(new Date().getFullYear() + (new Date().getMonth() + 2 > 12 ? 1 : 0)) }); setShowSubForm(true) }} className="px-2 py-1 rounded-lg bg-gradient-primary/10 text-gradient-primary text-[10px] font-bold hover:bg-gradient-primary/20 transition-all">Utwórz</button>
                     </div>
                   </div>
                 ))}
@@ -1150,15 +1150,15 @@ export default function TrainerDashboard() {
               <div className="bg-stone-50 rounded-xl p-3 sm:p-4 space-y-2.5 mb-3">
                 <p className="text-xs font-semibold text-stone-600">Nowy abonament z szablonu</p>
                 <div className="flex gap-2">
-                  <select value={subForm.template_id} onChange={e => setSubForm(p => ({ ...p, template_id: e.target.value }))} className="flex-1 px-3 py-2 rounded-lg border border-sand/30 text-xs focus:border-teal-brand focus:outline-none">
+                  <select value={subForm.template_id} onChange={e => setSubForm(p => ({ ...p, template_id: e.target.value }))} className="flex-1 px-3 py-2 rounded-lg border border-sand/30 text-xs focus:border-gradient-primary focus:outline-none">
                     <option value="">Szablon</option>
                     {templates.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
                   </select>
-                  <select value={subForm.month} onChange={e => setSubForm(p => ({ ...p, month: e.target.value }))} className="flex-1 px-3 py-2 rounded-lg border border-sand/30 text-xs focus:border-teal-brand focus:outline-none">
+                  <select value={subForm.month} onChange={e => setSubForm(p => ({ ...p, month: e.target.value }))} className="flex-1 px-3 py-2 rounded-lg border border-sand/30 text-xs focus:border-gradient-primary focus:outline-none">
                     <option value="">Miesiąc</option>
                     {Array.from({ length: 6 }, (_, i) => { const n = new Date(); const m = n.getMonth() + 1 + i; const mo = m > 12 ? m - 12 : m; const yr = m > 12 ? n.getFullYear() + 1 : n.getFullYear(); return <option key={m} value={mo.toString()}>{MONTHS_PL[mo - 1]} {yr}</option> })}
                   </select>
-                  <button onClick={async () => { const tmpl = templates.find(t => t.id === subForm.template_id); if (!tmpl || !subForm.month) return; const month = parseInt(subForm.month); const year = parseInt(subForm.year); const dates = []; const daysInM = new Date(year, month, 0).getDate(); for (let d = 1; d <= daysInM; d++) { const dt = new Date(year, month - 1, d); if (tmpl.days_of_week.includes((dt.getDay() + 6) % 7)) dates.push(year + '-' + String(month).padStart(2, '0') + '-' + String(d).padStart(2, '0')) }; let expiresAt = null; if (dates.length > 0) { const fd = new Date(dates[0] + 'T00:00:00'); fd.setDate(fd.getDate() - 1); fd.setHours(23, 59, 59); expiresAt = fd.toISOString() }; const ok = await saveSubscriptionToServer({ id: 'sub_' + Date.now(), template_id: tmpl.id, pool_id: tmpl.pool_id, month, year, price: tmpl.price, total_classes: tmpl.total_classes, dates, time_slot: tmpl.time_slots[0] || '', is_published: true, expires_at: expiresAt }); if (ok) setSubscriptions(await loadSubscriptionsFromServer()); setShowSubForm(false) }} disabled={!subForm.template_id || !subForm.month} className="px-4 py-2 rounded-lg bg-teal-brand text-white text-xs font-bold disabled:bg-stone-300 hover:bg-teal-light transition-all">Utwórz</button>
+                  <button onClick={async () => { const tmpl = templates.find(t => t.id === subForm.template_id); if (!tmpl || !subForm.month) return; const month = parseInt(subForm.month); const year = parseInt(subForm.year); const dates = []; const daysInM = new Date(year, month, 0).getDate(); for (let d = 1; d <= daysInM; d++) { const dt = new Date(year, month - 1, d); if (tmpl.days_of_week.includes((dt.getDay() + 6) % 7)) dates.push(year + '-' + String(month).padStart(2, '0') + '-' + String(d).padStart(2, '0')) }; let expiresAt = null; if (dates.length > 0) { const fd = new Date(dates[0] + 'T00:00:00'); fd.setDate(fd.getDate() - 1); fd.setHours(23, 59, 59); expiresAt = fd.toISOString() }; const ok = await saveSubscriptionToServer({ id: 'sub_' + Date.now(), template_id: tmpl.id, pool_id: tmpl.pool_id, month, year, price: tmpl.price, total_classes: tmpl.total_classes, dates, time_slot: tmpl.time_slots[0] || '', is_published: true, expires_at: expiresAt }); if (ok) setSubscriptions(await loadSubscriptionsFromServer()); setShowSubForm(false) }} disabled={!subForm.template_id || !subForm.month} className="px-4 py-2 rounded-lg bg-gradient-primary text-white text-xs font-bold disabled:bg-stone-300 hover:brightness-110 transition-all">Utwórz</button>
                   <button onClick={() => setShowSubForm(false)} className="px-4 py-2 rounded-lg border border-stone-300 text-xs text-stone-500 hover:bg-stone-50 transition-all">Anuluj</button>
                 </div>
               </div>

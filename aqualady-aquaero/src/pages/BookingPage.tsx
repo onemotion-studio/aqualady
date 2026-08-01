@@ -271,7 +271,7 @@ export default function BookingPage() {
             <div key={p.id}>
               <button
                 onClick={() => handlePoolClick(p.id)}
-                className={'w-full bg-white rounded-2xl p-4 sm:p-5 shadow-sm border text-left transition-all active:scale-[0.99] ' + (isSelected ? 'border-teal-brand shadow-md' : 'border-sand/15 hover:shadow-md hover:border-teal-brand/30')}
+                className={'w-full bg-white rounded-2xl p-4 sm:p-5 shadow-sm border text-left transition-all active:scale-[0.99] ' + (isSelected ? 'border-gradient-primary shadow-md' : 'border-sand/15 hover:shadow-md hover:border-gradient-primary/30')}
               >
                 <div className="flex items-start justify-between mb-1">
                   <h3 className="text-sm sm:text-base lg:text-lg font-bold text-stone-800">{p.name}</h3>
@@ -293,7 +293,7 @@ export default function BookingPage() {
 
               {isExpanded && (
                 <div className="overflow-hidden animate-fade-in" style={{ animationDuration: '0.3s' }}>
-                  <div className="bg-white rounded-2xl p-3 shadow-sm border border-teal-brand/20 mt-2 mx-1">
+                  <div className="bg-white rounded-2xl p-3 shadow-sm border border-gradient-primary/20 mt-2 mx-1">
                     <div className="flex items-center gap-2 mb-2">
                       <div className="w-2 h-2 rounded-full bg-green-accent" />
                       <span className="text-xs font-medium text-stone-700">{p.name}</span>
@@ -322,9 +322,9 @@ export default function BookingPage() {
       {selectedPool && (
         <div className="space-y-4 sm:space-y-5 mt-5 pt-5 border-t border-sand/20">
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-teal-brand" />
+            <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-gradient-primary" />
             <p className="text-sm sm:text-base font-semibold text-stone-700">
-              Wybrano: <span className="text-teal-brand">{currentPool?.name}</span>
+              Wybrano: <span className="text-gradient-primary">{currentPool?.name}</span>
             </p>
             <button onClick={() => { setSelectedPool(null); setExpandedMap(null); setSelectedDate(null); }} className="ml-auto text-xs sm:text-sm text-stone-400 underline hover:text-stone-600">
               Zmien
@@ -405,7 +405,7 @@ export default function BookingPage() {
                           {/* Add to cart button with icon */}
                           <button
                             onClick={() => handleAddToCart(slot, qty)}
-                            className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-teal-brand text-white shadow hover:bg-teal-light active:scale-[0.93] transition-all"
+                            className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-gradient-primary text-white shadow hover:brightness-110 active:scale-[0.93] transition-all"
                             title="Dodaj do koszyka"
                           >
                             <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -469,7 +469,7 @@ export default function BookingPage() {
                         })
                         showCartAnimation(`${tmpl.name} dodany do koszyka!`)
                       }}
-                      className="bg-white border border-sand/30 rounded-xl py-3 sm:py-4 px-3 text-center hover:border-teal-brand/40 hover:shadow transition-all active:scale-[0.98] block w-full relative"
+                      className="bg-white border border-sand/30 rounded-xl py-3 sm:py-4 px-3 text-center hover:border-gradient-primary/40 hover:shadow transition-all active:scale-[0.98] block w-full relative"
                     >
                       {tmpl.tag && (
                         <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-sm text-[9px] font-semibold px-2 py-0.5 rounded-full shadow-sm border border-sand/20 whitespace-nowrap text-stone-500">
@@ -477,7 +477,7 @@ export default function BookingPage() {
                         </div>
                       )}
                       <div className={tmpl.tag ? 'mt-0.5' : ''}>
-                        <div className="text-xs sm:text-sm font-bold text-teal-brand">{tmpl.name}</div>
+                        <div className="text-xs sm:text-sm font-bold text-gradient-primary">{tmpl.name}</div>
                         <div className="text-sm sm:text-base font-bold text-stone-800">{tmpl.price} zł</div>
                         <div className="text-[9px] sm:text-[11px] text-stone-400">{poolNames[tmpl.pool_id] || ''}</div>
                         <div className="text-[9px] sm:text-[11px] text-stone-400 mt-0.5">{tmpl.total_classes} zajęć · {(subs as any[]).length} mies.</div>
@@ -490,7 +490,7 @@ export default function BookingPage() {
           )}
 
           <div className="text-center pt-2">
-            <button onClick={() => navigate('/cart')} className="w-full py-3.5 sm:py-4 rounded-xl sm:rounded-2xl bg-teal-brand text-white font-bold text-sm sm:text-base shadow-lg hover:bg-teal-light active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+            <button onClick={() => navigate('/cart')} className="w-full py-3.5 sm:py-4 rounded-xl sm:rounded-2xl bg-gradient-primary text-white font-bold text-sm sm:text-base shadow-lg hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
               Przejdz do koszyka
               <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
@@ -519,7 +519,7 @@ export default function BookingPage() {
               </svg>
             </button>
             <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-teal-100 flex items-center justify-center">
-              <svg className="w-6 h-6 text-teal-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6 text-gradient-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" />
               </svg>
             </div>
@@ -527,7 +527,7 @@ export default function BookingPage() {
             <p className="text-xs text-stone-500 mb-4">{cartPopupLabel}</p>
             <Link
               to="/cart"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-teal-brand text-white text-sm font-bold shadow hover:bg-teal-light active:scale-[0.97] transition-all"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-primary text-white text-sm font-bold shadow hover:brightness-110 active:scale-[0.97] transition-all"
             >
               Przejdz do koszyka
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

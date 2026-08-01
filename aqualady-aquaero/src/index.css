@@ -1,4 +1,7 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Reenie+Beanie&display=swap');
+
 
 @theme {
   --color-teal-brand: #2C8889;
@@ -17,9 +20,57 @@
   --font-family-base: "DM Sans", "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
   --font-weight-base: 400;
   --line-height-base: 1.75;
-}
+  }
 
-* {
+  /* ── Градиенты для интерактивных элементов ── */
+  :root {
+    --gradient-primary: linear-gradient(90deg, #7BE2F7 0%, #58D6F4 100%);
+    --gradient-secondary: linear-gradient(90deg, #FFD878 0%, #FFC64E 100%);
+  }
+  .bg-gradient-primary {
+      background: var(--gradient-primary);
+    }
+    .bg-gradient-primary\/10 {
+      background: linear-gradient(90deg, rgba(123,226,247,0.10) 0%, rgba(88,214,244,0.10) 100%);
+    }
+    .bg-gradient-primary\/5 {
+      background: linear-gradient(90deg, rgba(123,226,247,0.05) 0%, rgba(88,214,244,0.05) 100%);
+    }
+    .bg-gradient-secondary {
+      background: var(--gradient-secondary);
+    }
+    .bg-gradient-secondary\/10 {
+      background: linear-gradient(90deg, rgba(255,216,120,0.10) 0%, rgba(255,198,78,0.10) 100%);
+    }
+    .bg-gradient-secondary\/5 {
+      background: linear-gradient(90deg, rgba(255,216,120,0.05) 0%, rgba(255,198,78,0.05) 100%);
+    }
+    .text-gradient-primary {
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .text-gradient-secondary {
+      background: var(--gradient-secondary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .border-gradient-primary {
+      border-color: transparent;
+      background-image: var(--gradient-primary);
+      background-origin: border-box;
+      background-clip: padding-box, border-box;
+    }
+    .border-gradient-secondary {
+      border-color: transparent;
+      background-image: var(--gradient-secondary);
+      background-origin: border-box;
+      background-clip: padding-box, border-box;
+    }
+
+  * {
   box-sizing: border-box;
 }
 
