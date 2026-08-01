@@ -220,57 +220,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Cennik � abonamenty miesieczne */}
-      {Object.keys(grouped).length > 0 && (
-        <section className="mt-6 sm:mt-8 lg:mt-10">
-          <div className="px-4 sm:px-6 lg:px-8 mb-4 sm:mb-5">
-            <h2 className="text-base sm:text-lg lg:text-xl font-extralight text-[#65AFB3] uppercase text-left">Abonamenty miesieczne</h2>
-          </div>
-          <div className="px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {Object.entries(grouped).map(([templateId, subs]) => {
-                const tmpl = templates.find((t: any) => t.id === templateId)
-                if (!tmpl) return null
-
-                const totalSlots = (subs as any[]).reduce((s: number, sub: any) => s + (sub.dates?.length || 0), 0)
-
-                return (
-                  <div key={templateId} className="bg-white rounded-2xl p-5 shadow-sm border border-sand/20 hover:shadow-md transition-all flex flex-col relative">
-                    {tmpl.tag && (
-                      <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-sm text-[9px] font-semibold px-2 py-0.5 rounded-full shadow-sm border border-sand/20 whitespace-nowrap text-stone-500 z-10">
-                        {tmpl.tag}
-                      </div>
-                    )}
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-2">
-                        <h3 className="text-base font-bold text-stone-800">{tmpl.name}</h3>
-                        <span className="text-lg font-bold text-gradient-primary">{tmpl.price} zl</span>
-                      </div>
-                      <p className="text-xs text-stone-400 mb-1">
-                        {tmpl.total_classes} zajec � {poolNames[tmpl.pool_id] || tmpl.pool_id}
-                      </p>
-                      {tmpl.days_of_week.length > 0 && (
-                        <p className="text-[10px] text-stone-400 mb-1">Dni: {tmpl.days_of_week.map((d: number) => DAY_SHORT[d]).join(', ')}</p>
-                      )}
-                      {tmpl.time_slots.length > 0 && (
-                        <p className="text-[10px] text-stone-400 mb-1">Godziny: {tmpl.time_slots.map(slotLabel).join(', ')}</p>
-                      )}
-                      <p className="text-[10px] text-stone-400">Dostepne miesiace: {(subs as any[]).map((s: any) => `${MONTHS_PL[s.month - 1]} ${s.year}`).join(', ')}</p>
-                    </div>
-                    <Link
-                      to="/subscriptions"
-                      className="mt-4 w-full py-2.5 rounded-xl bg-gradient-primary text-white text-xs font-bold text-center hover:brightness-110 active:scale-[0.98] transition-all block"
-                    >
-                      Wybierz termin
-                    </Link>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-        </section>
-      )}
-
       {/* Social media � pod galeria */}
         <section className="mt-6 sm:mt-8 lg:mt-10">
         <div className="px-4 sm:px-6 lg:px-8">
