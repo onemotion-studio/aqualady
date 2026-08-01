@@ -20,7 +20,7 @@ export default function Layout() {
         <Link to="/" className="flex items-center no-underline shrink-0">
           <img
             src={logoSrc}
-            className="h-10 sm:h-10 lg:h-12 w-auto object-contain"
+            className="h-9 sm:h-10 lg:h-12 w-auto object-contain"
           />
         </Link>
 
@@ -135,15 +135,15 @@ export default function Layout() {
                       <div className="max-w-2xl mx-auto pointer-events-auto">
                         <Link
                           to="/booking"
-                                                    className="flex items-center justify-center gap-4 sm:gap-5 w-full py-4 sm:py-5 px-5 sm:px-8 rounded-full bg-gradient-to-r from-[#94DEEE] to-[#29C5E2] text-white shadow-lg hover:brightness-110 active:scale-[0.98] transition-all"
+                                                                                                        className="flex items-center justify-center gap-3 sm:gap-4 w-full py-4 sm:py-5 px-3 sm:px-5 rounded-full bg-gradient-to-r from-[#94DEEE] to-[#29C5E2] text-white shadow-lg hover:brightness-110 active:scale-[0.98] transition-all"
                         >
-                                                    <div className="flex items-center gap-4 sm:gap-5">
+                                                    <div className="flex items-center gap-3 sm:gap-4">
                                                       <svg className="w-9 h-9 sm:w-11 sm:h-11 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
                                                       </svg>
                                                       <div className="flex flex-col text-left leading-tight">
-                                                        <span className="text-2xl sm:text-3xl font-light tracking-wide">Grafik i Cennik - Kup bilet</span>
-                                                        <span className="text-base sm:text-lg text-white/80 tracking-wide">Zarezerwuj swoje miejsce na zajęcia</span>
+                                                        <span className="text-lg sm:text-xl font-light tracking-wide whitespace-nowrap">Grafik i Cennik - Kup bilet</span>
+                                                        <span className="text-sm sm:text-base text-white/80 tracking-wide whitespace-nowrap">Zarezerwuj swoje miejsce na zajęcia</span>
                                                       </div>
                                                       <svg className="w-7 h-7 sm:w-8 sm:h-8 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />

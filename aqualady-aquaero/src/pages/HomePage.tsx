@@ -112,7 +112,7 @@ export default function HomePage() {
           <img
             src={heroImage}
             alt=""
-            className="absolute inset-0 w-full h-full object-cover object-bottom"
+            className="absolute inset-0 w-full h-full object-cover object-[65%_bottom]"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/5 to-[#fdfbf7]" />
           <div className="relative z-10 flex flex-col justify-between px-5 sm:px-8 lg:px-12 xl:px-16 pt-4 sm:pt-8 lg:pt-10 min-h-[520px] sm:min-h-[50vh] lg:min-h-[calc(65vh+80px)]">
@@ -158,17 +158,17 @@ export default function HomePage() {
             <div className="max-w-3xl mb-10 sm:mb-14">
                             <h1 className="space-y-3 sm:space-y-4">
                 <span
-                  className="block text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-light leading-[1.2] tracking-tight text-[#10527B] drop-shadow-[0_2px_4px_rgba(255,255,255,0.9)]"
+                  className="block text-2xl sm:text-4xl lg:text-5xl xl:text-6xl font-light leading-[1.2] tracking-tight text-[#10527B] drop-shadow-[0_2px_4px_rgba(255,255,255,0.9)]"
                   style={{ fontFamily: "'Merriweather', serif" }}
                 >
                   <span className="inline whitespace-nowrap">Studio aqua aerobiku "Aqua Lady"</span>
                 </span>
                 <span
-                  className="block text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-medium italic leading-[0.9] tracking-tight -mt-3 sm:-mt-4 pb-4 text-gradient-secondary drop-shadow-[0_1px_2px_rgba(255,255,255,1)] drop-shadow-[1px_0_2px_rgba(255,255,255,1)] drop-shadow-[0_-1px_2px_rgba(255,255,255,1)] drop-shadow-[-1px_0_2px_rgba(255,255,255,1)]"
-                                    style={{ fontFamily: "'Caveat', cursive" }}
-                                  >
-                                    zaprasza na zajęcia
-                                    prozdrowotne!
+                  className="block text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-medium italic leading-[0.9] tracking-tight -mt-3 sm:-mt-4 pb-4"
+                                                      style={{ fontFamily: "'Caveat', cursive", background: "linear-gradient(180deg, #E5B886 0%, #B87333 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}
+                                                    >
+                                                      zaprasza na zajęcia
+                                                      prozdrowotne!
                 </span>
               </h1>
             </div>
@@ -178,22 +178,22 @@ export default function HomePage() {
 
       {/* Opis */}
       <div className="px-4 sm:px-6 lg:px-8 mt-6 sm:mt-8">
-        <section className="rounded-2xl p-5 sm:p-6 lg:p-8">
+                <section className="rounded-2xl py-5 sm:py-6 lg:py-8 px-1 sm:px-2">
           <p className="text-lg sm:text-xl lg:text-2xl text-stone-600 leading-relaxed mb-4">
-            Program jest skierowany do osob starszych i ma na celu bezpieczna poprawe zdrowia, utrzymanie aktywnosci fizycznej oraz dobrego samopoczucia.
+           Program jest skierowany do osób starszych i ma na celu bezpieczną poprawę zdrowia, utrzymanie aktywności fizycznej oraz dobrego samopoczucia.
           </p>
           <p className="text-lg sm:text-xl lg:text-2xl font-semibold text-stone-700 mb-3">
-            Glowne efekty terapeutyczne:
+            Główne efekty terapeutyczne:
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
             {[
-              'Wzmocnienie ukladu ruchu',
-              'Ksztaltowanie prawidlowej postawy ciala',
-              'Redukcja masy ciala',
-              'Zwiekszenie elastycznosci skory i miesni',
+              'Wzmocnienie układu ruchu',
+              'Kształtowanie prawidłowej postawy ciała',
+              'Redukcja masy ciała',
+              'Zwiększenie elastyczności skóry i mięśni',
               'Hartowanie organizmu',
-              'Poprawa krazenia krwi w calym ciele',
-              'Likwidacja zastojow w nogach',
+              'Poprawa krążenia krwi w całym ciele',
+              'Likwidacja zastojów w nogach',
               'Redukcja stresu, poprawa snu i humoru',
             ].map((item, i) => (
               <div key={i} className="flex items-center gap-2 text-lg sm:text-xl text-stone-600">
@@ -205,7 +205,7 @@ export default function HomePage() {
             ))}
           </div>
           <p className="text-lg sm:text-xl lg:text-2xl text-stone-600 leading-relaxed mt-4">
-            Zajecia odbywaja sie w komfortowym tempie, bez przeciazen. Umiejetnosc plywania nie jest wymagana.
+            Zajęcia odbywają się w komfortowym tempie, bez przeciążeń. Umiejętność pływania nie jest wymagana.
           </p>
         </section>
       </div>
@@ -213,7 +213,7 @@ export default function HomePage() {
       {/* Galeria */}
       <section className="mt-6 sm:mt-8 lg:mt-10">
         <div className="px-4 sm:px-6 lg:px-8 mb-4 sm:mb-5">
-          <h2 className="text-base sm:text-lg lg:text-xl font-extralight text-[#65AFB3] uppercase text-left">Zobaczcie, jak to dziala</h2>
+          <h2 className="text-base sm:text-lg lg:text-xl font-extralight text-[#65AFB3] uppercase text-left">Zobaczcie, jak to działa</h2>
         </div>
         <div className="px-4 sm:px-6 lg:px-8">
           <GallerySlider slides={gallerySlides} className="w-full" />
