@@ -158,13 +158,13 @@ export default function HomePage() {
             <div className="max-w-3xl mb-10 sm:mb-14">
                             <h1 className="space-y-3 sm:space-y-4">
                 <span
-                  className="block text-2xl sm:text-4xl lg:text-5xl xl:text-6xl font-light leading-[1.2] tracking-tight text-[#10527B] drop-shadow-[0_2px_4px_rgba(255,255,255,0.9)]"
+                  className="block text-2xl sm:text-4xl lg:text-5xl xl:text-5xl font-light leading-[1.2] tracking-tight text-[#10527B] drop-shadow-[0_2px_4px_rgba(255,255,255,0.9)]"
                   style={{ fontFamily: "'Merriweather', serif" }}
                 >
                   <span className="inline whitespace-nowrap">Studio aqua aerobiku "Aqua Lady"</span>
                 </span>
                 <span
-                  className="block text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-medium italic leading-[0.9] tracking-tight -mt-3 sm:-mt-4 pb-4"
+                  className="block text-4xl sm:text-5xl lg:text-6xl xl:text-6xl font-medium italic leading-[0.9] tracking-tight -mt-3 sm:-mt-4 pb-4"
                                                       style={{ fontFamily: "'Caveat', cursive", background: "linear-gradient(180deg, #E5B886 0%, #B87333 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}
                                                     >
                                                       zaprasza na zajęcia
