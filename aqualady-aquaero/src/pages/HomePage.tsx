@@ -164,7 +164,7 @@ export default function HomePage() {
                   <span className="inline whitespace-nowrap">Studio aqua aerobiku "Aqua Lady"</span>
                 </span>
                 <span
-                  className="block text-4xl sm:text-5xl lg:text-6xl xl:text-6xl font-medium italic leading-[0.9] tracking-tight -mt-3 sm:-mt-4 pb-4"
+                  className="block text-3xl sm:text-5xl lg:text-6xl xl:text-6xl font-medium italic leading-[0.9] tracking-tight -mt-3 sm:-mt-4 pb-4"
                                                       style={{ fontFamily: "'Caveat', cursive", background: "linear-gradient(180deg, #E5B886 0%, #B87333 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}
                                                     >
                                                       zaprasza na zajęcia
