@@ -663,41 +663,41 @@ export default function TrainerDashboard() {
 
                 return (
                   <div key={slot.value}>
-                    <label className={`flex items-center gap-3 px-4 py-3 sm:py-3.5 rounded-xl border text-sm font-medium transition-all cursor-pointer ${
-                      isChecked ? 'bg-gradient-primary/10 border-gradient-primary text-gradient-primary' : 'bg-white border-sand/30 text-stone-600 hover:border-gradient-primary/40'
+                                        <label className={`flex items-center gap-3 px-4 py-3 sm:py-3.5 rounded-xl border text-sm font-medium transition-all cursor-pointer ${
+                      isChecked ? 'bg-gradient-primary border-gradient-primary text-white' : 'bg-white border-sand/30 text-stone-600 hover:border-gradient-primary/40'
                     }`}>
-                      <input type="checkbox" checked={isChecked} onChange={() => toggleSlot(slot.value)} className="w-4 h-4 sm:w-5 sm:h-5 accent-gradient-primary rounded" />
+                                            <input type="checkbox" checked={isChecked} onChange={() => toggleSlot(slot.value)} className="w-4 h-4 sm:w-5 sm:h-5 accent-gradient-primary rounded" />
                       <div className="flex items-center gap-3 flex-1 min-w-0">
                         <div className="flex flex-col flex-1 min-w-0">
                           {slot.label.includes(' - ') ? (
-                            <span className="text-xs sm:text-sm font-medium text-stone-700">{slot.label}</span>
+                            <span className={`text-xs sm:text-sm font-medium ${isChecked ? 'text-white' : 'text-stone-700'}`}>{slot.label}</span>
                           ) : (
                             <>
-                              <span className="text-xs sm:text-sm font-semibold text-stone-800 truncate">{slot.label}</span>
-                              <span className="text-xs sm:text-sm text-stone-400">{slot.time} - {String(parseInt(slot.time) + 1).padStart(2, '0')}:00</span>
+                              <span className={`text-xs sm:text-sm font-semibold truncate ${isChecked ? 'text-white' : 'text-stone-800'}`}>{slot.label}</span>
+                              <span className={`text-xs sm:text-sm ${isChecked ? 'text-white/70' : 'text-stone-400'}`}>{slot.time} - {String(parseInt(slot.time) + 1).padStart(2, '0')}:00</span>
                             </>
                           )}
                         </div>
                         {slot.capacity ? (
-                          <span className="text-xs font-bold text-gradient-primary bg-gradient-primary/10 px-3 py-1 rounded-full shrink-0">{slot.capacity}</span>
+                          <span className={`text-xs font-bold px-3 py-1 rounded-full shrink-0 ${isChecked ? 'bg-white text-gradient-primary' : 'text-gradient-primary bg-gradient-primary/10'}`}>{slot.capacity}</span>
                         ) : null}
                         {/* Индикатор бронирований */}
                         {totalBooked > 0 && (
                           <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0" title={`${totalBooked} os. zapisanych`} />
                         )}
                       </div>
-                      <div className="flex items-center gap-1 shrink-0">
+                                            <div className="flex items-center gap-1 shrink-0">
                         {totalBooked > 0 && (
-                          <span className="text-xs font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">{totalBooked}</span>
+                          <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${isChecked ? 'text-gradient-primary bg-white' : 'text-amber-600 bg-amber-50'}`}>{totalBooked}</span>
                         )}
-                        <button type="button" onClick={(e) => { e.preventDefault(); startEditSlot(slot, si) }} className="text-stone-400 hover:text-gradient-primary transition-colors" title="Edytuj">
+                        <button type="button" onClick={(e) => { e.preventDefault(); startEditSlot(slot, si) }} className={`transition-colors ${isChecked ? 'text-white/80 hover:text-white' : 'text-stone-400 hover:text-gradient-primary'}`} title="Edytuj">
                           <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                         </button>
-                        <button type="button" onClick={(e) => { e.preventDefault(); const next = allSlots.filter((_, i) => i !== si); setCustomSlots(next) }} className="text-red-400 hover:text-red-600 transition-colors" title="Usun">
+                        <button type="button" onClick={(e) => { e.preventDefault(); const next = allSlots.filter((_, i) => i !== si); setCustomSlots(next) }} className={`transition-colors ${isChecked ? 'text-white/80 hover:text-white' : 'text-red-400 hover:text-red-600'}`} title="Usun">
                           <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                         </button>
                         {slotBookings.length > 0 && (
-                          <button type="button" onClick={(e) => { e.preventDefault(); setExpandedSlot(isExpanded ? null : slot.value) }} className="text-stone-400 hover:text-stone-600 transition-colors">
+                          <button type="button" onClick={(e) => { e.preventDefault(); setExpandedSlot(isExpanded ? null : slot.value) }} className={`transition-colors ${isChecked ? 'text-white/80 hover:text-white' : 'text-stone-400 hover:text-stone-600'}`}>
                             <svg className={'w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform ' + (isExpanded ? 'rotate-180' : '')} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                           </button>
                         )}
@@ -934,8 +934,8 @@ export default function TrainerDashboard() {
                           {slots.map(slot => {
                             const isChecked = promoForm.time_slots.includes(slot.value)
                             return (
-                              <label key={slot.value} className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-xs cursor-pointer transition-all ${
-                                isChecked ? 'bg-gradient-primary/10 border-gradient-primary text-gradient-primary' : 'bg-white border-sand/30 text-stone-600 hover:border-gradient-primary/40'
+                                                            <label key={slot.value} className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-xs cursor-pointer transition-all ${
+                                isChecked ? 'bg-gradient-primary border-gradient-primary text-white' : 'bg-white border-sand/30 text-stone-600 hover:border-gradient-primary/40'
                               }`}>
                                 <input
                                   type="checkbox"
@@ -950,8 +950,8 @@ export default function TrainerDashboard() {
                                   }}
                                   className="w-3.5 h-3.5 accent-gradient-primary rounded"
                                 />
-                                <span className="font-medium">{slot.label}</span>
-                                {slot.capacity ? <span className="text-stone-400 ml-auto">max {slot.capacity} os.</span> : null}
+                                <span className={`font-medium ${isChecked ? 'text-white' : ''}`}>{slot.label}</span>
+                                {slot.capacity ? <span className={`ml-auto ${isChecked ? 'text-white/70' : 'text-stone-400'}`}>max {slot.capacity} os.</span> : null}
                               </label>
                             )
                           })}
