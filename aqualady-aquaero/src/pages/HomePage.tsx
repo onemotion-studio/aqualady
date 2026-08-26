@@ -246,7 +246,7 @@ export default function HomePage() {
         </div>
         </section>
 
-        <div className="h-16 sm:h-20" />
-    </div>
-  )
+        <div className="h-2 sm:h-3" />
+      </div>
+    )
 }
